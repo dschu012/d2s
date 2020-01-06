@@ -1,0 +1,882 @@
+{
+  "header": {
+    "identifier": "aa55aa55",
+    "checksum": "d3bbd01c",
+    "name": "ttest",
+    "status": {
+      "expansion": true,
+      "died": false,
+      "hardcore": false,
+      "ladder": false
+    },
+    "class": "Barbarian",
+    "last_played": 1565126066,
+    "left_skill": "Attack",
+    "right_skill": "Attack",
+    "left_swap_skill": "Attack",
+    "right_swap_skill": "Attack",
+    "merc_id": "0",
+    "assigned_skills": null,
+    "quests_normal": {
+      "act_i": {
+        "den_of_evil": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "sisters_burial_grounds": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "tools_of_the_trade": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_search_for_cain": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_forgotten_tower": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "sisters_to_the_slaughter": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_ii": {
+        "radaments_lair": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_horadric_staff": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "tainted_sun": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "arcane_sanctuary": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_summoner": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_seven_tombs": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_iii": {
+        "lam_esens_tome": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "khalims_will": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "blade_of_the_old_religion": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_golden_bird": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_blackened_temple": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_guardian": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_iv": {
+        "the_fallen_angel": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "terrors_end": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "hellforge": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_v": {
+        "siege_on_harrogath": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "rescue_on_mount_arreat": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "prison_of_ice": {
+          "is_completed": false,
+          "consumed_scroll": false,
+          "is_requirement_completed": false
+        },
+        "betrayal_of_harrogath": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "rite_of_passage": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "eve_of_destruction": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      }
+    },
+    "quests_nm": {
+      "act_i": {
+        "den_of_evil": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "sisters_burial_grounds": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "tools_of_the_trade": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_search_for_cain": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_forgotten_tower": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "sisters_to_the_slaughter": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_ii": {
+        "radaments_lair": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_horadric_staff": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "tainted_sun": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "arcane_sanctuary": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_summoner": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_seven_tombs": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_iii": {
+        "lam_esens_tome": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "khalims_will": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "blade_of_the_old_religion": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_golden_bird": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_blackened_temple": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_guardian": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_iv": {
+        "the_fallen_angel": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "terrors_end": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "hellforge": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_v": {
+        "siege_on_harrogath": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "rescue_on_mount_arreat": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "prison_of_ice": {
+          "is_completed": false,
+          "consumed_scroll": false,
+          "is_requirement_completed": false
+        },
+        "betrayal_of_harrogath": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "rite_of_passage": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "eve_of_destruction": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      }
+    },
+    "quests_hell": {
+      "act_i": {
+        "den_of_evil": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "sisters_burial_grounds": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "tools_of_the_trade": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_search_for_cain": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_forgotten_tower": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "sisters_to_the_slaughter": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_ii": {
+        "radaments_lair": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_horadric_staff": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "tainted_sun": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "arcane_sanctuary": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_summoner": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_seven_tombs": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_iii": {
+        "lam_esens_tome": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "khalims_will": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "blade_of_the_old_religion": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_golden_bird": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_blackened_temple": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "the_guardian": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_iv": {
+        "the_fallen_angel": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "terrors_end": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "hellforge": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      },
+      "act_v": {
+        "siege_on_harrogath": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "rescue_on_mount_arreat": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "prison_of_ice": {
+          "is_completed": false,
+          "consumed_scroll": false,
+          "is_requirement_completed": false
+        },
+        "betrayal_of_harrogath": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "rite_of_passage": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        },
+        "eve_of_destruction": {
+          "is_completed": false,
+          "is_requirement_completed": false
+        }
+      }
+    },
+    "version": 96,
+    "filesize": 980,
+    "active_arms": 0,
+    "progression": 0,
+    "level": 1,
+    "difficulty": {
+      "Normal": 128,
+      "Nightmare": 0,
+      "Hell": 0
+    },
+    "map_id": 1200399710,
+    "dead_merc": 0,
+    "merc_name_id": 0,
+    "merc_type": 0,
+    "merc_experience": 0
+  },
+  "attributes": {
+    "strength": 30,
+    "energy": 10,
+    "dexterity": 20,
+    "vitality": 25,
+    "unused_stats": 0,
+    "unused_skill_points": 0,
+    "current_hp": 55,
+    "max_hp": 55,
+    "current_mana": 10,
+    "max_mana": 10,
+    "current_stamina": 92,
+    "max_stamina": 92,
+    "level": 1,
+    "experience": 0,
+    "gold": 0,
+    "stashed_gold": 0
+  },
+  "skills": [
+    {
+      "id": 126,
+      "points": 0,
+      "name": "Bash"
+    },
+    {
+      "id": 127,
+      "points": 0,
+      "name": "Sword mastery"
+    },
+    {
+      "id": 128,
+      "points": 0,
+      "name": "Axe mastery"
+    },
+    {
+      "id": 129,
+      "points": 0,
+      "name": "Mace mastery"
+    },
+    {
+      "id": 130,
+      "points": 0,
+      "name": "Howl"
+    },
+    {
+      "id": 131,
+      "points": 0,
+      "name": "Find Potion"
+    },
+    {
+      "id": 132,
+      "points": 0,
+      "name": "Leap"
+    },
+    {
+      "id": 133,
+      "points": 0,
+      "name": "Double Swing"
+    },
+    {
+      "id": 134,
+      "points": 0,
+      "name": "Pole Arm Mastery"
+    },
+    {
+      "id": 135,
+      "points": 0,
+      "name": "Throwing Mastery"
+    },
+    {
+      "id": 136,
+      "points": 0,
+      "name": "Spear Mastery"
+    },
+    {
+      "id": 137,
+      "points": 0,
+      "name": "Taunt"
+    },
+    {
+      "id": 138,
+      "points": 0,
+      "name": "Shout"
+    },
+    {
+      "id": 139,
+      "points": 0,
+      "name": "Stun"
+    },
+    {
+      "id": 140,
+      "points": 0,
+      "name": "Double Throw"
+    },
+    {
+      "id": 141,
+      "points": 0,
+      "name": "Increased Stamina"
+    },
+    {
+      "id": 142,
+      "points": 0,
+      "name": "Find Item"
+    },
+    {
+      "id": 143,
+      "points": 0,
+      "name": "Leap Attack"
+    },
+    {
+      "id": 144,
+      "points": 0,
+      "name": "Concentrate"
+    },
+    {
+      "id": 145,
+      "points": 0,
+      "name": "Iron Skin"
+    },
+    {
+      "id": 146,
+      "points": 0,
+      "name": "Battle Cry"
+    },
+    {
+      "id": 147,
+      "points": 0,
+      "name": "Frenzy"
+    },
+    {
+      "id": 148,
+      "points": 0,
+      "name": "Increased Speed"
+    },
+    {
+      "id": 149,
+      "points": 0,
+      "name": "Battle Orders"
+    },
+    {
+      "id": 150,
+      "points": 0,
+      "name": "Grim Ward"
+    },
+    {
+      "id": 151,
+      "points": 0,
+      "name": "Whirlwind"
+    },
+    {
+      "id": 152,
+      "points": 0,
+      "name": "Berserk"
+    },
+    {
+      "id": 153,
+      "points": 0,
+      "name": "Natural Resistance"
+    },
+    {
+      "id": 154,
+      "points": 0,
+      "name": "War Cry"
+    },
+    {
+      "id": 155,
+      "points": 0,
+      "name": "Battle Command"
+    }
+  ],
+  "items": [
+    {
+      "identified": 1,
+      "socketed": 0,
+      "new": 1,
+      "is_ear": 0,
+      "starter_item": 1,
+      "simple_item": 1,
+      "ethereal": 0,
+      "personalized": 0,
+      "given_runeword": 0,
+      "location_id": 2,
+      "position_x": 0,
+      "position_y": 0,
+      "alt_position_id": 0,
+      "type": "hp1",
+      "type_id": 4,
+      "type_name": "Lesser Healing Potion",
+      "nr_of_items_in_sockets": 0,
+      "id": 0,
+      "level": 0,
+      "quality": 0,
+      "multiple_pictures": 0,
+      "class_specific": 0,
+      "low_quality_id": 0,
+      "timestamp": 0,
+      "ear_attributes": {
+        "class": 0,
+        "level": 0,
+        "name": ""
+      },
+      "total_nr_of_sockets": 0,
+      "runeword_attributes": null,
+      "set_list_count": 0,
+      "set_attributes": null,
+      "magic_attributes": null,
+      "socketed_items": null
+    },
+    {
+      "identified": 1,
+      "socketed": 0,
+      "new": 1,
+      "is_ear": 0,
+      "starter_item": 1,
+      "simple_item": 1,
+      "ethereal": 0,
+      "personalized": 0,
+      "given_runeword": 0,
+      "location_id": 2,
+      "position_x": 1,
+      "position_y": 0,
+      "alt_position_id": 0,
+      "type": "hp1",
+      "type_id": 4,
+      "type_name": "Lesser Healing Potion",
+      "nr_of_items_in_sockets": 0,
+      "id": 0,
+      "level": 0,
+      "quality": 0,
+      "multiple_pictures": 0,
+      "class_specific": 0,
+      "low_quality_id": 0,
+      "timestamp": 0,
+      "ear_attributes": {
+        "class": 0,
+        "level": 0,
+        "name": ""
+      },
+      "total_nr_of_sockets": 0,
+      "runeword_attributes": null,
+      "set_list_count": 0,
+      "set_attributes": null,
+      "magic_attributes": null,
+      "socketed_items": null
+    },
+    {
+      "identified": 1,
+      "socketed": 0,
+      "new": 1,
+      "is_ear": 0,
+      "starter_item": 1,
+      "simple_item": 1,
+      "ethereal": 0,
+      "personalized": 0,
+      "given_runeword": 0,
+      "location_id": 2,
+      "position_x": 2,
+      "position_y": 0,
+      "alt_position_id": 0,
+      "type": "hp1",
+      "type_id": 4,
+      "type_name": "Lesser Healing Potion",
+      "nr_of_items_in_sockets": 0,
+      "id": 0,
+      "level": 0,
+      "quality": 0,
+      "multiple_pictures": 0,
+      "class_specific": 0,
+      "low_quality_id": 0,
+      "timestamp": 0,
+      "ear_attributes": {
+        "class": 0,
+        "level": 0,
+        "name": ""
+      },
+      "total_nr_of_sockets": 0,
+      "runeword_attributes": null,
+      "set_list_count": 0,
+      "set_attributes": null,
+      "magic_attributes": null,
+      "socketed_items": null
+    },
+    {
+      "identified": 1,
+      "socketed": 0,
+      "new": 1,
+      "is_ear": 0,
+      "starter_item": 1,
+      "simple_item": 1,
+      "ethereal": 0,
+      "personalized": 0,
+      "given_runeword": 0,
+      "location_id": 2,
+      "position_x": 3,
+      "position_y": 0,
+      "alt_position_id": 0,
+      "type": "hp1",
+      "type_id": 4,
+      "type_name": "Lesser Healing Potion",
+      "nr_of_items_in_sockets": 0,
+      "id": 0,
+      "level": 0,
+      "quality": 0,
+      "multiple_pictures": 0,
+      "class_specific": 0,
+      "low_quality_id": 0,
+      "timestamp": 0,
+      "ear_attributes": {
+        "class": 0,
+        "level": 0,
+        "name": ""
+      },
+      "total_nr_of_sockets": 0,
+      "runeword_attributes": null,
+      "set_list_count": 0,
+      "set_attributes": null,
+      "magic_attributes": null,
+      "socketed_items": null
+    },
+    {
+      "identified": 1,
+      "socketed": 0,
+      "new": 1,
+      "is_ear": 0,
+      "starter_item": 1,
+      "simple_item": 1,
+      "ethereal": 0,
+      "personalized": 0,
+      "given_runeword": 0,
+      "location_id": 0,
+      "position_x": 9,
+      "position_y": 3,
+      "alt_position_id": 1,
+      "type": "tsc",
+      "type_id": 4,
+      "type_name": "Town Portal Scroll",
+      "nr_of_items_in_sockets": 0,
+      "id": 0,
+      "level": 0,
+      "quality": 0,
+      "multiple_pictures": 0,
+      "class_specific": 0,
+      "low_quality_id": 0,
+      "timestamp": 0,
+      "ear_attributes": {
+        "class": 0,
+        "level": 0,
+        "name": ""
+      },
+      "total_nr_of_sockets": 0,
+      "runeword_attributes": null,
+      "set_list_count": 0,
+      "set_attributes": null,
+      "magic_attributes": null,
+      "socketed_items": null
+    },
+    {
+      "identified": 1,
+      "socketed": 0,
+      "new": 1,
+      "is_ear": 0,
+      "starter_item": 1,
+      "simple_item": 1,
+      "ethereal": 0,
+      "personalized": 0,
+      "given_runeword": 0,
+      "location_id": 0,
+      "position_x": 9,
+      "position_y": 2,
+      "alt_position_id": 1,
+      "type": "isc",
+      "type_id": 4,
+      "type_name": "Identify Scroll",
+      "nr_of_items_in_sockets": 0,
+      "id": 0,
+      "level": 0,
+      "quality": 0,
+      "multiple_pictures": 0,
+      "class_specific": 0,
+      "low_quality_id": 0,
+      "timestamp": 0,
+      "ear_attributes": {
+        "class": 0,
+        "level": 0,
+        "name": ""
+      },
+      "total_nr_of_sockets": 0,
+      "runeword_attributes": null,
+      "set_list_count": 0,
+      "set_attributes": null,
+      "magic_attributes": null,
+      "socketed_items": null
+    },
+    {
+      "identified": 1,
+      "socketed": 0,
+      "new": 1,
+      "is_ear": 0,
+      "starter_item": 1,
+      "simple_item": 0,
+      "ethereal": 0,
+      "personalized": 0,
+      "given_runeword": 0,
+      "location_id": 1,
+      "equipped_id": 4,
+      "position_x": 4,
+      "position_y": 0,
+      "alt_position_id": 0,
+      "type": "hax",
+      "type_id": 3,
+      "type_name": "Hand Axe",
+      "nr_of_items_in_sockets": 0,
+      "id": 1201280146,
+      "level": 1,
+      "quality": 2,
+      "multiple_pictures": 0,
+      "class_specific": 0,
+      "low_quality_id": 0,
+      "timestamp": 0,
+      "ear_attributes": {
+        "class": 0,
+        "level": 0,
+        "name": ""
+      },
+      "max_durability": 28,
+      "current_durability": 28,
+      "total_nr_of_sockets": 0,
+      "runeword_attributes": null,
+      "set_list_count": 0,
+      "set_attributes": null,
+      "magic_attributes": null,
+      "socketed_items": null,
+      "base_damage": {
+        "min": 3,
+        "max": 6
+      }
+    },
+    {
+      "identified": 1,
+      "socketed": 0,
+      "new": 1,
+      "is_ear": 0,
+      "starter_item": 1,
+      "simple_item": 0,
+      "ethereal": 0,
+      "personalized": 0,
+      "given_runeword": 0,
+      "location_id": 1,
+      "equipped_id": 5,
+      "position_x": 5,
+      "position_y": 0,
+      "alt_position_id": 0,
+      "type": "buc",
+      "type_id": 2,
+      "type_name": "Buckler",
+      "nr_of_items_in_sockets": 0,
+      "id": 2605092378,
+      "level": 1,
+      "quality": 2,
+      "multiple_pictures": 0,
+      "class_specific": 0,
+      "low_quality_id": 0,
+      "timestamp": 0,
+      "ear_attributes": {
+        "class": 0,
+        "level": 0,
+        "name": ""
+      },
+      "defense_rating": 5,
+      "max_durability": 12,
+      "current_durability": 12,
+      "total_nr_of_sockets": 0,
+      "runeword_attributes": null,
+      "set_list_count": 0,
+      "set_attributes": null,
+      "magic_attributes": null,
+      "socketed_items": null
+    }
+  ],
+  "corpse_items": null,
+  "merc_items": null,
+  "golem_item": null,
+  "is_dead": 0
+}

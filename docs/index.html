@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/6.3.0/jsoneditor.min.css" 
+    integrity="sha256-YSy983pvDw/pNyv/+uiHXKNh1LlveOgHY6XAXFclM/Y=" crossorigin="anonymous" />
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" 
+    rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <style>
+  #d2sJson .jsoneditor {
+    border: 0;
+  }
+  </style>
+  <title>d2s - Example</title>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="octicon octicon-clippy navbar-brand">
+      <i class="fa fa-fw fa-github"></i>
+      <a href="https://github.com/dschu012">dschu012</a> / <a class="font-weight-bold" href="https://github.com/dschu012/d2s">d2s</a>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-2 d-none d-md-block"></div>
+      <div class="col-8 mt-2">
+        <div class="card bg-light">
+          <div class="card-body">
+            <form id="d2sForm">
+              <fieldset>
+                <div class="form-group">
+                  <div class="input-group">
+                    <div class="custom-file">
+                      <input type="file" name="d2sFile" id="d2sFile">
+                      <label class="custom-file-label" for="d2sFile">*.d2s</label>
+                    </div>
+                    <div class="input-group-append">
+                      <span>&nbsp;</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group mt-2">
+                  <div id="d2sJson"></div>
+                </div>
+              </fieldset>
+              <div id="errors">
+              </div>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/6.3.0/jsoneditor.min.js" 
+    integrity="sha256-o2/L37SBn4ufKxtZAItcvBdidVsP170IKNcqfVd3ZF4=" 
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <script src="../dist/constants.bundle.js"></script>
+  <script src="../dist/d2s.bundle.js"></script>
+  <script>
+    //if we arent local, use github latest
+    if (window.d2s === undefined) {
+      let s = document.createElement('script');
+      s.src = "https://github.com/dschu012/d2s/releases/latest/download/constants.bundle.min.js";
+      document.querySelector('body').appendChild(s);
+      s = document.createElement('script');
+      s.src = "https://github.com/dschu012/d2s/releases/latest/download/d2s.bundle.min.js";
+      document.querySelector('body').appendChild(s);
+    }
+    let editor = new JSONEditor(document.querySelector('#d2sJson'), {
+      mode: 'form',
+      mainMenuBar: false,
+      navigationBar: false
+    })
+    let errors = document.querySelector("#errors");
+
+    //read from input type=file
+    let input = document.querySelector('#d2sFile');
+    input.onchange = function (e) {
+      let reader = new FileReader();
+      reader.onload = function (re) {
+        try {
+          d2s.read(re.target.result, constants.constants).then((response) => {
+            editor.set(response);
+            //textarea.style.display = "block";
+            //textarea.value = JSON.stringify(response, null, 2);
+          });
+        } catch (e) {
+          errors.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <strong>Error: </strong>${e.message}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>`
+        }
+      }
+      reader.readAsArrayBuffer(this.files[0]);
+      this.value = null;
+    }
+
+    //write from json data
+    let form = document.querySelector("#d2sForm");
+    let link = document.createElement('a');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      let j = editor.get();
+      try {
+        d2s.write(j, constants.constants).then((response) => {
+          let blob = new Blob([response], { type: "octet/stream" });
+          link.href = window.URL.createObjectURL(blob);
+          link.download = j.header.name + '.d2s';
+          link.click();
+        });
+      } catch (e) {
+        errors.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <strong>Error: </strong>${e.message}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>`
+      }
+    }
+  </script>
+</body>
+</html>

@@ -473,8 +473,10 @@ function _readSimpleBits(reader: BinaryReader, constants: types.IConstantData, c
   item.starter_item = _readBits(reader, start, 33, 1);
   item.simple_item = _readBits(reader, start, 37, 1);
   item.ethereal = _readBits(reader, start, 38, 1); 
+  _readBits(reader, start, 39, 1);                        //always 1
   item.personalized = _readBits(reader, start, 40, 1);
   item.given_runeword = _readBits(reader, start, 42, 1);
+  item.version = _readBits(reader, start, 48, 8);                        //version
   item.location_id = _readBits(reader, start, 58, 3);
   item.equipped_id = _readBits(reader, start, 61, 4);
   item.position_x = _readBits(reader, start, 65, 4);
@@ -536,8 +538,10 @@ function _writeSimpleBits(writer: BinaryWriter, item: types.IItem, constants: ty
   _writeBits(writer, item.starter_item, start, 33, 1);
   _writeBits(writer, item.simple_item, start, 37, 1);
   _writeBits(writer, item.ethereal, start, 38, 1);
+  _writeBits(writer, 1, start, 39, 1);                      //always 1
   _writeBits(writer, item.personalized, start, 40, 1);
   _writeBits(writer, item.given_runeword, start, 42, 1);
+  _writeBits(writer, item.version != null ? item.version : 101, start, 48, 8);     // 0 = pre-1.08; 1 = 1.08/1.09 normal; 2 = 1.10 normal; 100 = 1.08/1.09 expansion; 101 = 1.10 expansion
   _writeBits(writer, item.location_id, start, 58, 3);
   _writeBits(writer, item.equipped_id, start, 61, 4);
   _writeBits(writer, item.position_x, start, 65, 4);

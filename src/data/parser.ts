@@ -47,7 +47,7 @@ function readConstantData(buffers: any): types.IConstantData {
     constants.other_items = {};
     other_items.map(item => { constants.other_items[item.code] = item; delete item.code; });
     _readGems(constants.other_items, _getArray(buffers, "Gems.txt"), strings);
-
+    
     return constants;
 }
 

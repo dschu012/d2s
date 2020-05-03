@@ -9,7 +9,7 @@ import * as Long from 'long'
 export function _readBits(reader: BinaryReader, start: number, bitoffset: number, size: number): number {
   reader.Seek(start + Math.floor(bitoffset / 8));
   let num = Long.default.fromNumber(reader.ReadUInt(Math.ceil((size+(bitoffset % 8))/8)), true);
-  let shift = num.shiftRightUnsigned(bitoffset % 8);
+  let shift = num.shiftRightUnsigned(bitoffset & 0x7);
   let mask = Long.default.fromNumber(1, true).shiftLeft(size).subtract(1);
   num = shift.and(mask);
   return num.toNumber();

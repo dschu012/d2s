@@ -398,10 +398,9 @@ function _readWaypoints(bytes: Uint8Array): types.IWaypoints {
 
 function _writeWaypointData(waypoints: types.IWaypointData): Uint8Array {
   let writer = new BinaryWriter(72).SetLittleEndian().SetLength(72);
-  if(waypoints) {
-   for(let i = 0; i < difficulties.length; i++) {
-     writer.WriteArray(_writeWaypoints(waypoints[difficulties[i]]));
-   }
+  for(let i = 0; i < difficulties.length; i++) {
+    let w = waypoints != null ? waypoints[difficulties[i]] : null;
+    writer.WriteArray(_writeWaypoints(w));
   }
   return writer.toArray();
 }

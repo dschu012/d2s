@@ -10,7 +10,7 @@ import { constants } from '../../src/data/versions/96_constant_data';
 describe('header', () => {
 
   it('should calulcate checksum', async () => {
-    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/simple.d2s"));
+    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/simple.d2s"));
     let writer = new BinaryWriter().SetLittleEndian();
     writer.WriteArray(inputstream);
     let pre = writer.Seek(0x000c).Peek(4);
@@ -20,7 +20,7 @@ describe('header', () => {
   });
 
   it('should read', async () => {
-    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/simple.d2s"));
+    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/simple.d2s"));
     let reader = new BinaryReader(inputstream).SetLittleEndian();
     let d2s = {} as types.ID2S;
     await readHeader(d2s, reader);
@@ -29,7 +29,7 @@ describe('header', () => {
   });
 
   it('should write', async () => {
-    let json = fs.readFileSync(path.join(__dirname, "../../examples/simple.json"), "utf-8");
+    let json = fs.readFileSync(path.join(__dirname, "../../examples/chars/simple.json"), "utf-8");
     let d2s = JSON.parse(json);
     let output = new BinaryWriter();
     output.WriteArray(await writeHeader(d2s));

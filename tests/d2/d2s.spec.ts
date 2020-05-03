@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { read, write } from '../../src/d2/d2s';
+import { read, write, readItem, writeItem } from '../../src/d2/d2s';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as types from '../../src/d2/types';
@@ -13,15 +13,15 @@ import { constants } from '../../src/data/versions/96_constant_data'
  */
 describe('d2s', () => {
   it('should read new character', async () => {
-    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/simple.d2s"));
+    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/simple.d2s"));
     let save = await read(inputstream, constants);
     //console.log(JSON.stringify(save, null, 2));
-    expect(save.header.name).to.eq("ttest");
+    expect(save.header.name).to.eq("Simple");
     expect(save.attributes.strength).to.eq(30);
   });
 
   it('should write new character', async () => {
-    let json = fs.readFileSync(path.join(__dirname, "../../examples/simple.json"), "utf-8");
+    let json = fs.readFileSync(path.join(__dirname, "../../examples/chars/simple.json"), "utf-8");
     let d2s = JSON.parse(json) as types.ID2S;
     let output = await write(d2s, constants);
     expect(output.length).to.eq(998);
@@ -29,20 +29,42 @@ describe('d2s', () => {
   });
 
   it('should read "complex" character', async () => {
-    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/complex.d2s"));
+    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/complex.d2s"));
     let save = await read(inputstream, constants);
     //console.log(JSON.stringify(save, null, 2));
-    expect(save.header.name).to.eq("SilverDeth-IV");
-    expect(save.items.length).to.eq(87);
+    expect(save.header.name).to.eq("Complex");
+    expect(save.items.length).to.eq(61);
   });
 
   it('should write "complex" character', async () => {
-    let json = fs.readFileSync(path.join(__dirname, "../../examples/complex.json"), "utf-8");
+    let json = fs.readFileSync(path.join(__dirname, "../../examples/chars/complex.json"), "utf-8");
     let d2s = JSON.parse(json) as types.ID2S;
     let output = await write(d2s, constants);
-    expect(output.length).to.eq(3734);
-    //fs.writeFileSync(path.join(__dirname,`../../../../Program Files (x86)/Diablo II/Save/${d2s.header.name}.d2s`), output);
+    expect(output.length).to.eq(3196);
+    fs.writeFileSync(path.join(__dirname,`../../../../Program Files (x86)/Diablo II/Saves/1.13d/${d2s.header.name}.d2s`), output);
   });
+
+  it('should read item',  async () => {
+    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/items/tal-rasha-lidless-eye.d2i"));
+    //console.log(toBinary(inputstream.toString('hex')));
+    let item = await readItem(inputstream, constants);
+    //let outputstream = await writeItem(item, constants);
+    //console.log(toBinary(new Buffer(outputstream).toString('hex')));
+    expect(item.set_name).to.eq("Tal Rasha's Lidless Eye");
+    //console.log(JSON.stringify(item, null, 2));
+  });
+
+  function toBinary(s : String) : any {
+    let tokens = s.match(/.{1,2}/g);
+    if(tokens != null) {
+      tokens = tokens.map(v => { 
+        let i = parseInt(v, 16);
+        return (i >>> 0).toString(2).padStart(8, '0');
+      });
+      return tokens.join("");
+    }
+    return null;
+  }
 
   function letter(i: number): String {
     let s = "";
@@ -90,7 +112,7 @@ describe('d2s', () => {
       console.log(c);
       let char = c.toLowerCase();
       let body = (await download(`https://armory.slashdiablo.net/retrieving/v1/character?name=${char}`));
-      //let body = fs.readFileSync(path.join(__dirname, `../../examples/${char}.json`), "utf-8")
+      //let body = fs.readFileSync(path.join(__dirname, `../../examples/chars/${char}.json`), "utf-8")
       let d2s = JSON.parse(body as string).character.d2s;
       fs.writeFileSync(path.join(__dirname,`../../../data/json/${d2s.header.name}.json`), JSON.stringify(d2s, null, 2));
       //let output = await write(d2s, constants);

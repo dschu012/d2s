@@ -40,7 +40,7 @@ export async function enhanceItems(items: types.IItem[], constants: types.IConst
   }
 }
 
-function enhanceItem(item: types.IItem, constants: types.IConstantData, level: number = 1, parent?: types.IItem) {
+export function enhanceItem(item: types.IItem, constants: types.IConstantData, level: number = 1, parent?: types.IItem) {
   if (parent) {
     //socket item.
     let pt = constants.armor_items[parent.type]

@@ -4,9 +4,8 @@ import { readAttributes, writeAttributes } from './attributes'
 import { BinaryReader } from '../binary/binaryreader';
 import { BinaryWriter } from '../binary/binarywriter';
 import { readSkills, writeSkills } from './skills';
-import { readCharItems, readCorpseItems, readMercItems, readGolemItems,
-  writeCharItems, writeCorpseItem, writeMercItems, writeGolemItems } from './items';
-import { enhanceAttributes } from './attribute_enhancer';
+import * as items from './items';
+import { enhanceAttributes, enhanceItem } from './attribute_enhancer';
 
 const defaultConfig = {
   extendedStash: false
@@ -21,14 +20,22 @@ async function read(buffer: Uint8Array, constants: types.IConstantData, userConf
   await readHeaderData(char, reader, constants);
   await readAttributes(char, reader, constants);
   await readSkills(char, reader, constants);
-  await readCharItems(char, reader, constants, config);
-  await readCorpseItems(char, reader, constants, config);
+  await items.readCharItems(char, reader, constants, config);
+  await items.readCorpseItems(char, reader, constants, config);
   if(char.header.status.expansion) {
-    await readMercItems(char, reader, constants, config);
-    await readGolemItems(char, reader, constants, config);
+    await items.readMercItems(char, reader, constants, config);
+    await items.readGolemItems(char, reader, constants, config);
   }
   await enhanceAttributes(char, constants);
   return char;
+}
+
+async function readItem(buffer: Uint8Array, constants: types.IConstantData, userConfig?: types.IConfig): Promise<types.IItem> {
+  let reader = new BinaryReader(buffer).SetLittleEndian();
+  let config =  Object.assign(defaultConfig, userConfig);
+  let item =  items.readItem(reader, constants, config);
+  await enhanceItem(item, constants);
+  return item;
 }
 
 async function write(data: types.ID2S, constants: types.IConstantData, userConfig?: types.IConfig): Promise<Uint8Array> {
@@ -39,14 +46,22 @@ async function write(data: types.ID2S, constants: types.IConstantData, userConfi
   writer.WriteArray(await writeHeaderData(data, constants));
   writer.WriteArray(await writeAttributes(data, constants));
   writer.WriteArray(await writeSkills(data, constants));
-  writer.WriteArray(await writeCharItems(data, constants, config));
-  writer.WriteArray(await writeCorpseItem(data, constants, config));
+  writer.WriteArray(await items.writeCharItems(data, constants, config));
+  writer.WriteArray(await items.writeCorpseItem(data, constants, config));
   if(data.header.status.expansion) {
-    writer.WriteArray(await writeMercItems(data, constants, config));
-    writer.WriteArray(await writeGolemItems(data, constants, config));
+    writer.WriteArray(await items.writeMercItems(data, constants, config));
+    writer.WriteArray(await items.writeGolemItems(data, constants, config));
   }
   await fixHeader(writer);
   return writer.toArray();
 }
 
-export { read, write };
+async function writeItem(item: types.IItem, constants: types.IConstantData, userConfig?: types.IConfig): Promise<Uint8Array> {
+  let config =  Object.assign(defaultConfig, userConfig);
+  let writer = new BinaryWriter().SetLittleEndian();
+  writer.WriteArray(await items.writeItem(item, constants, config));
+  return writer.toArray();
+}
+
+
+export { read, write, readItem, writeItem };

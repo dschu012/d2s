@@ -41,7 +41,7 @@ describe('d2s', () => {
     let d2s = JSON.parse(json) as types.ID2S;
     let output = await write(d2s, constants);
     expect(output.length).to.eq(3196);
-    fs.writeFileSync(path.join(__dirname,`../../../../Program Files (x86)/Diablo II/Saves/1.13d/${d2s.header.name}.d2s`), output);
+    //fs.writeFileSync(path.join(__dirname,`../../../../Program Files (x86)/Diablo II/Saves/1.13d/${d2s.header.name}.d2s`), output);
   });
 
   it('should read item',  async () => {

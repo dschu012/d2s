@@ -78,7 +78,8 @@ export function writeHeader(char: types.ID2S, writer: BinaryWriter, constants: t
    .WriteUInt16(char.header.merc_name_id)                                      //0x00b7
    .WriteUInt16(char.header.merc_type)                                         //0x00b9
    .WriteUInt32(char.header.merc_experience)                                   //0x00bb
-   .Skip(144)                                                                  //0x00bf [unk]
+   .Skip(140)                                                                  //0x00bf [unk]
+   .WriteUInt32(0x1)                                                           //0x014b [unk = 0x1, 0x0, 0x0, 0x0]
    .WriteString("Woo!")                                                        //0x014f [quests = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
    .WriteArray(new Uint8Array([0x06, 0x00, 0x00, 0x00, 0x2a, 0x01]))           //0x0153 [unk = 0x6, 0x0, 0x0, 0x0, 0x2a, 0x1]
    .WriteArray(_writeQuests(char.header.quests_normal))                        //0x0159
@@ -245,8 +246,9 @@ function _readQuests(bytes: Uint8Array): types.IQuests {
 
 function _writeQuests(quests: types.IQuests): Uint8Array {
   let writer = new BinaryWriter(96).SetLittleEndian().SetLength(96);
+  let difficultyCompleted = +quests.act_v.completed || +quests.act_v.eve_of_destruction.is_completed;
   return writer
-    .WriteUInt16(0x1)
+    .WriteUInt16(+quests.act_i.introduced)
     .WriteArray(_writeQuest(quests.act_i.den_of_evil))
     .WriteArray(_writeQuest(quests.act_i.sisters_burial_grounds))
     .WriteArray(_writeQuest(quests.act_i.tools_of_the_trade))
@@ -275,15 +277,17 @@ function _writeQuests(quests: types.IQuests): Uint8Array {
     .WriteArray(_writeQuest(quests.act_iv.terrors_end))
     .WriteArray(_writeQuest(quests.act_iv.hellforge))
     .WriteUInt16(+quests.act_iv.completed || +quests.act_iv.terrors_end.is_completed)
-    .Skip(10)
+    .Skip(6)
     .WriteUInt16(+quests.act_v.introduced || +quests.act_iv.terrors_end.is_completed)
+    .Skip(4)
     .WriteArray(_writeQuest(quests.act_v.siege_on_harrogath))
     .WriteArray(_writeQuest(quests.act_v.rescue_on_mount_arreat))
     .WriteArray(_writeQuest(quests.act_v.prison_of_ice))
     .WriteArray(_writeQuest(quests.act_v.betrayal_of_harrogath))
     .WriteArray(_writeQuest(quests.act_v.rite_of_passage))
     .WriteArray(_writeQuest(quests.act_v.eve_of_destruction))
-    .WriteUInt16(+quests.act_v.completed || +quests.act_v.eve_of_destruction.is_completed)
+    .WriteUInt8(difficultyCompleted)
+    .WriteUInt8(difficultyCompleted ? 0x80 : 0x0) //is this right?
     .Skip(12)
     .toArray()
     ;

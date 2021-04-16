@@ -11,6 +11,10 @@ const defaultConfig = {
   extendedStash: false
 } as types.IConfig;
 
+function reader(buffer: Uint8Array) {
+  return new BinaryReader(buffer).SetLittleEndian();
+}
+
 async function read(buffer: Uint8Array, constants: types.IConstantData, userConfig?: types.IConfig): Promise<types.ID2S> {
   let char = {} as types.ID2S;
   let reader = new BinaryReader(buffer).SetLittleEndian();
@@ -36,6 +40,10 @@ async function readItem(buffer: Uint8Array, constants: types.IConstantData, user
   let item =  items.readItem(reader, constants, config);
   await enhanceItem(item, constants);
   return item;
+}
+
+function writer(buffer: Uint8Array) {
+  return new BinaryWriter().SetLittleEndian();
 }
 
 async function write(data: types.ID2S, constants: types.IConstantData, userConfig?: types.IConfig): Promise<Uint8Array> {
@@ -64,4 +72,4 @@ async function writeItem(item: types.IItem, constants: types.IConstantData, user
 }
 
 
-export { read, write, readItem, writeItem };
+export { reader, writer, read, write, readItem, writeItem };

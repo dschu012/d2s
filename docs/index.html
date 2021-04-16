@@ -99,13 +99,16 @@
     let input = document.querySelector('#d2sFile');
     input.onchange = function (e) {
       let reader = new FileReader();
-      reader.onload = function (re) {
+      reader.onload = async function (re) {
         try {
-          d2s.read(re.target.result, constants.constants).then((response) => {
-            editor.set(response);
-            //textarea.style.display = "block";
-            //textarea.value = JSON.stringify(response, null, 2);
-          });
+          let response = {};
+          let r = d2s.reader(re.target.result);
+          await d2s.readHeader(response, r);
+          await d2s.readHeaderData(response, r, constants.constants);
+          await d2s.readAttributes(response, r, constants.constants);
+          await d2s.readSkills(response, r, constants.constants);
+          window.itemBytes = r.ReadArray(re.target.result.byteLength - r.Position());
+          editor.set(response);
         } catch (e) {
           errors.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
           <strong>Error: </strong>${e.message}
@@ -122,17 +125,24 @@
     let link = document.createElement('a');
     link.style.display = 'none';
     document.body.appendChild(link);
-    form.onsubmit = function (e) {
+    form.onsubmit = async function (e) {
       e.preventDefault();
       e.stopPropagation();
       let j = editor.get();
       try {
-        d2s.write(j, constants.constants).then((response) => {
-          let blob = new Blob([response], { type: "octet/stream" });
-          link.href = window.URL.createObjectURL(blob);
-          link.download = j.header.name + '.d2s';
-          link.click();
-        });
+        let writer = d2s.writer();
+        writer.WriteArray(await d2s.writeHeader(j));
+        writer.WriteArray(await d2s.writeHeaderData(j, constants.constants));
+        writer.WriteArray(await d2s.writeAttributes(j, constants.constants));
+        writer.WriteArray(await d2s.writeSkills(j, constants.constants));
+        writer.WriteArray(window.itemBytes);
+        await d2s.fixHeader(writer);
+        
+        let blob = new Blob([writer.toArray()], { type: "octet/stream" });
+        link.href = window.URL.createObjectURL(blob);
+        link.download = j.header.name + '.d2s';
+        link.click();
+
       } catch (e) {
         errors.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
           <strong>Error: </strong>${e.message}

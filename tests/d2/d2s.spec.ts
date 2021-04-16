@@ -13,7 +13,7 @@ import { constants } from '../../src/data/versions/96_constant_data'
  */
 describe('d2s', () => {
   it('should read new character', async () => {
-    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/simple.d2s"));
+    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/simple.d2s"));
     let save = await read(inputstream, constants);
     //console.log(JSON.stringify(save, null, 2));
     expect(save.header.name).to.eq("Simple");
@@ -21,15 +21,15 @@ describe('d2s', () => {
   });
 
   it('should write new character', async () => {
-    let json = fs.readFileSync(path.join(__dirname, "../../examples/chars/simple.json"), "utf-8");
+    let json = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/simple.json"), "utf-8");
     let d2s = JSON.parse(json) as types.ID2S;
     let output = await write(d2s, constants);
-    expect(output.length).to.eq(998);
+    expect(output.length).to.eq(980);
     //fs.writeFileSync(path.join(__dirname,`../../../Program Files (x86)/Diablo II/Save/${d2s.header.name}.d2s`), output);
   });
 
   it('should read "complex" character', async () => {
-    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/complex.d2s"));
+    let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/complex.d2s"));
     let save = await read(inputstream, constants);
     //console.log(JSON.stringify(save, null, 2));
     expect(save.header.name).to.eq("Complex");
@@ -37,10 +37,10 @@ describe('d2s', () => {
   });
 
   it('should write "complex" character', async () => {
-    let json = fs.readFileSync(path.join(__dirname, "../../examples/chars/complex.json"), "utf-8");
+    let json = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/complex.json"), "utf-8");
     let d2s = JSON.parse(json) as types.ID2S;
     let output = await write(d2s, constants);
-    expect(output.length).to.eq(3196);
+    expect(output.length).to.eq(3191);
     //fs.writeFileSync(path.join(__dirname,`../../../../Program Files (x86)/Diablo II/Saves/1.13d/${d2s.header.name}.d2s`), output);
   });
 
@@ -112,7 +112,7 @@ describe('d2s', () => {
       console.log(c);
       let char = c.toLowerCase();
       let body = (await download(`https://armory.slashdiablo.net/retrieving/v1/character?name=${char}`));
-      //let body = fs.readFileSync(path.join(__dirname, `../../examples/chars/${char}.json`), "utf-8")
+      //let body = fs.readFileSync(path.join(__dirname, `../../examples/chars/96/${char}.json`), "utf-8")
       let d2s = JSON.parse(body as string).character.d2s;
       fs.writeFileSync(path.join(__dirname,`../../../data/json/${d2s.header.name}.json`), JSON.stringify(d2s, null, 2));
       //let output = await write(d2s, constants);

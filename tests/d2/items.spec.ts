@@ -11,6 +11,58 @@ describe('items', () => {
     extendedStash: false
   } as types.IConfig;
 
+
+  /*
+HP1
+Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 207, 79, 0]
+
+HP2
+Uint8Array(9) [16, 0, 160, 0, 5, 228, 4, 79, 38]
+
+HP3
+Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 207, 109, 0]
+
+HP4
+Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 207, 175, 0]
+
+HP5
+Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 79, 180, 0]
+  */
+
+  xit('should read "simple" item 1.15', async() => {
+    //hp1 from game
+    //let buffer = new Uint8Array([16,32,130,0,13,17,0,63,30,22,187,92,65,2,2,14,14,255,1]);
+    let buffer, reader, item;
+    //HP1 (inv, col=9, row=3)
+    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 207, 79, 0]);
+    reader = new BinaryReader(buffer).SetLittleEndian();
+    item = await readItem(reader, constants, config);
+
+    //HP2 (inv, col=9, row=3)
+    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 79, 38]);
+    reader = new BinaryReader(buffer).SetLittleEndian();
+    item = await readItem(reader, constants, config);
+
+    //HP3 (inv, col=9, row=3)
+    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 207, 109, 0]);
+    reader = new BinaryReader(buffer).SetLittleEndian();
+    item = await readItem(reader, constants, config);
+
+    //HP4 (inv, col=9, row=3)
+    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 207, 175, 0]);
+    reader = new BinaryReader(buffer).SetLittleEndian();
+    item = await readItem(reader, constants, config);
+
+    //HP5 (inv, col=9, row=3)
+    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 79, 180, 0]);
+    reader = new BinaryReader(buffer).SetLittleEndian();
+    item = await readItem(reader, constants, config);
+
+    expect(item.type).to.eq("hp1");
+    expect(item.simple_item).to.eq(1);
+  });
+
+
   it('should read "simple" item', async() => {
     //hp1 from game
     let buffer = new Uint8Array([74,77,16,32,34,0,0,8,0,128,6,23,3,2]);

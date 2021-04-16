@@ -42,6 +42,9 @@ export async function writeAttributes(char: types.ID2S, constants: types.IConsta
       throw new Error(`Invalid attribute: ${property}`)
     }
     let value = char.attributes[Attributes[property.s]];
+    if(!value) {
+      continue;
+    }
     let size = property.cB;
     if(i >= 6 && i <= 11) {
       value <<= 8;

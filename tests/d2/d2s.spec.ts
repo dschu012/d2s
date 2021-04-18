@@ -1,10 +1,12 @@
 import { expect } from 'chai';
 import { read, write, readItem, writeItem } from '../../src/d2/d2s';
+import { readHeader, writeHeader, fixHeader, writeHeaderData, readHeaderData } from '../../src/d2/header';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as types from '../../src/d2/types';
 import * as request from 'request';
 import { constants } from '../../src/data/versions/96_constant_data'
+import { BinaryWriter } from '../../src/binary/binarywriter';
 
 
 
@@ -47,7 +49,7 @@ describe('d2s', () => {
   it('should read item',  async () => {
     let inputstream = fs.readFileSync(path.join(__dirname, "../../examples/items/tal-rasha-lidless-eye.d2i"));
     //console.log(toBinary(inputstream.toString('hex')));
-    let item = await readItem(inputstream, constants);
+    let item = await readItem(inputstream, 0x60, constants);
     //let outputstream = await writeItem(item, constants);
     //console.log(toBinary(new Buffer(outputstream).toString('hex')));
     expect(item.set_name).to.eq("Tal Rasha's Lidless Eye");

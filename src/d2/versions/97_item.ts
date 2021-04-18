@@ -2,6 +2,7 @@ import * as types from '../types'
 import { BinaryReader } from '../../binary/binaryreader'
 import { BinaryWriter } from '../../binary/binarywriter'
 import { _readBits, _writeBits } from '../../util';
+import { _readMagicProperties, _writeMagicProperties } from './default_item';
 
 //TODO
 //No JM HEADER
@@ -14,11 +15,19 @@ enum ItemType {
     Other = 0x04
   }
 
+export function readItem(reader: BinaryReader, constants: types.IConstantData, config: types.IConfig, parent?: types.IItem): types.IItem {
+  let start = reader.Position();
+  let item = _readSimpleBits(reader, constants, config);
+  return item;
+}
+
+export function writeItem(item: types.IItem, constants: types.IConstantData, config: types.IConfig): Uint8Array {
+  return new Uint8Array(14);
+}
+
 function _readSimpleBits(reader: BinaryReader, constants: types.IConstantData, config: types.IConfig): types.IItem {
     let item = {} as types.IItem;
     let start = reader.Position();
-    //1.10-1.14d 
-    //[flags:32][version:10][mode:3]([invloc:4][x:4][y:4][page:3])([itemcode:32])([sockets:3])
     //1.15
     //[flags:32][version:3][mode:3]([invloc:4][x:4][y:4][page:3])([itemcode:32])([sockets:3])
     item.identified = _readBits(reader, start, 4, 1);

@@ -11,7 +11,7 @@ import { constants } from '../../src/data/versions/96_constant_data';
 
 describe('header', () => {
 
-  xit('should calulcate checksum', async () => {
+  xit('should make all char classes w/ custom charm', async () => {
     for(let c of constants.classes) {
       let writer = new BinaryWriter().SetLittleEndian();
       let inputstream = fs.readFileSync(path.join(__dirname, `../../examples/chars/97/${c.n}.d2s`));
@@ -42,15 +42,17 @@ describe('header', () => {
         d2s.header.waypoints[i].act_v.harrogath = true;
       }
       for(var i of ["normal", "nm", "hell"]) {
-        for(var a of d2s.header.waypoints[i]) {
-          for(var w of d2s.header.waypoints[i][a]) {
+        for(var a in d2s.header.waypoints[i]) {
+          for(var w in d2s.header.waypoints[i][a]) {
             d2s.header.waypoints[i][a][w] = true;
           }
         }
       }
+
       writer.WriteArray(await writeHeaderData(d2s, constants));
 
       await readAttributes(d2s, reader, constants);
+      d2s.attributes.experience = 3520485254;
       d2s.attributes.level = 99;
       d2s.attributes.unused_stats = 0x3ff;
       d2s.attributes.unused_skill_points = 0xff;
@@ -59,26 +61,35 @@ describe('header', () => {
       writer.WriteArray(await writeAttributes(d2s, constants));
 
       await readSkills(d2s, reader, constants);
+      for(var s of d2s.skills) {
+        s.points = 20;
+      }
       writer.WriteArray(await writeSkills(d2s, constants));
+      console.log(writer.Position());
 
-      writer.WriteArray(reader.ReadArray(inputstream.length - reader.Position())); 
+      writer.Seek(853);
+      let items = new Uint8Array([74, 77, 1, 0, 16,0,128,0,5,228,68,216,79,120,250,137,117,89,210,96,199,72,92,218,243,193,252,199,252,211,252,1,252,5,248,11,248,15,248,159,248,71,65,83,252,171,160,43,254,89,208,22,255,46,168,136,127,196,79,226,191,196,191,163,255,163,63,164,127,164,191,164,255,164,63,165,127,165,127,210,88,74,99,45,141,197,52,86,211,63,167,127,79,255,160,254,97,251,179,253,127,158,101,161,140,195,251,195,216,248,254,3]);
+      let endBytes = new Uint8Array([74, 77, 0, 0, 106, 102, 107, 102, 0]);
+      writer.WriteArray(items);
+      writer.WriteArray(endBytes);
+      
+
       let end = writer.Position();
       writer.Seek(0x000c)
       await fixHeader(writer);
       
       console.log(`Reader: ${reader.Position()}, Writer ${end}`);
-      //C:/Users/Danny/Saved Games/Diablo II Resurrected Tech Alpha
       for(let f of [
-        `C:/Users/Danny/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`,
-        `C:/Users/Danny/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.ctl`,
-        `C:/Users/Danny/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.ma0`,
-        `C:/Users/Danny/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.ma1`,
-        `C:/Users/Danny/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.map`,
-        `C:/Users/Danny/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.key`
+        `${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`,
+        `${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.ctl`,
+        `${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.ma0`,
+        `${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.ma1`,
+        `${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.map`,
+        `${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.key`
       ]) {
         if(fs.existsSync(f)) fs.unlinkSync(f);
       }
-      fs.writeFileSync(`C:/Users/Danny/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`, writer.toArray());
+      fs.writeFileSync(`${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`, writer.toArray());
     }
   });
   

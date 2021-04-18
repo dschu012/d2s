@@ -34,10 +34,10 @@ async function read(buffer: Uint8Array, constants: types.IConstantData, userConf
   return char;
 }
 
-async function readItem(buffer: Uint8Array, constants: types.IConstantData, userConfig?: types.IConfig): Promise<types.IItem> {
+async function readItem(buffer: Uint8Array, version: number, constants: types.IConstantData, userConfig?: types.IConfig): Promise<types.IItem> {
   let reader = new BinaryReader(buffer).SetLittleEndian();
   let config =  Object.assign(defaultConfig, userConfig);
-  let item =  items.readItem(reader, constants, config);
+  let item =  await items.readItem(reader, version, constants, config);
   await enhanceItem(item, constants);
   return item;
 }
@@ -64,10 +64,10 @@ async function write(data: types.ID2S, constants: types.IConstantData, userConfi
   return writer.toArray();
 }
 
-async function writeItem(item: types.IItem, constants: types.IConstantData, userConfig?: types.IConfig): Promise<Uint8Array> {
+async function writeItem(item: types.IItem, version: number, constants: types.IConstantData, userConfig?: types.IConfig): Promise<Uint8Array> {
   let config =  Object.assign(defaultConfig, userConfig);
   let writer = new BinaryWriter().SetLittleEndian();
-  writer.WriteArray(await items.writeItem(item, constants, config));
+  writer.WriteArray(await items.writeItem(item, version, constants, config));
   return writer.toArray();
 }
 

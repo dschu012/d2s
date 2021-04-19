@@ -208,6 +208,10 @@ export async function readItem(reader: BinaryReader, version: number, constants:
       }
       if (item.given_runeword) {
           item.runeword_id = _readBits(reader, start, offset, 12);
+          //fix delerium on d2gs??? why is this a thing?
+          if(item.runeword_id == 2718) {
+            item.runeword_id = 48;
+          }
           offset += 12;
           item.runeword_name = constants.runewords[item.runeword_id]!.n!;
           offset += 4; //always 5
@@ -382,7 +386,12 @@ export async function writeItem(item: types.IItem, version: number, constants: t
       }
 
       if (item.given_runeword) {
-          _writeBits(writer, item.runeword_id, start, offset, 12);
+          //fix delerium on d2gs??? why is this a thing?
+          let runeword_id = item.runeword_id;
+          if(runeword_id == 2718) {
+            runeword_id = 48;
+          }
+          _writeBits(writer, runeword_id, start, offset, 12);
           offset += 12;
           _writeBits(writer, 5, start, offset, 4); //always 5?
           offset += 4;

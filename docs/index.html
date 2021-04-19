@@ -205,6 +205,9 @@
       save(false);
     }
     document.querySelector("#d2r").onclick = async function (e) {
+      let z = editor.get();
+      z.header.difficulty = { Normal: 128, Nightmare: 0, Hell: 0 };
+      editor.set(z);
       save(true);
     }
   </script>

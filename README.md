@@ -47,6 +47,7 @@ function write(data: types.ID2S, constants: types.IConstantData, userConfig?: ty
 ```
 
 ##### Useful Links:
+* https://github.com/d07RiV/d07riv.github.io/blob/master/d2r.html (credits to d07riv for reversing the item code on D2R)
 * https://github.com/nokka/d2s
 * https://github.com/krisives/d2s-format
 * http://paul.siramy.free.fr/d2ref/eng/

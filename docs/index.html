@@ -57,8 +57,13 @@
               </fieldset>
               <div id="errors">
               </div>
-              <button type="submit" id="d2" class="btn btn-primary">Save D2</button>
-              <button type="submit" id="d2r" class="btn btn-primary">Save D2R</button>
+              <button type="button" id="unlockHell" class="btn btn-primary">Unlock Hell</button>
+              <button type="button" id="unlockAllWPs" class="btn btn-primary">Unlock All WPs</button>
+              <button type="button" id="set99" class="btn btn-primary">Set Level 99</button>
+              <button type="button" id="maxAllSkills" class="btn btn-primary">Set All Skills 20</button>
+              <br /><br />
+              <button type="button" id="d2" class="btn btn-primary">Save D2</button>
+              <button type="button" id="d2r" class="btn btn-primary">Save D2R</button>
             </form>
           </div>
         </div>
@@ -143,6 +148,57 @@
           <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>`
       }
+    }
+
+    document.querySelector("#unlockHell").onclick = async function(e) {
+      let z = editor.get();
+      z.header.progression = 15;
+      for(var i of ["quests_normal", "quests_nm", "quests_hell"]) {
+        for(var j of ["act_i", "act_ii", "act_iii", "act_iv", "act_v"]) {
+          z.header[i][j].introduced = true;
+          z.header[i][j].completed = true;
+        }
+        z.header[i].act_iii.the_guardian.is_completed = true;
+        z.header[i].act_iv.terrors_end.is_completed = true;
+      }
+      for(var i of ["normal", "nm", "hell"]) {
+        z.header.waypoints[i].act_i.rogue_encampement = true;
+        z.header.waypoints[i].act_ii.lut_gholein = true;
+        z.header.waypoints[i].act_iii.kurast_docks = true;
+        z.header.waypoints[i].act_iv.the_pandemonium_fortress = true;
+        z.header.waypoints[i].act_v.harrogath = true;
+      }
+      editor.set(z);
+    }
+
+    document.querySelector("#unlockAllWPs").onclick = async function(e) {
+      let z = editor.get();
+      for(var i of ["normal", "nm", "hell"]) {
+        for(var a in z.header.waypoints[i]) {
+          for(var w in z.header.waypoints[i][a]) {
+            z.header.waypoints[i][a][w] = true;
+          }
+        }
+      }
+      editor.set(z);
+    }
+
+    document.querySelector("#set99").onclick = async function(e) {
+      let z = editor.get();
+      let s = z.attributes.level;
+      z.header.level = 99;
+      z.attributes.experience = 3520485254;
+      z.attributes.level = 99;
+      z.attributes.unused_stats = ((99 - s) * 5);
+      editor.set(z);
+    }
+
+    document.querySelector("#maxAllSkills").onclick = async function(e) {
+      let z = editor.get();
+      for(var s of z.skills) {
+        s.points = 20;
+      }
+      editor.set(z);
     }
 
     document.querySelector("#d2").onclick = async function (e) {

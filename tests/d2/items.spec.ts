@@ -1,12 +1,10 @@
 import { expect } from 'chai';
-import { readItems, readItem, writeItem } from '../../src/d2/items';
+import { readItems, readItem, writeItem, _writeMagicProperties } from '../../src/d2/items';
 import * as types from '../../src/d2/types';
 import { BinaryReader } from '../../src/binary/binaryreader';
 import { _writeBits } from '../../src/util';
 import { constants } from '../../src/data/versions/96_constant_data';
 import { BinaryWriter } from '../../src/binary/binarywriter';
-import { writer } from '../../src/d2/d2s';
-import { _writeMagicProperties } from '../../src/d2/versions/default_item';
 
 describe('items', () => {
 
@@ -32,36 +30,17 @@ HP5
 Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 79, 180, 0]
   */
 
-  xit('should read "simple" item 1.15', async() => {
+  it('should read "simple" item 1.15', async() => {
     //hp1 from game
     //let buffer = new Uint8Array([16,32,130,0,13,17,0,63,30,22,187,92,65,2,2,14,14,255,1]);
     let buffer, reader, item;
-    
-    //HP1 (inv, col=9, row=3)
-    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 207, 79, 0]);
-    reader = new BinaryReader(buffer).SetLittleEndian();
-    item = await readItem(reader, 0x61, constants, config);
-
-    //HP2 (inv, col=9, row=3)
-    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 79, 38]);
-    reader = new BinaryReader(buffer).SetLittleEndian();
-    item = await readItem(reader, 0x61, constants, config);
-
-    //HP3 (inv, col=9, row=3)
-    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 207, 109, 0]);
-    reader = new BinaryReader(buffer).SetLittleEndian();
-    item = await readItem(reader, 0x61, constants, config);
-
-    //HP4 (inv, col=9, row=3)
-    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 207, 175, 0]);
-    reader = new BinaryReader(buffer).SetLittleEndian();
-    item = await readItem(reader, 0x61, constants, config);
 
     //HP5 (inv, col=9, row=3)
     buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 79, 180, 0]);
     reader = new BinaryReader(buffer).SetLittleEndian();
     item = await readItem(reader, 0x61, constants, config);
     
+    expect(item.type).to.eq("hp5");
   });
 
   xit('should write custom charm', async() => {

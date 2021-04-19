@@ -37,6 +37,7 @@
       <div class="col-8 mt-2">
         <div class="card bg-light">
           <div class="card-body">
+            <p>Load a save from 1.10-1.14d OR D2R Alpha</p>
             <form id="d2sForm">
               <fieldset>
                 <div class="form-group">
@@ -56,7 +57,8 @@
               </fieldset>
               <div id="errors">
               </div>
-              <button type="submit" class="btn btn-primary">Save</button>
+              <button type="submit" id="d2" class="btn btn-primary">Save D2</button>
+              <button type="submit" id="d2r" class="btn btn-primary">Save D2R</button>
             </form>
           </div>
         </div>
@@ -101,14 +103,12 @@
       let reader = new FileReader();
       reader.onload = async function (re) {
         try {
-          let response = {};
-          let r = d2s.reader(re.target.result);
-          await d2s.readHeader(response, r);
-          await d2s.readHeaderData(response, r, constants.constants);
-          await d2s.readAttributes(response, r, constants.constants);
-          await d2s.readSkills(response, r, constants.constants);
-          window.itemBytes = r.ReadArray(re.target.result.byteLength - r.Position());
-          editor.set(response);
+          if(e.target.value.endsWith('.json')) {
+            editor.set(re.target.result);
+          }
+          d2s.read(re.target.result, constants.constants).then(function(response) {
+            editor.set(response);
+          });
         } catch (e) {
           errors.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
           <strong>Error: </strong>${e.message}
@@ -120,35 +120,36 @@
       this.value = null;
     }
 
-    //write from json data
-    let form = document.querySelector("#d2sForm");
     let link = document.createElement('a');
     link.style.display = 'none';
     document.body.appendChild(link);
-    form.onsubmit = async function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      let j = editor.get();
-      try {
-        let writer = d2s.writer();
-        writer.WriteArray(await d2s.writeHeader(j));
-        writer.WriteArray(await d2s.writeHeaderData(j, constants.constants));
-        writer.WriteArray(await d2s.writeAttributes(j, constants.constants));
-        writer.WriteArray(await d2s.writeSkills(j, constants.constants));
-        writer.WriteArray(window.itemBytes);
-        await d2s.fixHeader(writer);
-        
-        let blob = new Blob([writer.toArray()], { type: "octet/stream" });
-        link.href = window.URL.createObjectURL(blob);
-        link.download = j.header.name + '.d2s';
-        link.click();
 
+    //write from json data
+    function save(d2r) {
+      let j = editor.get();
+      if(d2r) {
+        j.header.version = 0x61;
+      }
+      try {
+        d2s.write(j, constants.constants).then(function(response) {
+          let blob = new Blob([response], { type: "octet/stream" });
+          link.href = window.URL.createObjectURL(blob);
+          link.download = j.header.name + '.d2s';
+          link.click();
+        });
       } catch (e) {
         errors.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
           <strong>Error: </strong>${e.message}
           <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>`
       }
+    }
+
+    document.querySelector("#d2").onclick = async function (e) {
+      save(false);
+    }
+    document.querySelector("#d2r").onclick = async function (e) {
+      save(true);
     }
   </script>
 </body>

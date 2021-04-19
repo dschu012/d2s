@@ -1,12 +1,10 @@
 import { expect } from 'chai';
-import { read, write, readItem, writeItem } from '../../src/d2/d2s';
-import { readHeader, writeHeader, fixHeader, writeHeaderData, readHeaderData } from '../../src/d2/header';
+import { read, write, readItem } from '../../src/d2/d2s';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as types from '../../src/d2/types';
 import * as request from 'request';
 import { constants } from '../../src/data/versions/96_constant_data'
-import { BinaryWriter } from '../../src/binary/binarywriter';
 
 
 
@@ -43,7 +41,8 @@ describe('d2s', () => {
     let d2s = JSON.parse(json) as types.ID2S;
     let output = await write(d2s, constants);
     expect(output.length).to.eq(3191);
-    //fs.writeFileSync(path.join(__dirname,`../../../../Program Files (x86)/Diablo II/Saves/1.13d/${d2s.header.name}.d2s`), output);
+    //d2s.header.version = 0x61;
+    //fs.writeFileSync(`${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`, output);
   });
 
   it('should read item',  async () => {

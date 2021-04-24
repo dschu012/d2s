@@ -136,7 +136,7 @@ Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 79, 180, 0]
       type: "hp1",
       type_id: 4,
       nr_of_items_in_sockets: 0,
-      version: 0
+      version: "0"
     } as types.IItem;
     let bytes = await writeItem(item, 0x60, constants, config);
     expect(bytes).to.eql(new Uint8Array([74,77,16,32,162,0,0,8,0,128,6,23,3,2]));

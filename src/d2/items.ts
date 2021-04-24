@@ -490,9 +490,9 @@ function _readSimpleBits(item: types.IItem, reader: BinaryReader, version: numbe
   item.given_runeword = _readBits(reader, start, 26, 1);
   let offset = 32;
   if(version <= 0x60) {
-    item.version = _readBits(reader, start, offset, 10);offset+=10;                        //version
+    item.version = _readBits(reader, start, offset, 10).toString(10);offset+=10;                        //version
   } else if(version >= 0x61) {
-    item.version = _readBits(reader, start, offset, 3);offset+=3;                        //version
+    item.version = _readBits(reader, start, offset, 3).toString(2);offset+=3;                        //version
   }
   item.location_id = _readBits(reader, start, offset, 3);offset+=3;
   item.equipped_id = _readBits(reader, start, offset, 4);offset+=4;
@@ -576,12 +576,11 @@ function _writeSimpleBits(writer: BinaryWriter, version: number, item: types.IIt
   _writeBits(writer, item.personalized, start, 24, 1);
   _writeBits(writer, item.given_runeword, start, 26, 1);
   let offset = 32;
-  let itemVersion = item.version != null ? item.version : 101;
+  let itemVersion = item.version != null ? item.version : "101";
   if(version <= 0x60) {
-    _writeBits(writer, itemVersion, start, offset, 8); offset+=10;    // 0 = pre-1.08; 1 = 1.08/1.09 normal; 2 = 1.10 normal; 100 = 1.08/1.09 expansion; 101 = 1.10 expansion
+    _writeBits(writer, parseInt(itemVersion, 10), start, offset, 10); offset+=10;    // 0 = pre-1.08; 1 = 1.08/1.09 normal; 2 = 1.10 normal; 100 = 1.08/1.09 expansion; 101 = 1.10 expansion
   } else if(version >= 0x61) {
-    if(itemVersion > 7) { itemVersion = parseInt(itemVersion.toString(), 2) };
-    _writeBits(writer, itemVersion, start, offset, 3); offset+=3;    // 0 = pre-1.08; 1 = 1.08/1.09 normal; 2 = 1.10 normal; 100 = 1.08/1.09 expansion; 101 = 1.10 expansion
+    _writeBits(writer, parseInt(itemVersion, 2), start, offset, 3); offset+=3;    // 0 = pre-1.08; 1 = 1.08/1.09 normal; 2 = 1.10 normal; 100 = 1.08/1.09 expansion; 101 = 1.10 expansion
   }
   _writeBits(writer, item.location_id, start, offset, 3); offset+=3;
   _writeBits(writer, item.equipped_id, start, offset, 4); offset+=4;

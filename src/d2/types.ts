@@ -308,7 +308,7 @@ export interface IItem {
   personalized: number,
   personalized_name: string,
   given_runeword: number,
-  version: number,
+  version: string,
   location_id: number,
   equipped_id: number,
   position_x: number,

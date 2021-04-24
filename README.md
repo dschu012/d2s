@@ -48,7 +48,8 @@ function write(data: types.ID2S, constants: types.IConstantData, userConfig?: ty
 
 ##### Useful Links:
 * https://github.com/d07RiV/d07riv.github.io/blob/master/d2r.html (credits to d07riv for reversing the item code on D2R)
-* https://github.com/nokka/d2s
+* https://github.com/dschu012/D2SLib (c# version of this library)
+* https://github.com/nokka/d2s (go d2s parser)
 * https://github.com/krisives/d2s-format
 * http://paul.siramy.free.fr/d2ref/eng/
 * http://user.xmission.com/~trevin/DiabloIIv1.09_File_Format.shtml

@@ -173,11 +173,6 @@ function _enhanceAttributeDescription(magic_attributes: types.IMagicProperty[], 
       //damage range or enhanced damage.
       let count = 0;
       descString = prop.dR;
-      if(prop.s === "poisonmindam") { //TODO: this is wrong
-        property.values[2] = Math.floor(property.values[2] / 25);
-        property.values[0] = Math.floor(property.values[0] / property.values[2]);
-        property.values[1] = Math.floor(property.values[1] / property.values[2]);
-      }
       if (property.values[0] === property.values[1]) {
         count++;
         descString = prop.dE;

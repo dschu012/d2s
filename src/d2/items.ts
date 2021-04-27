@@ -670,6 +670,15 @@ export function _readMagicProperties(reader: BinaryReader, start: number, offset
                   break;
           }
       }
+    
+      //Transform poison damage values
+      if (id === 57) { //poisonmindam
+        let min = Math.floor((values[0] * values[2]) / 256);
+        let max = Math.floor((values[1] * values[2]) / 256);
+        let seconds = Math.floor(values[2] / 25);
+        values = [min, max, seconds];
+      }
+
       magic_attributes.push({
           id: id,
           values: values,
@@ -688,6 +697,16 @@ export function _writeMagicProperties(writer: BinaryWriter, properties: types.IM
           _writeBits(writer, property.id, start, offset, 9);
           offset += 9;
           let num_of_properties = constants.magical_properties[property!.id].np || 1;
+        
+          //Transform poison damage values
+          if (property.id === 57) { //poisonmindam
+            let seconds = Math.ceil(property.values[2] * 25);
+            let min = Math.ceil((property.values[0] / seconds) * 256);
+            let max = Math.ceil((property.values[1] / seconds) * 256);
+            
+            property.values = [min, max, seconds];
+          }
+
           for (let j = 0; j < num_of_properties; j++) {
               let prop = constants.magical_properties[property!.id + j];
               if (prop == null) {

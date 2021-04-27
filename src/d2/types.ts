@@ -393,3 +393,16 @@ export enum EItemQuality {
   exceptional,
   elite
 }
+
+export interface IStash {
+  version: string;
+  pageCount: number;
+  sharedGold: number;
+  pages: IStashPage[];
+}
+
+export interface IStashPage {
+  name: string;
+  type: number;
+  items: IItem[];
+}

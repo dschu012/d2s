@@ -367,7 +367,7 @@ export async function writeItem(item: types.IItem, version: number, constants: t
               offset += 8;
               _writeBits(writer, _lookupRareId(item.rare_name2, constants), start, offset, 8);
               offset += 8;
-              item.magical_name_ids = [];
+              
               for (let i = 0; i < 6; i++) {
                   let magical_name_id = item.magical_name_ids[i];
                   if (magical_name_id) {

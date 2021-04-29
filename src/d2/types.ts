@@ -385,3 +385,17 @@ export interface IMagicProperty {
   op_value: number,
   op_stats: string[]
 }
+
+
+export interface IStash {
+  version: string;
+  pageCount: number;
+  sharedGold: number;
+  pages: IStashPage[];
+}
+
+export interface IStashPage {
+  name: string;
+  type: number;
+  items: IItem[];
+}

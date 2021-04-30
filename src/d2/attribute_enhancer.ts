@@ -404,12 +404,12 @@ function _allAttributes(item: types.IItem, constants: types.IConstantData): type
   let socketed_attributes = [] as types.IMagicProperty[];
   if (item.socketed_items) {
     for (const i of item.socketed_items) {
-      socketed_attributes = socketed_attributes.concat(...i.magic_attributes);
+      socketed_attributes = socketed_attributes.concat(...JSON.parse(JSON.stringify(i.magic_attributes)));
     }
   }
   let magic_attributes = item.magic_attributes || [];
   let runeword_attributes = item.runeword_attributes || [];
-  return [...[], ...magic_attributes, ...runeword_attributes, ...socketed_attributes].filter(attribute => attribute != null);
+  return [...[], ...JSON.parse(JSON.stringify(magic_attributes)), ...JSON.parse(JSON.stringify(runeword_attributes)), ...JSON.parse(JSON.stringify(socketed_attributes))].filter(attribute => attribute != null);
 }
 
 function _groupAttributes(all_attributes: types.IMagicProperty[], constants: types.IConstantData): types.IMagicProperty[] {

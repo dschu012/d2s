@@ -142,6 +142,8 @@ export async function readItem(
   config: types.IConfig,
   parent?: types.IItem
 ): Promise<types.IItem> {
+  let rare_name_id = undefined;
+  let rare_name_id2 = undefined;
   if (version <= 0x60) {
     const header = reader.ReadString(2); //0x0000 [item header = 0x4a, 0x4d "JM"]
     if (header !== "JM") {
@@ -203,11 +205,11 @@ export async function readItem(
       case Quality.Rare:
       case Quality.Crafted:
         // eslint-disable-line no-eval
-        const rare_name_id = _readBits(reader, start, offset, 8);
+        rare_name_id = _readBits(reader, start, offset, 8);
         offset += 8;
         if (rare_name_id) item.rare_name = constants.rare_names[rare_name_id] ? constants.rare_names[rare_name_id].n : null;
         // eslint-disable-line no-eval
-        const rare_name_id2 = _readBits(reader, start, offset, 8);
+        rare_name_id2 = _readBits(reader, start, offset, 8);
         offset += 8;
         if (rare_name_id2) item.rare_name2 = constants.rare_names[rare_name_id2] ? constants.rare_names[rare_name_id2].n : null;
         item.magical_name_ids = [];

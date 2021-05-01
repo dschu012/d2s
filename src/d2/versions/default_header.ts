@@ -69,7 +69,7 @@ export function writeHeader(char: types.ID2S, writer: BinaryWriter, constants: t
    .WriteUInt32(_skillId(char.header.right_skill, constants))                             //0x007c
    .WriteUInt32(_skillId(char.header.left_swap_skill, constants))                         //0x0080
    .WriteUInt32(_skillId(char.header.right_swap_skill, constants))                        //0x0084
-   .Skip(32)                                                                   //0x0088 [char menu appearance]
+   .WriteArray(_writeCharMenuAppearance(char.header.menu_appearance,constants)) //0x0088 [char menu appearance]
    .WriteArray(_writeDifficulty(char.header.difficulty))                       //0x00a8
    .WriteUInt32(char.header.map_id)                                            //0x00ab
    .WriteArray(new Uint8Array([0x00, 0x00]))                                   //0x00af [unk = 0x0, 0x0]
@@ -148,6 +148,55 @@ function _readCharMenuAppearance(bytes: Uint8Array, constants: types.IConstantDa
   appearance.special7 =  { graphic: graphics[14], tint: tints[14] } as types.IMenuAppearance;
   appearance.special8 =  { graphic: graphics[15], tint: tints[15] } as types.IMenuAppearance;
   return appearance;
+}
+
+function _writeCharMenuAppearance(appearance: types.ICharMenuAppearance, constants: types.IConstantData): Uint8Array {
+  let writer = new BinaryWriter(32).SetLittleEndian().SetLength(32);
+
+  let graphics: number[] = [];
+  graphics.push(appearance && appearance.head ? appearance.head.graphic : 0)
+  graphics.push(appearance && appearance.torso ? appearance.torso.graphic : 0)
+  graphics.push(appearance && appearance.legs ? appearance.legs.graphic : 0)
+  graphics.push(appearance && appearance.right_arm ? appearance.right_arm.graphic : 0)
+  graphics.push(appearance && appearance.left_arm ? appearance.left_arm.graphic : 0)
+  graphics.push(appearance && appearance.right_hand ? appearance.right_hand.graphic : 0)
+  graphics.push(appearance && appearance.left_hand ? appearance.left_hand.graphic : 0)
+  graphics.push(appearance && appearance.shield ? appearance.shield.graphic : 0)
+  graphics.push(appearance && appearance.special1 ? appearance.special1.graphic : 0)
+  graphics.push(appearance && appearance.special2 ? appearance.special2.graphic : 0)
+  graphics.push(appearance && appearance.special3 ? appearance.special3.graphic : 0)
+  graphics.push(appearance && appearance.special4 ? appearance.special4.graphic : 0)
+  graphics.push(appearance && appearance.special5 ? appearance.special5.graphic : 0)
+  graphics.push(appearance && appearance.special6 ? appearance.special6.graphic : 0)
+  graphics.push(appearance && appearance.special7 ? appearance.special7.graphic : 0)
+  graphics.push(appearance && appearance.special8 ? appearance.special8.graphic : 0)
+
+  for (let g of graphics) {
+    writer.WriteUInt(g,1);
+  }
+
+  let tints: number[] = [];
+  tints.push(appearance && appearance.head ? appearance.head.tint : 0)
+  tints.push(appearance && appearance.torso ? appearance.torso.tint : 0)
+  tints.push(appearance && appearance.legs ? appearance.legs.tint : 0)
+  tints.push(appearance && appearance.right_arm ? appearance.right_arm.tint : 0)
+  tints.push(appearance && appearance.left_arm ? appearance.left_arm.tint : 0)
+  tints.push(appearance && appearance.right_hand ? appearance.right_hand.tint : 0)
+  tints.push(appearance && appearance.left_hand ? appearance.left_hand.tint : 0)
+  tints.push(appearance && appearance.shield ? appearance.shield.tint : 0)
+  tints.push(appearance && appearance.special1 ? appearance.special1.tint : 0)
+  tints.push(appearance && appearance.special2 ? appearance.special2.tint : 0)
+  tints.push(appearance && appearance.special3 ? appearance.special3.tint : 0)
+  tints.push(appearance && appearance.special4 ? appearance.special4.tint : 0)
+  tints.push(appearance && appearance.special5 ? appearance.special5.tint : 0)
+  tints.push(appearance && appearance.special6 ? appearance.special6.tint : 0)
+  tints.push(appearance && appearance.special7 ? appearance.special7.tint : 0)
+  tints.push(appearance && appearance.special8 ? appearance.special8.tint : 0)
+
+  for (let t of tints) {
+    writer.WriteUInt(t,1);
+  }
+  return writer.toArray();
 }
 
 function _readAssignedSkills(bytes: Uint8Array, constants: types.IConstantData): string[] {

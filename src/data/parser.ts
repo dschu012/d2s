@@ -1,5 +1,4 @@
-import * as types from "../d2/types";
-import { parentPort } from "worker_threads";
+import * as types from '../d2/types'
 
 //special stats. read the next N properties.
 //seems to be hardcode in d2 and not in itemstatcost
@@ -244,75 +243,123 @@ function _readRunewords(tsv: any, strings: any): any[] {
 }
 
 function _readTypes(tsv: any, strings: any): any {
-  const arr = {} as any;
-  const cCode = tsv.header.indexOf("Code");
-  const cInvGfx = [];
-  for (let i = 1; i <= 6; i++) {
-    cInvGfx.push(tsv.header.indexOf(`InvGfx${i}`));
-  }
-  for (let i = 1; i < tsv.lines.length; i++) {
-    const code = tsv.lines[i][cCode];
-    if (code) {
-      const o = {} as any;
-      const invgfx = [];
-      for (let j = 0; j <= 6; j++) {
-        if (tsv.lines[i][cInvGfx[j]]) invgfx[j] = tsv.lines[i][cInvGfx[j]];
-      }
-      o.ig = invgfx;
-      arr[code] = o;
+    let arr = {} as any;
+    let cCode = tsv.header.indexOf("Code");
+    let cItemType = tsv.header.indexOf("ItemType");
+    let cEquiv1 = tsv.header.indexOf("Equiv1");
+    let cEquiv2 = tsv.header.indexOf("Equiv2");
+    let cInvGfx = [];
+    for(let i = 1; i <= 6; i++) {
+        cInvGfx.push(tsv.header.indexOf(`InvGfx${i}`));
     }
-  }
-  return arr;
+    for (let i = 1; i < tsv.lines.length; i++) {
+        let code = tsv.lines[i][cCode];
+        if(code) {
+            let o = {} as any;
+            let invgfx = [];
+            for(let j = 0; j <= 6; j++) {
+                if(tsv.lines[i][cInvGfx[j]]) invgfx[j] = tsv.lines[i][cInvGfx[j]];
+            }
+            o.ig = invgfx;
+            o.eq1 = tsv.lines[i][cEquiv1];
+            o.eq2 = tsv.lines[i][cEquiv2];
+            o.n = tsv.lines[i][cItemType];
+            o.c = [o.n];
+            arr[code] = o;
+        }
+    }
+
+    for (let k of Object.keys(arr)) {
+        arr[k].c = [..._resolvetItemTypeCategories(arr, k)];
+        if (arr[k] !== undefined && arr[arr[k].eq1] !== undefined) {
+          arr[k].eq1n = arr[arr[k].eq1].n;
+        }
+
+        if (arr[k] !== undefined && arr[arr[k].eq2] !== undefined) {
+          arr[k].eq2n = arr[arr[k].eq2].n;
+        }
+      }
+
+    return arr;
 }
 
+function _resolvetItemTypeCategories(arr: any, key: string) {
+    let res: string[] = [];
+    if (arr[key] !== undefined) {
+      res = [
+        arr[key].n,
+        ..._resolvetItemTypeCategories(arr, arr[key].eq1),
+        ..._resolvetItemTypeCategories(arr, arr[key].eq2),
+      ];
+    }
+    return res;
+  }
+
 function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
-  const arr = [] as any[];
-  const cCode = tsv.header.indexOf("code");
-  const cNameStr = tsv.header.indexOf("namestr");
-  const cStackable = tsv.header.indexOf("stackable");
-  const cMindam = tsv.header.indexOf("mindam");
-  const cMaxdam = tsv.header.indexOf("maxdam");
-  const cTwoHandMindam = tsv.header.indexOf("2handmindam");
-  const cTwoHandMaxdam = tsv.header.indexOf("2handmaxdam");
-  const cMinmisdam = tsv.header.indexOf("minmisdam");
-  const cMaxmisdam = tsv.header.indexOf("maxmisdam");
-  const cReqstr = tsv.header.indexOf("reqstr");
-  const cReqdex = tsv.header.indexOf("reqdex");
-  const cGemapplytype = tsv.header.indexOf("gemapplytype");
-  const cInvfile = tsv.header.indexOf("invfile");
-  const cUniqueInvfile = tsv.header.indexOf("uniqueinvfile");
-  const cSetInvfile = tsv.header.indexOf("setinvfile");
-  const cInvwidth = tsv.header.indexOf("invwidth");
-  const cInvheight = tsv.header.indexOf("invheight");
-  const cInvtransform = tsv.header.indexOf("InvTrans");
-  const cType = tsv.header.indexOf("type");
-  for (let i = 1; i < tsv.lines.length; i++) {
-    const code = tsv.lines[i][cCode];
-    if (code) {
-      const item = {} as any;
-      item.code = code;
-      item.n = strings[tsv.lines[i][cNameStr]];
-      if (tsv.lines[i][cStackable] && +tsv.lines[i][cStackable] > 0) item.s = 1;
-      if (tsv.lines[i][cMindam] && +tsv.lines[i][cMindam] > 0) item.mind = +tsv.lines[i][cMindam];
-      if (tsv.lines[i][cMaxdam] && +tsv.lines[i][cMaxdam] > 0) item.maxd = +tsv.lines[i][cMaxdam];
-      if (tsv.lines[i][cTwoHandMindam] && +tsv.lines[i][cTwoHandMindam] > 0) item.min2d = +tsv.lines[i][cTwoHandMindam];
-      if (tsv.lines[i][cTwoHandMaxdam] && +tsv.lines[i][cTwoHandMaxdam] > 0) item.max2d = +tsv.lines[i][cTwoHandMaxdam];
-      if (tsv.lines[i][cMinmisdam] && +tsv.lines[i][cMinmisdam] > 0) item.minmd = +tsv.lines[i][cMinmisdam];
-      if (tsv.lines[i][cMaxmisdam] && +tsv.lines[i][cMaxmisdam] > 0) item.maxmd = +tsv.lines[i][cMaxmisdam];
-      if (tsv.lines[i][cReqstr]) item.rs = +tsv.lines[i][cReqstr];
-      if (tsv.lines[i][cReqdex]) item.rd = +tsv.lines[i][cReqdex];
-      if (tsv.lines[i][cGemapplytype]) item.gt = +tsv.lines[i][cGemapplytype];
-      if (tsv.lines[i][cInvfile]) item.i = tsv.lines[i][cInvfile];
-      if (tsv.lines[i][cUniqueInvfile]) item.ui = tsv.lines[i][cUniqueInvfile];
-      if (tsv.lines[i][cSetInvfile]) item.si = tsv.lines[i][cSetInvfile];
-      if (tsv.lines[i][cInvwidth]) item.iw = +tsv.lines[i][cInvwidth];
-      if (tsv.lines[i][cInvheight]) item.ih = +tsv.lines[i][cInvheight];
-      if (tsv.lines[i][cInvtransform]) item.it = +tsv.lines[i][cInvtransform];
-      const type = itemtypes[tsv.lines[i][cType]];
-      if (type && type.ig) {
-        item.ig = type.ig;
-      }
-      arr.push(item);
+    let arr = [] as any[];
+    let cCode =  tsv.header.indexOf("code");
+    let cNameStr =  tsv.header.indexOf("namestr");
+    let cStackable =  tsv.header.indexOf("stackable");
+    let cMindam = tsv.header.indexOf("mindam");
+    let cMaxdam = tsv.header.indexOf("maxdam");
+    let cTwoHandMindam = tsv.header.indexOf("2handmindam");
+    let cTwoHandMaxdam = tsv.header.indexOf("2handmaxdam");
+    let cMinmisdam = tsv.header.indexOf("minmisdam");
+    let cMaxmisdam = tsv.header.indexOf("maxmisdam");
+    let cReqstr = tsv.header.indexOf("reqstr");
+    let cReqdex = tsv.header.indexOf("reqdex");
+    let cGemapplytype = tsv.header.indexOf("gemapplytype");
+    let cInvfile = tsv.header.indexOf("invfile");
+    let cUniqueInvfile = tsv.header.indexOf("uniqueinvfile");
+    let cSetInvfile = tsv.header.indexOf("setinvfile");
+    let cInvwidth = tsv.header.indexOf("invwidth");
+    let cInvheight = tsv.header.indexOf("invheight");
+    let cInvtransform = tsv.header.indexOf("InvTrans");
+    let cType = tsv.header.indexOf("type");
+    let cNormCode = tsv.header.indexOf("normcode");
+    let cUberCode = tsv.header.indexOf("ubercode");
+    let cUltraCode = tsv.header.indexOf("ultracode");
+
+    for (let i = 1; i < tsv.lines.length; i++) {
+        let code = tsv.lines[i][cCode]
+        if (code) {
+            let item = {} as any;
+            item.code = code;
+            item.normCode = tsv.lines[i][cNormCode];
+            item.expCode = tsv.lines[i][cUberCode];
+            item.eliteCode = tsv.lines[i][cUltraCode];
+            item.itemQuality =
+                item.code === item.expCode
+                ? types.EItemQuality.exceptional
+                : item.code === item.eliteCode
+                ? types.EItemQuality.elite
+                : types.EItemQuality.normal;
+            item.n = strings[tsv.lines[i][cNameStr]];
+            if(tsv.lines[i][cStackable] && +tsv.lines[i][cStackable] > 0) item.s = 1;
+            if(tsv.lines[i][cMindam] && +tsv.lines[i][cMindam] > 0) item.mind = +tsv.lines[i][cMindam];
+            if(tsv.lines[i][cMaxdam] && +tsv.lines[i][cMaxdam] > 0) item.maxd = +tsv.lines[i][cMaxdam];
+            if(tsv.lines[i][cTwoHandMindam] && +tsv.lines[i][cTwoHandMindam] > 0) item.min2d = +tsv.lines[i][cTwoHandMindam];
+            if(tsv.lines[i][cTwoHandMaxdam] && +tsv.lines[i][cTwoHandMaxdam] > 0) item.max2d = +tsv.lines[i][cTwoHandMaxdam];
+            if(tsv.lines[i][cMinmisdam] && +tsv.lines[i][cMinmisdam] > 0) item.minmd = +tsv.lines[i][cMinmisdam];
+            if(tsv.lines[i][cMaxmisdam] && +tsv.lines[i][cMaxmisdam] > 0) item.maxmd = +tsv.lines[i][cMaxmisdam];
+            if(tsv.lines[i][cReqstr]) item.rs = +tsv.lines[i][cReqstr];
+            if(tsv.lines[i][cReqdex]) item.rd = +tsv.lines[i][cReqdex];
+            if(tsv.lines[i][cGemapplytype]) item.gt = +tsv.lines[i][cGemapplytype];
+            if(tsv.lines[i][cInvfile]) item.i = tsv.lines[i][cInvfile];
+            if(tsv.lines[i][cUniqueInvfile]) item.ui = tsv.lines[i][cUniqueInvfile];
+            if(tsv.lines[i][cSetInvfile]) item.si = tsv.lines[i][cSetInvfile];
+            if(tsv.lines[i][cInvwidth]) item.iw = +tsv.lines[i][cInvwidth];
+            if(tsv.lines[i][cInvheight]) item.ih = +tsv.lines[i][cInvheight];
+            if(tsv.lines[i][cInvtransform]) item.it = +tsv.lines[i][cInvtransform];
+            let type = itemtypes[tsv.lines[i][cType]];
+            if(type && type.ig) {
+                item.ig = type.ig;
+                item.eq1n = type.eq1n;
+                item.eq2n = type.eq2n;
+                item.c = type.c;
+            }
+            arr.push(item);
+        }
     }
   }
   return arr;

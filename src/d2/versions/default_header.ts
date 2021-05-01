@@ -50,48 +50,48 @@ export function readHeader(char: types.ID2S, reader: BinaryReader, constants: ty
 }
 
 export function writeHeader(char: types.ID2S, writer: BinaryWriter, constants: types.IConstantData) {
-  writer
-    .SetLittleEndian()
-    .Skip(4) //0x0008 (filesize. needs to be writen after all data)
-    .Skip(4) //0x000c (checksum. needs to be calculated after all data writer)
-    .WriteUInt32(char.header.active_arms) //0x0010
-    .WriteString(char.header.name, 16) //0x0014
-    .WriteArray(_writeStatus(char.header.status)) //0x0024
-    .WriteUInt8(char.header.progression) //0x0025
-    .WriteArray(new Uint8Array([0x00, 0x00])) //0x0026
-    .WriteUInt8(_classId(char.header.class, constants)) //0x0028
-    .WriteArray(new Uint8Array([0x10, 0x1e])) //0x0029
-    .WriteUInt8(char.header.level) //0x002b
-    .WriteArray(new Uint8Array([0x00, 0x00, 0x00, 0x00])) //0x002c
-    .WriteUInt32(char.header.last_played) //0x0030
-    .WriteArray(new Uint8Array([0xff, 0xff, 0xff, 0xff])) //0x0034
-    .WriteArray(_writeAssignedSkills(char.header.assigned_skills, constants)) //0x0038
-    .WriteUInt32(_skillId(char.header.left_skill, constants)) //0x0078
-    .WriteUInt32(_skillId(char.header.right_skill, constants)) //0x007c
-    .WriteUInt32(_skillId(char.header.left_swap_skill, constants)) //0x0080
-    .WriteUInt32(_skillId(char.header.right_swap_skill, constants)) //0x0084
-    .Skip(32) //0x0088 [char menu appearance]
-    .WriteArray(_writeDifficulty(char.header.difficulty)) //0x00a8
-    .WriteUInt32(char.header.map_id) //0x00ab
-    .WriteArray(new Uint8Array([0x00, 0x00])) //0x00af [unk = 0x0, 0x0]
-    .WriteUInt16(char.header.dead_merc) //0x00b1
-    .WriteUInt32(parseInt(char.header.merc_id, 16)) //0x00b3
-    .WriteUInt16(char.header.merc_name_id) //0x00b7
-    .WriteUInt16(char.header.merc_type) //0x00b9
-    .WriteUInt32(char.header.merc_experience) //0x00bb
-    .Skip(140) //0x00bf [unk]
-    .WriteUInt32(0x1) //0x014b [unk = 0x1, 0x0, 0x0, 0x0]
-    .WriteString("Woo!") //0x014f [quests = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
-    .WriteArray(new Uint8Array([0x06, 0x00, 0x00, 0x00, 0x2a, 0x01])) //0x0153 [unk = 0x6, 0x0, 0x0, 0x0, 0x2a, 0x1]
-    .WriteArray(_writeQuests(char.header.quests_normal)) //0x0159
-    .WriteArray(_writeQuests(char.header.quests_nm)) //0x01b9
-    .WriteArray(_writeQuests(char.header.quests_hell)) //0x0219
-    .WriteString("WS") //0x0279 [waypoint data = 0x57, 0x53 "WS"]
-    .WriteArray(new Uint8Array([0x01, 0x00, 0x00, 0x00, 0x50, 0x00])) //0x027b [unk = 0x1, 0x0, 0x0, 0x0, 0x50, 0x0]
-    .WriteArray(_writeWaypointData(char.header.waypoints)) //0x0281
-    .WriteArray(new Uint8Array([0x01, 0x77])) //0x02c9 [npc header = 0x01, 0x77 ".w"]
-    .WriteUInt16(0x34) //0x02ca [npc struct length]
-    .WriteArray(_writeNPCData(char.header.npcs)); //0x02cc [npc introduction data... unk]
+  writer.SetLittleEndian()
+   .Skip(4)                                                                    //0x0008 (filesize. needs to be writen after all data)
+   .Skip(4)                                                                    //0x000c (checksum. needs to be calculated after all data writer)
+   .WriteUInt32(char.header.active_arms)                                       //0x0010
+   .WriteString(char.header.name, 16)                                          //0x0014
+   .WriteArray(_writeStatus(char.header.status))                               //0x0024
+   .WriteUInt8(char.header.progression)                                        //0x0025
+   .WriteArray(new Uint8Array([0x00, 0x00]))                                   //0x0026
+   .WriteUInt8(_classId(char.header.class, constants))                                    //0x0028
+   .WriteArray(new Uint8Array([0x10, 0x1e]))                                   //0x0029
+   .WriteUInt8(char.header.level)                                              //0x002b
+   .WriteArray(new Uint8Array([0x00, 0x00, 0x00, 0x00]))                       //0x002c
+   .WriteUInt32(char.header.last_played)                                       //0x0030
+   .WriteArray(new Uint8Array([0xff, 0xff, 0xff, 0xff]))                       //0x0034
+   .WriteArray(_writeAssignedSkills(char.header.assigned_skills, constants))              //0x0038
+   .WriteUInt32(_skillId(char.header.left_skill, constants))                              //0x0078
+   .WriteUInt32(_skillId(char.header.right_skill, constants))                             //0x007c
+   .WriteUInt32(_skillId(char.header.left_swap_skill, constants))                         //0x0080
+   .WriteUInt32(_skillId(char.header.right_swap_skill, constants))                        //0x0084
+   .WriteArray(_writeCharMenuAppearance(char.header.menu_appearance,constants)) //0x0088 [char menu appearance]
+   .WriteArray(_writeDifficulty(char.header.difficulty))                       //0x00a8
+   .WriteUInt32(char.header.map_id)                                            //0x00ab
+   .WriteArray(new Uint8Array([0x00, 0x00]))                                   //0x00af [unk = 0x0, 0x0]
+   .WriteUInt16(char.header.dead_merc)                                         //0x00b1
+   .WriteUInt32(parseInt(char.header.merc_id,16))                              //0x00b3
+   .WriteUInt16(char.header.merc_name_id)                                      //0x00b7
+   .WriteUInt16(char.header.merc_type)                                         //0x00b9
+   .WriteUInt32(char.header.merc_experience)                                   //0x00bb
+   .Skip(140)                                                                  //0x00bf [unk]
+   .WriteUInt32(0x1)                                                           //0x014b [unk = 0x1, 0x0, 0x0, 0x0]
+   .WriteString("Woo!")                                                        //0x014f [quests = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
+   .WriteArray(new Uint8Array([0x06, 0x00, 0x00, 0x00, 0x2a, 0x01]))           //0x0153 [unk = 0x6, 0x0, 0x0, 0x0, 0x2a, 0x1]
+   .WriteArray(_writeQuests(char.header.quests_normal))                        //0x0159
+   .WriteArray(_writeQuests(char.header.quests_nm))                            //0x01b9
+   .WriteArray(_writeQuests(char.header.quests_hell))                          //0x0219
+   .WriteString("WS")                                                          //0x0279 [waypoint data = 0x57, 0x53 "WS"]
+   .WriteArray(new Uint8Array([0x01, 0x00, 0x00, 0x00, 0x50, 0x00]))           //0x027b [unk = 0x1, 0x0, 0x0, 0x0, 0x50, 0x0]
+   .WriteArray(_writeWaypointData(char.header.waypoints))                         //0x0281
+   .WriteArray(new Uint8Array([0x01, 0x77]))                                   //0x02c9 [npc header = 0x01, 0x77 ".w"]
+   .WriteUInt16(0x34)                                                          //0x02ca [npc struct length]
+   .WriteArray(_writeNPCData(char.header.npcs))                            //0x02cc [npc introduction data... unk]                       
+   ;
 }
 
 function _classId(name: string, constants: types.IConstantData): number {
@@ -147,6 +147,55 @@ function _readCharMenuAppearance(bytes: Uint8Array, constants: types.IConstantDa
   appearance.special7 = { graphic: graphics[14], tint: tints[14] } as types.IMenuAppearance;
   appearance.special8 = { graphic: graphics[15], tint: tints[15] } as types.IMenuAppearance;
   return appearance;
+}
+
+function _writeCharMenuAppearance(appearance: types.ICharMenuAppearance, constants: types.IConstantData): Uint8Array {
+  let writer = new BinaryWriter(32).SetLittleEndian().SetLength(32);
+
+  let graphics: number[] = [];
+  graphics.push(appearance && appearance.head ? appearance.head.graphic : 0)
+  graphics.push(appearance && appearance.torso ? appearance.torso.graphic : 0)
+  graphics.push(appearance && appearance.legs ? appearance.legs.graphic : 0)
+  graphics.push(appearance && appearance.right_arm ? appearance.right_arm.graphic : 0)
+  graphics.push(appearance && appearance.left_arm ? appearance.left_arm.graphic : 0)
+  graphics.push(appearance && appearance.right_hand ? appearance.right_hand.graphic : 0)
+  graphics.push(appearance && appearance.left_hand ? appearance.left_hand.graphic : 0)
+  graphics.push(appearance && appearance.shield ? appearance.shield.graphic : 0)
+  graphics.push(appearance && appearance.special1 ? appearance.special1.graphic : 0)
+  graphics.push(appearance && appearance.special2 ? appearance.special2.graphic : 0)
+  graphics.push(appearance && appearance.special3 ? appearance.special3.graphic : 0)
+  graphics.push(appearance && appearance.special4 ? appearance.special4.graphic : 0)
+  graphics.push(appearance && appearance.special5 ? appearance.special5.graphic : 0)
+  graphics.push(appearance && appearance.special6 ? appearance.special6.graphic : 0)
+  graphics.push(appearance && appearance.special7 ? appearance.special7.graphic : 0)
+  graphics.push(appearance && appearance.special8 ? appearance.special8.graphic : 0)
+
+  for (let g of graphics) {
+    writer.WriteUInt(g,1);
+  }
+
+  let tints: number[] = [];
+  tints.push(appearance && appearance.head ? appearance.head.tint : 0)
+  tints.push(appearance && appearance.torso ? appearance.torso.tint : 0)
+  tints.push(appearance && appearance.legs ? appearance.legs.tint : 0)
+  tints.push(appearance && appearance.right_arm ? appearance.right_arm.tint : 0)
+  tints.push(appearance && appearance.left_arm ? appearance.left_arm.tint : 0)
+  tints.push(appearance && appearance.right_hand ? appearance.right_hand.tint : 0)
+  tints.push(appearance && appearance.left_hand ? appearance.left_hand.tint : 0)
+  tints.push(appearance && appearance.shield ? appearance.shield.tint : 0)
+  tints.push(appearance && appearance.special1 ? appearance.special1.tint : 0)
+  tints.push(appearance && appearance.special2 ? appearance.special2.tint : 0)
+  tints.push(appearance && appearance.special3 ? appearance.special3.tint : 0)
+  tints.push(appearance && appearance.special4 ? appearance.special4.tint : 0)
+  tints.push(appearance && appearance.special5 ? appearance.special5.tint : 0)
+  tints.push(appearance && appearance.special6 ? appearance.special6.tint : 0)
+  tints.push(appearance && appearance.special7 ? appearance.special7.tint : 0)
+  tints.push(appearance && appearance.special8 ? appearance.special8.tint : 0)
+
+  for (let t of tints) {
+    writer.WriteUInt(t,1);
+  }
+  return writer.toArray();
 }
 
 function _readAssignedSkills(bytes: Uint8Array, constants: types.IConstantData): string[] {

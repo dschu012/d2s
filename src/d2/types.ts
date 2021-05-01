@@ -300,69 +300,71 @@ export interface ISkill {
 }
 
 export interface IItem {
-  identified: number;
-  socketed: number;
-  new: number;
-  is_ear: number;
-  starter_item: number;
-  simple_item: number;
-  ethereal: number;
-  personalized: number;
-  personalized_name: string;
-  given_runeword: number;
-  version: string;
-  location_id: number;
-  equipped_id: number;
-  position_x: number;
-  position_y: number;
-  alt_position_id: number;
-  type: string;
-  type_id: number;
-  type_name: string;
-  nr_of_items_in_sockets: number;
-  id: number;
-  level: number;
-  quality: number;
-  multiple_pictures: number;
-  picture_id: number;
-  class_specific: number;
-  low_quality_id: number;
-  timestamp: number;
-  ear_attributes: IEarAttributes;
-  defense_rating: number;
-  max_durability: number;
-  current_durability: number;
-  total_nr_of_sockets: number;
-  quantity: number;
-  magic_prefix: number;
-  magic_prefix_name: string;
-  magic_suffix: number;
-  magic_suffix_name: string;
-  runeword_id: number;
-  runeword_name: string;
-  runeword_attributes: IMagicProperty[];
-  set_id: number;
-  set_name: string;
-  set_list_count: number;
-  set_attributes: IMagicProperty[][];
-  set_attributes_num_req: number;
-  set_attributes_ids_req: number;
-  rare_name: string;
-  rare_name2: string;
-  magical_name_ids: number[] | null[];
-  unique_id: number;
-  unique_name: string;
-  magic_attributes: IMagicProperty[];
-  combined_magic_attributes: IMagicProperty[];
-  socketed_items: IItem[];
-  base_damage: IWeaponDamage;
-  reqstr: number;
-  reqdex: number;
-  inv_width: number;
-  inv_height: number;
-  inv_file: number;
-  inv_transform: number;
-  transform_color: string;
+  identified: number,
+  socketed: number,
+  new: number,
+  is_ear: number,
+  starter_item: number,
+  simple_item: number,
+  ethereal: number,
+  personalized: number,
+  personalized_name: string,
+  given_runeword: number,
+  version: string,
+  location_id: number,
+  equipped_id: number,
+  position_x: number,
+  position_y: number,
+  alt_position_id: number,
+  type: string,
+  type_id: number,
+  type_name: string,
+  nr_of_items_in_sockets: number,
+  id: number,
+  level: number,
+  quality: number,
+  multiple_pictures: number,
+  picture_id: number,
+  class_specific: number,
+  low_quality_id: number,
+  timestamp: number,
+  ear_attributes: IEarAttributes,
+  defense_rating: number,
+  max_durability: number,
+  current_durability: number,
+  total_nr_of_sockets: number,
+  quantity: number,
+  magic_prefix: number,
+  magic_prefix_name: string,
+  magic_suffix: number,
+  magic_suffix_name: string,
+  runeword_id: number,
+  runeword_name: string,
+  runeword_attributes: IMagicProperty[],
+  set_id: number,
+  set_name: string,
+  set_list_count: number,
+  set_attributes: IMagicProperty[][],
+  set_attributes_num_req: number,
+  set_attributes_ids_req: number,
+  rare_name: string,
+  rare_name2: string,
+  magical_name_ids: number[] | null[],
+  unique_id: number,
+  unique_name: string,
+  magic_attributes: IMagicProperty[],
+  combined_magic_attributes: IMagicProperty[],
+  socketed_items: IItem[],
+  base_damage: IWeaponDamage,
+  reqstr: number,
+  reqdex: number,
+  inv_width: number,
+  inv_height: number,
+  inv_file: number,
+  inv_transform: number,
+  transform_color: string,
+  item_quality: EItemQuality,
+  categories: string[],
 }
 
 export interface IWeaponDamage {
@@ -386,6 +388,12 @@ export interface IMagicProperty {
   visible: boolean;
   op_value: number;
   op_stats: string[];
+}
+
+export enum EItemQuality {
+  normal,
+  exceptional,
+  elite
 }
 
 export interface IStash {

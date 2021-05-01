@@ -349,64 +349,73 @@ export async function writeItem(
   const start = writer.Position();
   let offset = _writeSimpleBits(writer, version, item, constants, config);
   if (!item.simple_item) {
-    _writeBits(writer, item.id, start, offset, 32);
-    offset += 32;
-    _writeBits(writer, item.level, start, offset, 7);
-    offset += 7;
-    _writeBits(writer, item.quality, start, offset, 4);
-    offset += 4;
-    _writeBits(writer, item.multiple_pictures, start, offset, 1);
-    offset += 1;
-    if (item.multiple_pictures) {
-      _writeBits(writer, item.picture_id, start, offset, 3);
-      offset += 3;
-    }
-    _writeBits(writer, item.class_specific, start, offset, 1);
-    offset += 1;
-    if (item.class_specific) {
-      offset += 11; //????
-    }
-    switch (item.quality) {
-      case Quality.Low:
-        _writeBits(writer, item.low_quality_id, start, offset, 3);
-        offset += 3;
-        break;
-      case Quality.Normal:
-        break;
-      case Quality.Superior:
-        offset += 3;
-        break;
-      case Quality.Magic:
-        _writeBits(writer, item.magic_prefix, start, offset, 11);
-        offset += 11;
-        _writeBits(writer, item.magic_suffix, start, offset, 11);
-        offset += 11;
-        break;
-      case Quality.Set:
-        _writeBits(writer, item.set_id, start, offset, 12);
-        offset += 12;
-        break;
-      case Quality.Unique:
-        _writeBits(writer, item.unique_id, start, offset, 12);
-        offset += 12;
-        break;
-      case Quality.Rare:
-      case Quality.Crafted:
-        _writeBits(writer, _lookupRareId(item.rare_name, constants), start, offset, 8);
-        offset += 8;
-        _writeBits(writer, _lookupRareId(item.rare_name2, constants), start, offset, 8);
-        offset += 8;
-        item.magical_name_ids = [];
-        for (let i = 0; i < 6; i++) {
-          const magical_name_id = item.magical_name_ids[i];
-          if (magical_name_id) {
-            _writeBits(writer, 1, start, offset, 1);
-            offset++;
-            _writeBits(writer, magical_name_id, start, offset, 11);
-            offset += 11;
-          } else {
-            _writeBits(writer, 0, start, offset, 1);
-            offset++;
+
+      _writeBits(writer, item.id, start, offset, 32); offset+=32;
+      _writeBits(writer, item.level, start, offset, 7); offset+=7;
+      _writeBits(writer, item.quality, start, offset, 4); offset+=4;
+      _writeBits(writer, item.multiple_pictures, start, offset, 1); offset+=1;
+      if (item.multiple_pictures) {
+          _writeBits(writer, item.picture_id, start, offset, 3);
+          offset += 3;
+      }
+      _writeBits(writer, item.class_specific, start, offset, 1);
+      offset += 1;
+      if (item.class_specific) {
+          offset += 11; //????
+      }
+      switch (item.quality) {
+          case Quality.Low:
+              _writeBits(writer, item.low_quality_id, start, offset, 3);
+              offset += 3;
+              break;
+          case Quality.Normal:
+              break;
+          case Quality.Superior:
+              offset += 3;
+              break;
+          case Quality.Magic:
+              _writeBits(writer, item.magic_prefix, start, offset, 11);
+              offset += 11;
+              _writeBits(writer, item.magic_suffix, start, offset, 11);
+              offset += 11;
+              break;
+          case Quality.Set:
+              _writeBits(writer, item.set_id, start, offset, 12);
+              offset += 12;
+              break;
+          case Quality.Unique:
+              _writeBits(writer, item.unique_id, start, offset, 12);
+              offset += 12;
+              break;
+          case Quality.Rare:
+          case Quality.Crafted:
+              _writeBits(writer, _lookupRareId(item.rare_name, constants), start, offset, 8);
+              offset += 8;
+              _writeBits(writer, _lookupRareId(item.rare_name2, constants), start, offset, 8);
+              offset += 8;
+              
+              for (let i = 0; i < 6; i++) {
+                  let magical_name_id = item.magical_name_ids[i];
+                  if (magical_name_id) {
+                      _writeBits(writer, 1, start, offset, 1);
+                      offset++;
+                      _writeBits(writer, magical_name_id, start, offset, 11);
+                      offset += 11;
+                  } else {
+                      _writeBits(writer, 0, start, offset, 1);
+                      offset++;
+                  }
+              }
+              break;
+          default:
+              break;
+      }
+
+      if (item.given_runeword) {
+          //fix delerium on d2gs??? why is this a thing?
+          let runeword_id = item.runeword_id;
+          if(runeword_id == 2718) {
+            runeword_id = 48;
           }
         }
         break;
@@ -682,55 +691,56 @@ export function _readMagicProperties(reader: BinaryReader, start: number, offset
   offset += 9;
   const magic_attributes = [];
   while (id != 0x1ff) {
-    const values = [];
-    const num_of_properties = constants.magical_properties[id].np || 1;
-    for (let i = 0; i < num_of_properties; i++) {
-      const prop = constants.magical_properties[id + i];
-      if (prop == null) {
-        throw new Error(`Cannot find Magical Property for id: ${id} at position ${start + offset}`);
-      }
-      if (prop.sP) {
-        let param = _readBits(reader, start, offset, prop.sP);
-        offset += prop.sP;
-        switch (prop.dF) {
-          case 14: //+skill to skilltab
-            values.push(param & 0x7);
-            param = (param >> 3) & 0x1fff;
-            break;
-          default:
-            break;
-        }
-        //encode
-        switch (prop.e) {
-          case 1:
-            //throw new Error(`Unimplemented encoding: ${prop.encode}`);
-            break;
-          case 2: //chance to cast
-          case 3: //charges
-            values.push(param & 0x3f); //skill level
-            param = (param >> 6) & 0x3ff; //skll id
-            break;
-          default:
-            break;
-        }
-        values.push(param);
-      }
-      if (!prop.sB) {
-        throw new Error(`Save Bits is undefined for stat: ${id}:${prop.s} at position ${start + offset}`);
-      }
-      let v = _readBits(reader, start, offset, prop.sB);
-      offset += prop.sB;
-      if (prop.sA) {
-        v -= prop.sA;
-      }
-      switch (prop.e) {
-        case 3:
-          values.push((v >> 8) & 0xff); //charges
-          values.push(v & 0xff); //charges
-          break;
-        default:
-          values.push(v);
-          break;
+      let values = [];
+      let num_of_properties = constants.magical_properties[id].np || 1;
+      for (let i = 0; i < num_of_properties; i++) {
+          let prop = constants.magical_properties[id + i];
+          if (prop == null) {
+              throw new Error(`Cannot find Magical Property for id: ${id} at position ${start + offset}`);
+          }
+          if (prop.sP) {
+              let param = _readBits(reader, start, offset, prop.sP);
+              offset += prop.sP;
+              switch (prop.dF) {
+                  case 14: //+skill to skilltab
+                      values.push(param & 0x7);
+                      param = (param >> 3) & 0x1fff;
+                      break;
+                  default:
+                      break;
+              }
+              //encode
+              switch (prop.e) {
+                  case 1:
+                      //throw new Error(`Unimplemented encoding: ${prop.encode}`);
+                      break;
+                  case 2: //chance to cast
+                  case 3: //charges
+                      values.push(param & 0x3f);          //skill level
+                      param = (param >> 6) & 0x3ff;  //skll id
+                      break;
+                  default:
+                      break;
+              }
+              values.push(param);
+          }
+          if (!prop.sB) {
+              throw new Error(`Save Bits is undefined for stat: ${id}:${prop.s} at position ${start + offset}`);
+          }
+          let v = _readBits(reader, start, offset, prop.sB);
+          offset += prop.sB;
+          if (prop.sA) {
+              v -= prop.sA;
+          }
+          switch (prop.e) {
+              case 3:
+                  values.push(v & 0xff);  // current charges
+                  values.push((v >> 8) & 0xff);  //max charges
+                  break;
+              default:
+                  values.push(v);
+                  break;
+          }
       }
     }
     magic_attributes.push({
@@ -752,56 +762,58 @@ export function _writeMagicProperties(
   constants: types.IConstantData
 ): number {
   if (properties) {
-    for (let i = 0; i < properties.length; i++) {
-      const property = properties[i];
-      _writeBits(writer, property.id, start, offset, 9);
-      offset += 9;
-      const num_of_properties = constants.magical_properties[property!.id].np || 1;
-      for (let j = 0; j < num_of_properties; j++) {
-        const prop = constants.magical_properties[property!.id + j];
-        if (prop == null) {
-          throw new Error(`Cannot find Magical Property for id: ${property.id}`);
-        }
-        if (prop.sP) {
-          let param = property.values.shift()!;
-          switch (prop.dF) {
-            case 14: //+skill to skilltab
-              param |= (property.values.shift()! & 0x1fff) << 3;
-              break;
-            default:
-              break;
-          }
-          //encode
-          switch (prop.e) {
-            case 1:
-              //throw new Error(`Unimplemented encoding: ${prop.encode}`);
-              break;
-            case 2: //chance to cast
-            case 3: //charges
-              param |= (property.values.shift()! & 0x3ff) << 6;
-              break;
-            default:
-              break;
-          }
-          _writeBits(writer, param, start, offset, prop.sP);
-          offset += prop.sP;
-        }
-        let v = property.values.shift()!;
-        if (prop.sA) {
-          v += prop.sA;
-        }
-        switch (prop.e) {
-          case 3:
-            v |= (property.values.shift()! & 0xff) << 8;
-            break;
-          default:
-            break;
-        }
-        if (!prop.sB) {
-          throw new Error(`Save Bits is undefined for stat: ${property.id}:${prop.s}`);
-        }
-        _writeBits(writer, v, start, offset, prop.sB);
-        offset += prop.sB;
+      for (let i = 0; i < properties.length; i++) {
+        let property = properties[i];
+        let valueIdx = 0;
+          _writeBits(writer, property.id, start, offset, 9);
+          offset += 9;
+          let num_of_properties = constants.magical_properties[property!.id].np || 1;
+          for (let j = 0; j < num_of_properties; j++) {
+              let prop = constants.magical_properties[property!.id + j];
+              if (prop == null) {
+                  throw new Error(`Cannot find Magical Property for id: ${property.id}`);
+              }
+              if (prop.sP) {
+                  let param = property.values[valueIdx++]!;
+                  switch (prop.dF) {
+                      case 14: //+skill to skilltab
+                          param |= (property.values[valueIdx++]! & 0x1fff) << 3;
+                          break;
+                      default:
+                          break;
+                  }
+                  //encode
+                  switch (prop.e) {
+                      case 1:
+                          //throw new Error(`Unimplemented encoding: ${prop.encode}`);
+                          break;
+                      case 2: //chance to cast
+                      case 3: //charges
+                          param |= (property.values[valueIdx++]! & 0x3ff) << 6;
+                          break;
+                      default:
+                          break;
+                  }
+                  _writeBits(writer, param, start, offset, prop.sP);
+                  offset += prop.sP;
+              }
+              let v = property.values[valueIdx++]!;
+              if (prop.sA) {
+                  v += prop.sA;
+              }
+              switch (prop.e) {
+                  case 3:
+                      v |= (property.values[valueIdx++]! & 0xff) << 8;
+                      break;
+                  default:
+                      break;
+              }
+              if (!prop.sB) {
+                  throw new Error(`Save Bits is undefined for stat: ${property.id}:${prop.s}`);
+              }
+              _writeBits(writer, v, start, offset, prop.sB);
+              offset += prop.sB;
+
       }
     }
   }

@@ -2,41 +2,40 @@ import { Buffer } from "buffer/";
 import { Endianness } from "./constants";
 
 export class BinaryWriter {
-
-  private littleEndian: boolean = true;
+  private littleEndian = true;
   private buffer: Buffer;
-  private length: number = 0;
-  private offset: number = 0;
-  private noAssert: boolean = false;
+  private length = 0;
+  private offset = 0;
+  private noAssert = false;
   private poolSize: number;
 
-  constructor(poolSize: number = 1024) {
+  constructor(poolSize = 1024) {
     this.poolSize = poolSize;
     this.buffer = Buffer.alloc(this.poolSize, 0x0);
   }
 
-  private _CheckAlloc(bytes: number = 0) {
-    while(this.length + bytes > this.buffer.length) {
-      this.buffer = Buffer.concat([this.buffer, Buffer.alloc(this.poolSize, 0x0)])
+  private _CheckAlloc(bytes = 0) {
+    while (this.length + bytes > this.buffer.length) {
+      this.buffer = Buffer.concat([this.buffer, Buffer.alloc(this.poolSize, 0x0)]);
     }
   }
 
   private _Increment(num: number) {
     this.offset += num;
-    if(this.offset > this.length) {
+    if (this.offset > this.length) {
       this.length = this.offset;
       this._CheckAlloc();
     }
   }
 
-  SetEndianness(endiannes: Endianness) : BinaryWriter {
-    if(endiannes === Endianness.be) {
+  SetEndianness(endiannes: Endianness): BinaryWriter {
+    if (endiannes === Endianness.be) {
       return this.SetBigEndian();
     }
     return this.SetLittleEndian();
   }
 
-  GetEndianness() : Endianness {
+  GetEndianness(): Endianness {
     return this.littleEndian ? Endianness.le : Endianness.be;
   }
   SetLittleEndian(): BinaryWriter {
@@ -51,18 +50,18 @@ export class BinaryWriter {
 
   toArray(): Uint8Array {
     return new Uint8Array(this.buffer.slice(0, this.length));
-  } 
+  }
 
   WriteArray(array: Uint8Array): BinaryWriter {
     this._CheckAlloc(array.byteLength);
-    let newBuffer = Buffer.from(array);
+    const newBuffer = Buffer.from(array);
     newBuffer.copy(this.buffer, this.offset);
     this._Increment(newBuffer.length);
     return this;
   }
 
   WriteStringNullTerminated(str: string): BinaryWriter {
-    let write = `${str}\0`;
+    const write = `${str}\0`;
     this._CheckAlloc(write.length);
     this.buffer.write(write, this.offset, write.length, "utf8");
     this._Increment(write.length);
@@ -75,7 +74,7 @@ export class BinaryWriter {
     this.buffer.write(str, this.offset, len, "utf8");
     this._Increment(len);
     return this;
-  } 
+  }
   WriteUInt8(number: number): BinaryWriter {
     this._CheckAlloc(1);
     this.buffer.writeUInt8(number, this.offset, this.noAssert);
@@ -92,7 +91,7 @@ export class BinaryWriter {
 
   WriteUInt16(number: number): BinaryWriter {
     this._CheckAlloc(2);
-    if(this.littleEndian) {
+    if (this.littleEndian) {
       this.buffer.writeUInt16LE(number, this.offset, this.noAssert);
     } else {
       this.buffer.writeUInt16BE(number, this.offset, this.noAssert);
@@ -103,7 +102,7 @@ export class BinaryWriter {
 
   WriteInt16(number: number): BinaryWriter {
     this._CheckAlloc(2);
-    if(this.littleEndian) {
+    if (this.littleEndian) {
       this.buffer.writeInt16LE(number, this.offset, this.noAssert);
     } else {
       this.buffer.writeInt16BE(number, this.offset, this.noAssert);
@@ -114,7 +113,7 @@ export class BinaryWriter {
 
   WriteUInt32(number: number): BinaryWriter {
     this._CheckAlloc(4);
-    if(this.littleEndian) {
+    if (this.littleEndian) {
       this.buffer.writeUInt32LE(number, this.offset, this.noAssert);
     } else {
       this.buffer.writeUInt32BE(number, this.offset, this.noAssert);
@@ -125,7 +124,7 @@ export class BinaryWriter {
 
   WriteInt32(number: number): BinaryWriter {
     this._CheckAlloc(4);
-    if(this.littleEndian) {
+    if (this.littleEndian) {
       this.buffer.writeInt32LE(number, this.offset, this.noAssert);
     } else {
       this.buffer.writeInt32BE(number, this.offset, this.noAssert);
@@ -136,7 +135,7 @@ export class BinaryWriter {
 
   WriteUInt(number: number, size: number): BinaryWriter {
     this._CheckAlloc(size);
-    if(this.littleEndian) {
+    if (this.littleEndian) {
       this.buffer.writeUIntLE(number, this.offset, size, this.noAssert);
     } else {
       this.buffer.writeUIntBE(number, this.offset, size, this.noAssert);
@@ -147,7 +146,7 @@ export class BinaryWriter {
 
   WriteInt(number: number, size: number): BinaryWriter {
     this._CheckAlloc(size);
-    if(this.littleEndian) {
+    if (this.littleEndian) {
       this.buffer.writeIntLE(number, this.offset, size, this.noAssert);
     } else {
       this.buffer.writeIntBE(number, this.offset, size, this.noAssert);
@@ -163,7 +162,7 @@ export class BinaryWriter {
 
   Seek(number: number): BinaryWriter {
     this.offset = number;
-    if(this.offset > this.length) {
+    if (this.offset > this.length) {
       this.length = this.offset;
       this._CheckAlloc();
     }
@@ -174,17 +173,17 @@ export class BinaryWriter {
     return this.offset;
   }
 
-  Peek(size: number = 1): number {
+  Peek(size = 1): number {
     this._CheckAlloc(size);
-    return this.littleEndian ?
-      this.buffer.readUIntLE(this.offset, size, this.noAssert)
-      : this.buffer.readUIntBE(this.offset, size, this.noAssert);;
+    return this.littleEndian
+      ? this.buffer.readUIntLE(this.offset, size, this.noAssert)
+      : this.buffer.readUIntBE(this.offset, size, this.noAssert);
   }
 
   Buffer(): Buffer {
     return this.buffer;
   }
-  
+
   SetLength(len: number): BinaryWriter {
     this.length = len;
     return this;
@@ -192,5 +191,4 @@ export class BinaryWriter {
   Length(): number {
     return this.length;
   }
-
 }

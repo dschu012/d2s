@@ -12,11 +12,13 @@
     "prepare": "npm run build",
     "prepublish": "npm run build",
     "preversion": "npm test",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "eslint": "eslint"
   },
   "dependencies": {
-    "long": "^4.0.0",
-    "buffer": "^5.2.1"
+    "buffer": "^5.2.1",
+    "long": "^4.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.3",
@@ -24,7 +26,12 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.7.0",
     "@types/request": "^2.48.2",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
     "chai": "^4.2.0",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
     "mocha": "^8.3.2",
     "request": "2.88.0",
     "ts-loader": "^6.0.4",

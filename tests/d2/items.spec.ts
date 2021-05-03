@@ -31,69 +31,20 @@ Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 79, 180, 0]
   it('should read "simple" item 1.15', async () => {
     //hp1 from game
     //let buffer = new Uint8Array([16,32,130,0,13,17,0,63,30,22,187,92,65,2,2,14,14,255,1]);
-    let buffer, reader, item;
-
     //HP5 (inv, col=9, row=3)
-    buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 79, 180, 0]);
-    reader = new BinaryReader(buffer).SetLittleEndian();
-    item = await readItem(reader, 0x61, constants, config);
+    const buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 79, 180, 0]);
+    const reader = new BinaryReader(buffer).SetLittleEndian();
+    const item = await readItem(reader, 0x61, constants, config);
 
     expect(item.type).to.eq("hp5");
   });
 
   xit("should write custom charm", async () => {
-    let buffer, reader, item;
-    buffer = new Uint8Array([
-      16,
-      0,
-      128,
-      0,
-      5,
-      228,
-      68,
-      216,
-      79,
-      120,
-      250,
-      137,
-      117,
-      89,
-      210,
-      96,
-      199,
-      72,
-      0,
-      248,
-      12,
-      240,
-      17,
-      240,
-      25,
-      240,
-      57,
-      17,
-      155,
-      34,
-      118,
-      69,
-      108,
-      139,
-      216,
-      63,
-      207,
-      178,
-      80,
-      198,
-      195,
-      216,
-      8,
-      192,
-      80,
-      255,
-      31,
+    // prettier-ignore
+    const buffer = new Uint8Array([16,0,128,0,5,228,68,216,79,120,250,137,117,89,210,96,199,72,0,248,12,240,17,240,25,240,57,17,155,34,118,69,108,139,216,63,207,178,80,198,195,216,8,192,80,255,31,
     ]);
-    reader = new BinaryReader(buffer).SetLittleEndian();
-    item = await readItem(reader, 0x61, constants, config);
+    const reader = new BinaryReader(buffer).SetLittleEndian();
+    const item = await readItem(reader, 0x61, constants, config);
 
     const writer = new BinaryWriter().SetLittleEndian();
     writer.WriteArray(buffer);

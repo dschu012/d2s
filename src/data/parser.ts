@@ -62,11 +62,11 @@ function readConstantData(buffers: any): types.IConstantData {
   return constants;
 }
 
-function _getArray(files: Object, find: string): any {
+function _getArray(files: { [id: string]: Buffer }, find: string): any {
   return _readTsv(_getKey(files, find));
 }
 
-function _getKey(files: Object, find: string): any {
+function _getKey(files: { [id: string]: Buffer }, find: string): any {
   const key = Object.keys(files).find((key) => key.toLowerCase() === find.toLowerCase());
   if (!key) {
     throw new Error(`Cannot find file: ${find}`);

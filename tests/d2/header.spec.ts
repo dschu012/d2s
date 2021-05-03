@@ -25,7 +25,7 @@ describe("header", () => {
       d2s.header.level = 99;
       d2s.header.status.ladder = true;
 
-      for (var i of ["quests_normal", "quests_nm", "quests_hell"]) {
+      for (const i of ["quests_normal", "quests_nm", "quests_hell"]) {
         for (const j of ["act_i", "act_ii", "act_iii", "act_iv", "act_v"]) {
           d2s.header[i][j].introduced = true;
           d2s.header[i][j].completed = true;
@@ -34,13 +34,13 @@ describe("header", () => {
         d2s.header[i].act_iv.terrors_end.is_completed = true;
       }
 
-      for (var i of ["normal", "nm", "hell"]) {
+      for (const i of ["normal", "nm", "hell"]) {
         d2s.header.waypoints[i].act_i.rogue_encampement = true;
         d2s.header.waypoints[i].act_iii.kurast_docks = true;
         d2s.header.waypoints[i].act_iv.the_pandemonium_fortress = true;
         d2s.header.waypoints[i].act_v.harrogath = true;
       }
-      for (var i of ["normal", "nm", "hell"]) {
+      for (const i of ["normal", "nm", "hell"]) {
         for (const a in d2s.header.waypoints[i]) {
           for (const w in d2s.header.waypoints[i][a]) {
             d2s.header.waypoints[i][a][w] = true;

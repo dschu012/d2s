@@ -1,5 +1,7 @@
 //todo define types for these
-export interface IConfig {}
+export interface IConfig {
+  extendedStash?: boolean;
+}
 
 export interface IConstantData {
   classes: any[];

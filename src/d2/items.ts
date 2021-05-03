@@ -662,8 +662,8 @@ export function _readMagicProperties(reader: BinaryReader, start: number, offset
           }
           switch (prop.e) {
               case 3:
-                  values.push((v >> 8) & 0xff);  //charges
-                  values.push(v & 0xff);  //charges
+                  values.push(v & 0xff);  // current charges
+                  values.push((v >> 8) & 0xff);  //max charges
                   break;
               default:
                   values.push(v);

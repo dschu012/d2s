@@ -1,6 +1,5 @@
 
 import * as types from '../d2/types'
-import { parentPort } from 'worker_threads';
 
 //special stats. read the next N properties.
 //seems to be hardcode in d2 and not in itemstatcost
@@ -234,7 +233,10 @@ function _readRunewords(tsv: any, strings: any): any[] {
 
 function _readTypes(tsv: any, strings: any): any {
     let arr = {} as any;
-    let cCode =  tsv.header.indexOf("Code");
+    let cCode = tsv.header.indexOf("Code");
+    let cItemType = tsv.header.indexOf("ItemType");
+    let cEquiv1 = tsv.header.indexOf("Equiv1");
+    let cEquiv2 = tsv.header.indexOf("Equiv2");
     let cInvGfx = [];
     for(let i = 1; i <= 6; i++) {
         cInvGfx.push(tsv.header.indexOf(`InvGfx${i}`));
@@ -248,11 +250,39 @@ function _readTypes(tsv: any, strings: any): any {
                 if(tsv.lines[i][cInvGfx[j]]) invgfx[j] = tsv.lines[i][cInvGfx[j]];
             }
             o.ig = invgfx;
+            o.eq1 = tsv.lines[i][cEquiv1];
+            o.eq2 = tsv.lines[i][cEquiv2];
+            o.n = tsv.lines[i][cItemType];
+            o.c = [o.n];
             arr[code] = o;
         }
     }
+
+    for (let k of Object.keys(arr)) {
+        arr[k].c = [..._resolvetItemTypeCategories(arr, k)];
+        if (arr[k] !== undefined && arr[arr[k].eq1] !== undefined) {
+          arr[k].eq1n = arr[arr[k].eq1].n;
+        }
+
+        if (arr[k] !== undefined && arr[arr[k].eq2] !== undefined) {
+          arr[k].eq2n = arr[arr[k].eq2].n;
+        }
+      }
+
     return arr;
 }
+
+function _resolvetItemTypeCategories(arr: any, key: string) {
+    let res: string[] = [];
+    if (arr[key] !== undefined) {
+      res = [
+        arr[key].n,
+        ..._resolvetItemTypeCategories(arr, arr[key].eq1),
+        ..._resolvetItemTypeCategories(arr, arr[key].eq2),
+      ];
+    }
+    return res;
+  }
 
 function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
     let arr = [] as any[];
@@ -275,11 +305,24 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
     let cInvheight = tsv.header.indexOf("invheight");
     let cInvtransform = tsv.header.indexOf("InvTrans");
     let cType = tsv.header.indexOf("type");
+    let cNormCode = tsv.header.indexOf("normcode");
+    let cUberCode = tsv.header.indexOf("ubercode");
+    let cUltraCode = tsv.header.indexOf("ultracode");
+
     for (let i = 1; i < tsv.lines.length; i++) {
         let code = tsv.lines[i][cCode]
         if (code) {
             let item = {} as any;
             item.code = code;
+            item.normCode = tsv.lines[i][cNormCode];
+            item.expCode = tsv.lines[i][cUberCode];
+            item.eliteCode = tsv.lines[i][cUltraCode];
+            item.itemQuality =
+                item.code === item.expCode
+                ? types.EItemQuality.exceptional
+                : item.code === item.eliteCode
+                ? types.EItemQuality.elite
+                : types.EItemQuality.normal;
             item.n = strings[tsv.lines[i][cNameStr]];
             if(tsv.lines[i][cStackable] && +tsv.lines[i][cStackable] > 0) item.s = 1;
             if(tsv.lines[i][cMindam] && +tsv.lines[i][cMindam] > 0) item.mind = +tsv.lines[i][cMindam];
@@ -300,6 +343,9 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
             let type = itemtypes[tsv.lines[i][cType]];
             if(type && type.ig) {
                 item.ig = type.ig;
+                item.eq1n = type.eq1n;
+                item.eq2n = type.eq2n;
+                item.c = type.c;
             }
             arr.push(item);
         }

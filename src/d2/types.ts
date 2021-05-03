@@ -360,7 +360,9 @@ export interface IItem {
   inv_height: number,
   inv_file: number,
   inv_transform: number,
-  transform_color: string
+  transform_color: string,
+  item_quality: EItemQuality,
+  categories: string[],
 }
 
 export interface IWeaponDamage {
@@ -386,7 +388,6 @@ export interface IMagicProperty {
   op_stats: string[]
 }
 
-
 export interface IStash {
   version: string;
   pageCount: number;
@@ -399,3 +400,11 @@ export interface IStashPage {
   type: number;
   items: IItem[];
 }
+
+export enum EItemQuality {
+  normal,
+  exceptional,
+  elite
+}
+
+

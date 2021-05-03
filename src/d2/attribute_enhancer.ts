@@ -72,7 +72,7 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
     if(details.ih) item.inv_height = details.ih;
     if(details.iw) item.inv_width = details.iw;
     if (details.it) item.inv_transform = details.it;
-    if (details.itemQuality) item.item_quality = details.itemQuality;
+    if (details.iq) item.item_quality = details.iq;
     if (details.c) item.categories = details.c;
     if(item.multiple_pictures) {
       item.inv_file  = details.ig[item.picture_id];

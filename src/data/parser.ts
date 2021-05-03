@@ -314,13 +314,13 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
         if (code) {
             let item = {} as any;
             item.code = code;
-            item.normCode = tsv.lines[i][cNormCode];
-            item.expCode = tsv.lines[i][cUberCode];
-            item.eliteCode = tsv.lines[i][cUltraCode];
-            item.itemQuality =
-                item.code === item.expCode
+            item.nc = tsv.lines[i][cNormCode];
+            item.exc = tsv.lines[i][cUberCode];
+            item.elc = tsv.lines[i][cUltraCode];
+            item.iq =
+                item.code === item.exc
                 ? types.EItemQuality.exceptional
-                : item.code === item.eliteCode
+                : item.code === item.elc
                 ? types.EItemQuality.elite
                 : types.EItemQuality.normal;
             item.n = strings[tsv.lines[i][cNameStr]];

@@ -684,7 +684,8 @@ export function _readMagicProperties(reader: BinaryReader, start: number, offset
 export function _writeMagicProperties(writer: BinaryWriter, properties: types.IMagicProperty[], start: number, offset: number, constants: types.IConstantData): number {
   if (properties) {
       for (let i = 0; i < properties.length; i++) {
-          let property = properties[i];
+        let property = properties[i];
+        let valueIdx = 0;
           _writeBits(writer, property.id, start, offset, 9);
           offset += 9;
           let num_of_properties = constants.magical_properties[property!.id].np || 1;
@@ -694,10 +695,10 @@ export function _writeMagicProperties(writer: BinaryWriter, properties: types.IM
                   throw new Error(`Cannot find Magical Property for id: ${property.id}`);
               }
               if (prop.sP) {
-                  let param = property.values.shift()!;
+                  let param = property.values[valueIdx++]!;
                   switch (prop.dF) {
                       case 14: //+skill to skilltab
-                          param |= (property.values.shift()! & 0x1fff) << 3;
+                          param |= (property.values[valueIdx++]! & 0x1fff) << 3;
                           break;
                       default:
                           break;
@@ -709,7 +710,7 @@ export function _writeMagicProperties(writer: BinaryWriter, properties: types.IM
                           break;
                       case 2: //chance to cast
                       case 3: //charges
-                          param |= (property.values.shift()! & 0x3ff) << 6;
+                          param |= (property.values[valueIdx++]! & 0x3ff) << 6;
                           break;
                       default:
                           break;
@@ -717,13 +718,13 @@ export function _writeMagicProperties(writer: BinaryWriter, properties: types.IM
                   _writeBits(writer, param, start, offset, prop.sP);
                   offset += prop.sP;
               }
-              let v = property.values.shift()!;
+              let v = property.values[valueIdx++]!;
               if (prop.sA) {
                   v += prop.sA;
               }
               switch (prop.e) {
                   case 3:
-                      v |= (property.values.shift()! & 0xff) << 8;
+                      v |= (property.values[valueIdx++]! & 0xff) << 8;
                       break;
                   default:
                       break;

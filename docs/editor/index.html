@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/6.3.0/jsoneditor.min.css"
+    integrity="sha256-YSy983pvDw/pNyv/+uiHXKNh1LlveOgHY6XAXFclM/Y=" crossorigin="anonymous" />
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <style>
+    #d2sJson .jsoneditor {
+      border: 0;
+    }
+  </style>
+  <title>d2s - Example</title>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="octicon octicon-clippy navbar-brand">
+      <i class="fa fa-fw fa-github"></i>
+      <a href="https://github.com/dschu012">dschu012</a> / <a class="font-weight-bold"
+        href="https://github.com/dschu012/d2s">d2s</a>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container-fluid" id="app">
+    <div class="row">
+      <div class="col-2 d-none d-md-block"></div>
+      <div class="col-8 mt-2">
+        <div class="card bg-light">
+          <div class="card-body">
+            <p>Load a save from 1.10-1.14d OR D2R Alpha. Parser uses <a href="https://github.com/dschu012/d2s">d2s</a>.
+              C# version of this library found <a href="https://github.com/dschu012/D2SLib">here</a>.
+              <br />Copy D2R Saves to:
+              <code>%userprofile%\Saved Games\Diablo II Resurrected Tech Alpha</code>
+              <br />Copy D2 Saves to: <code>C:\Program Files (x86)\Diablo II\Save</code>
+            </p>
+            <form id="d2sForm">
+              <fieldset>
+                <div class="form-group">
+                  <div class="input-group">
+                    <div class="custom-file">
+                      <input type="file" name="d2sFile" @change="onFileChange" id="d2sFile">
+                      <label class="custom-file-label" for="d2sFile">*.d2s</label>
+                    </div>
+                    <div class="input-group-append"><span>&nbsp;</span></div>
+                  </div>
+                </div>
+                <div v-if="save != null">
+                  <div class="form-group mt-2">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Character Name"
+                      v-model="save.header.name" required>
+                  </div>
+                  <div class="form-row">
+                    <div class="col">
+                      <label for="Strength">Strength</label>
+                      <input type="number" class="form-control" id="Strength" v-model="save.attributes.strength">
+                    </div>
+                    <div class="col">
+                      <label for="Dexterity">Dexterity</label>
+                      <input type="number" class="form-control" id="Dexterity" v-model="save.attributes.dexterity">
+                    </div>
+                    <div class="col">
+                      <label for="inputEmail4">Vitality</label>
+                      <input type="number" class="form-control" id="Vitality" v-model="save.attributes.vitality">
+                    </div>
+                    <div class="col">
+                      <label for="inputEmail4">Energy</label>
+                      <input type="number" class="form-control" id="Energy" v-model="save.attributes.energy">
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <div id="errors">
+              </div>
+              <br />
+              <br />
+              <button v-if="save != null" type="button" id="d2" class="btn btn-primary" @click="saveD2">Save D2</button>
+              <button v-if="save != null" type="button" id="d2r" class="btn btn-primary" @click="saveD2R">Save D2R</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <script src="../../dist/constants.bundle.js"></script>
+  <script src="../../dist/d2s.bundle.js"></script>
+  <script>
+    let app = new Vue({
+      el: "#app",
+      data: {
+        save: null
+      },
+      created() {
+      },
+      mounted() {
+        if (window.d2s === undefined) {
+          let s = document.createElement('script');
+          s.src = "https://github.com/dschu012/d2s/releases/latest/download/constants.bundle.min.js";
+          document.querySelector('body').appendChild(s);
+          s = document.createElement('script');
+          s.src = "https://github.com/dschu012/d2s/releases/latest/download/d2s.bundle.min.js";
+          document.querySelector('body').appendChild(s);
+        }
+      },
+      filters: {
+      },
+      computed: {
+      },
+      methods: {
+        onFileLoad(event) {
+          let that = this;
+          d2s.read(event.target.result, constants.constants).then(response => {
+            that.save = response;
+          });
+        },
+        onFileChange(event) {
+          let reader = new FileReader();
+          reader.onload = this.onFileLoad;
+          reader.readAsArrayBuffer(event.target.files[0]);
+          event.target.value = null;
+        },
+        saveD2() {
+
+        },
+        saveD2R() {
+
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -13,7 +13,7 @@
     "prepublish": "npm run build",
     "preversion": "npm test",
     "postversion": "git push && git push --tags",
-    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "lint": "eslint \"*/**/*.{js,ts,tsx}\" --quiet --fix",
     "eslint": "eslint"
   },
   "dependencies": {
@@ -32,6 +32,7 @@
     "eslint": "^7.25.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.2.1",
     "husky": "^6.0.0",
     "mocha": "^8.3.2",
     "request": "2.88.0",

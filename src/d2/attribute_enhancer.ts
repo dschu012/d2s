@@ -1,5 +1,4 @@
 import * as types from "./types";
-import { type } from "os";
 
 //do nice stuff
 //combine group properties (all resists/all stats) and build friendly strings for a ui
@@ -90,10 +89,12 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
       for (let i = 0; i < 6; i++) {
         const id = item.magical_name_ids[i];
         if (id) {
-          if (i % 5 == 0 && constants.magic_suffixes[id].tc) {
-            item.transform_color = constants.magic_suffixes[id].tc;
-          } else if (constants.magic_prefixes[id].tc) {
+          if (i % 2 == 0 && constants.magic_prefixes[id] && constants.magic_prefixes[id].tc) {
+            // even is prefixes
             item.transform_color = constants.magic_prefixes[id].tc;
+          } else if (constants.magic_suffixes[id] && constants.magic_suffixes[id].tc) {
+            // odd is suffixes
+            item.transform_color = constants.magic_suffixes[id].tc;
           }
         }
       }
@@ -111,17 +112,23 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
   }
 
   if (item.magic_attributes || item.runeword_attributes || item.socketed_items) {
-    _enhanceAttributeDescription(item.magic_attributes, constants, level);
-    _enhanceAttributeDescription(item.runeword_attributes, constants, level);
+    item.displayed_magic_attributes = _enhanceAttributeDescription(item.magic_attributes, constants, level);
+    item.displayed_runeword_attributes = _enhanceAttributeDescription(item.runeword_attributes, constants, level);
     item.combined_magic_attributes = _groupAttributes(_allAttributes(item, constants), constants);
-    _enhanceAttributeDescription(item.combined_magic_attributes, constants, level);
+    item.displayed_combined_magic_attributes = _enhanceAttributeDescription(item.combined_magic_attributes, constants, level);
   }
 }
 
-function _enhanceAttributeDescription(magic_attributes: types.IMagicProperty[], constants: types.IConstantData, level = 1) {
-  if (!magic_attributes) {
-    return;
+function _enhanceAttributeDescription(
+  _magic_attributes: types.IMagicProperty[],
+  constants: types.IConstantData,
+  level = 1
+): types.IMagicProperty[] {
+  if (!_magic_attributes) {
+    return [];
   }
+
+  const magic_attributes: types.IMagicProperty[] = [..._magic_attributes.map((attr) => ({ ...attr }))];
   const dgrps = [0, 0, 0];
   const dgrpsVal = [0, 0, 0];
   for (const property of magic_attributes) {
@@ -177,12 +184,16 @@ function _enhanceAttributeDescription(magic_attributes: types.IMagicProperty[], 
       //damage range or enhanced damage.
       let count = 0;
       descString = prop.dR;
+
+      //TODO: (ga) fix issue with posion damage
       if (prop.s === "poisonmindam") {
-        //TODO: this is wrong
-        property.values[2] = Math.floor(property.values[2] / 25);
-        property.values[0] = Math.floor(property.values[0] / property.values[2]);
-        property.values[1] = Math.floor(property.values[1] / property.values[2]);
+        //poisonmindam
+        let min = Math.floor((property.values[0] * property.values[2]) / 256);
+        let max = Math.floor((property.values[1] * property.values[2]) / 256);
+        let seconds = Math.floor(property.values[2] / 25);
+        property.values = [min, max, seconds];
       }
+
       if (property.values[0] === property.values[1]) {
         count++;
         descString = prop.dE;
@@ -199,12 +210,17 @@ function _enhanceAttributeDescription(magic_attributes: types.IMagicProperty[], 
       _descFunc(property, constants, v, descFunc, descVal, descString, desc2);
     }
   }
+
+  //TODO: (ga) fix issue with sorting creating different output in d2s
   magic_attributes.sort((a, b) => constants.magical_properties[b.id].so - constants.magical_properties[a.id].so);
+
   for (let i = magic_attributes.length - 1; i > 0; i--) {
     if (magic_attributes[i].description === magic_attributes[i - 1].description) {
       magic_attributes[i - 1].visible = false;
     }
   }
+
+  return magic_attributes;
 }
 
 function _compactAttributes(mods: any[], constants: types.IConstantData): types.IMagicProperty[] {

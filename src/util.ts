@@ -12,10 +12,10 @@ const D2S_DEBUG = process.env["D2S_DEBUG"] !== undefined;
 export function _readBits(reader: BinaryReader, start: number, bitoffset: number, size: number, debugInfo?: string): number {
   // TODO: (ga) remove debug information
   if (D2S_DEBUG) {
-    let s = start + Math.floor(bitoffset / 8);
-    let e = Math.ceil(size / 8);
+    const s = start + Math.floor(bitoffset / 8);
+    const e = Math.ceil(size / 8);
     reader.Seek(s);
-    let tr = reader.ReadArray(e);
+    const tr = reader.ReadArray(e);
     process.stdout.write(`r ${s}-${s + e}[${e}b] (bit ${bitoffset}-${bitoffset + size})[${size}bits]: ${Buffer.from(tr).toString("hex")} `);
   }
   // END TODO
@@ -56,8 +56,8 @@ export function _writeBits(
     current = current.xor(v.and(bitmask).shiftLeft(bitoffset % 8));
     //TODO: (ga) remove debug information
     if (D2S_DEBUG) {
-      let s = start + Math.floor(bitoffset / 8);
-      let e = Math.ceil(size / 8);
+      const s = start + Math.floor(bitoffset / 8);
+      const e = Math.ceil(size / 8);
       D2S_DEBUG &&
         process.stdout.write(
           `w ${s}-${s + e}[${e}b] (bit ${bitoffset}-${bitoffset + size})[${size}bits]: ${current} = ${current.toString(16)} ${

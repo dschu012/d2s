@@ -188,9 +188,9 @@ function _enhanceAttributeDescription(
       //TODO: (ga) fix issue with posion damage
       if (prop.s === "poisonmindam") {
         //poisonmindam
-        let min = Math.floor((property.values[0] * property.values[2]) / 256);
-        let max = Math.floor((property.values[1] * property.values[2]) / 256);
-        let seconds = Math.floor(property.values[2] / 25);
+        const min = Math.floor((property.values[0] * property.values[2]) / 256);
+        const max = Math.floor((property.values[1] * property.values[2]) / 256);
+        const seconds = Math.floor(property.values[2] / 25);
         property.values = [min, max, seconds];
       }
 

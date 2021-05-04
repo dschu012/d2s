@@ -88,12 +88,14 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
       }
     } else if (item.magical_name_ids && item.magical_name_ids.length === 6) {
       for (let i = 0; i < 6; i++) {
-        const id = item.magical_name_ids[i];
+        let id = item.magical_name_ids[i];
         if (id) {
-          if (i % 5 == 0 && constants.magic_suffixes[id].tc) {
-            item.transform_color = constants.magic_suffixes[id].tc;
-          } else if (constants.magic_prefixes[id].tc) {
+          if (i % 2 == 0 && constants.magic_prefixes[id] && constants.magic_prefixes[id].tc) {
+            // even is prefixes
             item.transform_color = constants.magic_prefixes[id].tc;
+          } else if (constants.magic_suffixes[id] && constants.magic_suffixes[id].tc) {
+            // odd is suffixes
+            item.transform_color = constants.magic_suffixes[id].tc;
           }
         }
       }

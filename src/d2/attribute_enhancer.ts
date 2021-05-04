@@ -88,7 +88,7 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
       }
     } else if (item.magical_name_ids && item.magical_name_ids.length === 6) {
       for (let i = 0; i < 6; i++) {
-        let id = item.magical_name_ids[i];
+        const id = item.magical_name_ids[i];
         if (id) {
           if (i % 2 == 0 && constants.magic_prefixes[id] && constants.magic_prefixes[id].tc) {
             // even is prefixes

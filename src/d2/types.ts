@@ -365,7 +365,9 @@ export interface IItem {
   transform_color: string;
   item_quality: EItemQuality;
   categories: string[];
-  _unknownData: {
+  file_index: number;
+  auto_affix_id: number;
+  _unknown_data: {
     b0_3?: number;
     b5_10?: number;
     b12?: number;
@@ -374,8 +376,6 @@ export interface IItem {
     b23?: number;
     b25?: number;
     b27_31?: number;
-    class_specific?: number;
-    superior_data?: number;
     aft_max_dura?: number;
     plist_flag?: number;
   };

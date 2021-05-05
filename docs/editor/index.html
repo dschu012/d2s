@@ -1429,18 +1429,22 @@
       },
       data() {
         return {
-          dirty: false,
           rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
+          timeout: null,
         };
       },
       watch: {
         item: {
           handler(val) {
-            //this seems hackish. basically it is to prevent infinite loop.
-            this.dirty = !this.dirty;
-            if(this.dirty) {
-              val = d2s.enhanceItem(val, window.constants.constants);
+            //this seems hackish. basically it is to prevent infinite loop since we modify item here.
+            if(this.timeout) {
+              clearTimeout(this.timeout);
+              this.timeout = null;
+              return;
             }
+            this.timeout = setTimeout(() => {
+              val = d2s.enhanceItem(val, window.constants.constants);
+            }, 0);
           },
           deep: true
         },

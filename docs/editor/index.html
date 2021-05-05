@@ -1077,10 +1077,15 @@
       </div>
       <div class="form-row" v-for="(stat, statIdx) in itemStats">
         <div class="col-md-2">
+          <div class="form-row">
+            <div class="col-md-2"><button type="button" class="btn btn-link red" @click="remove(statIdx)">&times;</button></div>
+            <div class="col-md-10">
+              <select class="form-control" :id="'Stat' + statIdx" v-model="stat.id">
+                <option v-for="(s, idx) in stats" :value="idx" :key="idx">{{s.s}}</option>
+              </select>
+            </div>
+          </div>
           <!-- <label :for="'Stat' + statIdx">Stat</label> -->
-          <select class="form-control" :id="'Stat' + statIdx" v-model="stat.id">
-            <option v-for="(s, idx) in stats" :value="idx" :key="idx">{{s.s}}</option>
-          </select>
         </div>
         <div class="col-md-2" v-for="i in numValues(stat.id)">
           <!-- <label :for="'Stat' + statIdx + 'Value'+ i">Value</label> -->
@@ -1095,6 +1100,9 @@
           </select>
           <input type="number" class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else>
         </div>
+      </div>
+      <div class="form-row">
+        <button type="button" class="btn btn-link" @click="add">Add Stat</button>
       </div>
     </div>
   </script>
@@ -1361,6 +1369,12 @@
         }
       },
       methods: {
+        add() {
+          this.itemStats.push({ id: 0, values: []});
+        },
+        remove(idx) {
+          this.itemStats.splice(idx, 1);
+        },
         isClass(id, idx) {
           let stat = this.stats[id];
           if((stat.dF == 14) && idx == 2) {

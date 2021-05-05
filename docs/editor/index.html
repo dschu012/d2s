@@ -1043,28 +1043,43 @@
           </div>
           -->
         </div>
-        <div class="form-row" v-for="(stat, statIdx) in item.magic_attributes">
-          <div class="col-md-2">
-            <label :for="'Stat' + statIdx">Stat</label>
-            <select class="form-control" :id="'Stat' + statIdx" v-model="stat.id">
-              <option v-for="(s, idx) in stats" :value="idx" :key="idx">{{s.s}}</option>
-            </select>
-          </div>
-          <div class="col-md-2" v-for="i in numValues(stat.id)">
-            <label :for="'Stat' + statIdx + 'Value'+ i">Value</label>
-            <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-if="isClass(stat.id, i)">
-              <option v-for="(c, idx) in classes" :value="idx" :key="idx">{{c.co}}</option>
-            </select>
-            <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else-if="isClassSkill(stat.id, i)">
-              <option v-for="(t, idx) in classes[stat.values[i]].ts" :value="idx" :key="idx">{{t}}</option>
-            </select>
-            <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else-if="isSkill(stat.id, i)">
-              <option v-for="(s, idx) in skills" v-if="s != null" :value="idx" :key="idx">{{s.s}}</option>
-            </select>
-            <input type="number" class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else>
+        <ItemStatsEditor :itemStats.sync="item.magic_attributes" />
+        <div v-if="item.runeword_attributes"><ItemStatsEditor :itemStats.sync="item.runeword_attributes" /></div>
+        <div v-if="item.set_attributes">
+          <div v-for="set_attribute in item.set_attributes">
+            <ItemStatsEditor :itemStats.sync="set_attribute" />
           </div>
         </div>
+        <div v-for="socketed_item in item.socketed_items">
+          <ItemEditor :item.sync="socketed_item" />
+        </div>
       </div>
+  </script>
+
+  <script type="text/x-template" id="ItemStatsEditor">
+    <div>
+      <div class="form-row" v-for="(stat, statIdx) in itemStats">
+        <div class="col-md-2">
+          <label :for="'Stat' + statIdx">Stat</label>
+          <select class="form-control" :id="'Stat' + statIdx" v-model="stat.id">
+            <option v-for="(s, idx) in stats" :value="idx" :key="idx">{{s.s}}</option>
+          </select>
+        </div>
+        <div class="col-md-2" v-for="i in numValues(stat.id)">
+          <label :for="'Stat' + statIdx + 'Value'+ i">Value</label>
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-if="isClass(stat.id, i)">
+            <option v-for="(c, idx) in classes" :value="idx" :key="idx">{{c.co}}</option>
+          </select>
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else-if="isClassSkill(stat.id, i)">
+            <option v-for="(t, idx) in classes[stat.values[i]].ts" :value="idx" :key="idx">{{t}}</option>
+          </select>
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else-if="isSkill(stat.id, i)">
+            <option v-for="(s, idx) in skills" v-if="s != null" :value="idx" :key="idx">{{s.s}}</option>
+          </select>
+          <input type="number" class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else>
+        </div>
+      </div>
+    </div>
   </script>
 
   <script type="text/x-template" id="Item">
@@ -1316,18 +1331,17 @@
       },
     });
 
-    Vue.component('ItemEditor', {
-      template: '#ItemEditor',
+    Vue.component('ItemStatsEditor', {
+      template: '#ItemStatsEditor',
       props: {
-        item: Object,
+        itemStats: Array
       },
       data() {
         return {
-          rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
           stats: window.constants.constants.magical_properties,
           skills: window.constants.constants.skills,
           classes: window.constants.constants.classes,
-        };
+        }
       },
       methods: {
         isClass(id, idx) {
@@ -1371,6 +1385,18 @@
           }
           return 1;
         }
+      }
+    });
+
+    Vue.component('ItemEditor', {
+      template: '#ItemEditor',
+      props: {
+        item: Object,
+      },
+      data() {
+        return {
+          rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
+        };
       }
     });
 

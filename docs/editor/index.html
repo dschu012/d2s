@@ -17,6 +17,10 @@
       --grid-size: 32px;
     }
 
+    ul {
+      list-style-type: none;
+    }
+
     #equipped-content, #inventory-content, #stash-content, #cube-content, #mercenary-content {
         font-family: 'Avenir', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
@@ -600,6 +604,9 @@
       <div class="col-8 mt-2">
         <div class="card bg-light">
           <div class="card-body">
+            <p>Extract your mpq data into a <code>data</code> folder in the same directory as this html file for images to load. It will create the images
+              from the DC6 files directly in the browser.
+            </p>
             <form id="d2sForm">
               <fieldset>
                 <div class="form-group">
@@ -623,6 +630,9 @@
                       <button class="nav-link" id="quests-tab" data-toggle="tab" data-target="#quests-content" role="tab" type="button">Quests</button>
                     </li>
                     <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="skills-tab" data-toggle="tab" data-target="#skills-content" role="tab" type="button">Skills</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
                       <button class="nav-link" id="equipped-tab" data-toggle="tab" data-target="#equipped-content" role="tab" type="button">Equipped</button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -642,6 +652,7 @@
                     <div class="tab-pane show active" id="stats-content" role="tabpanel"><Stats v-bind:save.sync="save" /></div>
                     <div class="tab-pane" id="waypoints-content" role="tabpanel"><Waypoints v-bind:save.sync="save" /></div>
                     <div class="tab-pane" id="quests-content" role="tabpanel"><Quests v-bind:save.sync="save" /></div>
+                    <div class="tab-pane" id="skills-content" role="tabpanel"><Skills v-bind:save.sync="save" /></div>
                     <div class="tab-pane" id="equipped-content" role="tabpanel"><Equipped v-bind:items.sync="equipped" /></div>
                     <div class="tab-pane" id="inventory-content" role="tabpanel">
                       <Grid :width="10" :height="4" :items.sync="inventory" />
@@ -660,8 +671,7 @@
               </div>
               <br />
               <br />
-              <button v-if="save != null" type="button" id="d2" class="btn btn-primary" @click="saveD2">Save D2</button>
-              <button v-if="save != null" type="button" id="d2r" class="btn btn-primary" @click="saveD2R">Save D2R</button>
+              <button v-if="save != null" type="button" class="btn btn-primary" @click="saveFile">Save</button>
             </form>
           </div>
         </div>
@@ -693,36 +703,312 @@
           v-model="save.header.name" required>
       </div>
       <div class="form-row">
-        <div class="col">
+        <div class="col-md-2">
+          <label for="Level">Level</label>
+          <input type="number" class="form-control" id="Level" v-model="save.attributes.level">
+        </div>
+        <div class="col-md-2">
+          <label for="Level">Experience</label>
+          <input type="number" class="form-control" id="Level" v-model="save.attributes.experience">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-2">
+          <label for="Life">Life</label>
+          <div class="input-group">
+            <input class="form-control" type="number" id="Life" v-model="save.attributes.current_hp">
+            <div class="input-group-prepend input-group-append">
+              <div class="input-group-text">/</div>
+            </div>
+            <input class="form-control" type="number" id="MaxLife" v-model="save.attributes.max_hp">
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label for="Mana">Mana</label>
+          <div class="input-group">
+            <input class="form-control" type="number" id="Mana" v-model="save.attributes.current_mana">
+            <div class="input-group-prepend input-group-append">
+              <div class="input-group-text">/</div>
+            </div>
+            <input class="form-control" type="number" id="MaxMana" v-model="save.attributes.max_mana">
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-2">
           <label for="Strength">Strength</label>
           <input type="number" class="form-control" id="Strength" v-model="save.attributes.strength">
         </div>
-        <div class="col">
+        <div class="col-md-2">
           <label for="Dexterity">Dexterity</label>
           <input type="number" class="form-control" id="Dexterity" v-model="save.attributes.dexterity">
         </div>
-        <div class="col">
+        <div class="col-md-2">
           <label for="Vitality">Vitality</label>
           <input type="number" class="form-control" id="Vitality" v-model="save.attributes.vitality">
         </div>
-        <div class="col">
+        <div class="col-md-2">
           <label for="Energy">Energy</label>
           <input type="number" class="form-control" id="Energy" v-model="save.attributes.energy">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-2">
+          <label for="UnusedStatPoints">Unused Stat Points</label>
+          <input type="number" class="form-control" id="UnusedStatPoints" v-model="save.attributes.unused_stats">
+        </div>
+        <div class="col-md-2">
+          <label for="UnusedSkillPoints">Unused Skilled Points</label>
+          <input type="number" class="form-control" id="UnusedSkillPoints" v-model="save.attributes.unused_skill_points">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-2">
+          <label for="Gold">Gold</label>
+          <input type="number" class="form-control" id="Gold" v-model="save.attributes.gold">
+        </div>
+        <div class="col-md-2">
+          <label for="StashedGold">Stashed Gold</label>
+          <input type="number" class="form-control" id="StashedGold" v-model="save.attributes.stashed_gold">
         </div>
       </div>
     </div>
   </script>
 
   <script type="text/x-template" id="Waypoints">
-    <div></div>
+    <div class="form-row">
+      <div class="col-md-4" v-for="difficulty in difficulties">
+        <ul><li><i class="fa fa-angle-right rotate"></i> {{difficulty.value}}</li>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act I</li>
+            <ul class="col-md-offset-2">
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.rogue_encampement">Rogue Encampement</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.cold_plains">Cold Plains</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.stony_field">Stoney Field</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.dark_woods">Dark Woods</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.black_marsh">Black Marsh</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.outer_cloister">Outer Cloister</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.jail_lvl_1">Jail Lvl 1</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.inner_cloister">Inner Cloister</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_i.catacombs_lvl_2">Catacombs Lvl 2</label></li>
+            </ul>
+          </ul>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act II</li>
+            <ul class="col-md-offset-2">
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.lut_gholein">Rogue Encampement</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.sewers_lvl_2">Cold Plains</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.dry_hills">Stoney Field</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.halls_of_the_dead_lvl_2">Dark Woods</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.far_oasis">Black Marsh</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.lost_city">Outer Cloister</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.palace_cellar_lvl_1">Jail Lvl 1</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.arcane_sanctuary">Inner Cloister</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_ii.canyon_of_the_magi">Catacombs Lvl 2</label></li>
+            </ul>
+          </ul>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act III</li>
+            <ul class="col-md-offset-2">
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.kurast_docks">Rogue Encampement</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.spider_forest">Cold Plains</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.great_marsh">Stoney Field</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.flayer_jungle">Dark Woods</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.lower_kurast">Black Marsh</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.kurast_bazaar">Outer Cloister</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.upper_kurast">Jail Lvl 1</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.travincal">Inner Cloister</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_iii.durance_of_hate_lvl_2">Catacombs Lvl 2</label></li>
+            </ul>
+          </ul>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act IV</li>
+            <ul class="col-md-offset-2">
+              <li><label><input class="form-check-input" type="checkbox" :checked="save.header.waypoints[difficulty.key].act_iv.the_pandemonium_fortress">Rogue Encampement</label></li>
+              <li><label><input class="form-check-input" type="checkbox" :checked="save.header.waypoints[difficulty.key].act_iv.city_of_the_damned">Cold Plains</label></li>
+              <li><label><input class="form-check-input" type="checkbox" :checked="save.header.waypoints[difficulty.key].act_iv.river_of_flame">Stoney Field</label></li>
+            </ul>
+          </ul>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act V</li>
+            <ul class="col-md-offset-2">
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.harrogath">Rogue Encampement</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.frigid_highlands">Cold Plains</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.arreat_plateau">Stoney Field</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.crystalline_passage">Dark Woods</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.halls_of_pain">Black Marsh</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.glacial_trail">Outer Cloister</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.frozen_tundra">Jail Lvl 1</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.the_ancients_way">Inner Cloister</label></li>
+              <li><label><input class="form-check-input" type="checkbox" v-model="save.header.waypoints[difficulty.key].act_v.worldstone_keep_lvl_2">Catacombs Lvl 2</label></li>
+            </ul>
+          </ul>
+        </ul>
+      </div>
+    </div>
   </script>
 
   <script type="text/x-template" id="Skills">
-    <div></div>
+    <div class="form-row">
+      <div class="col-md-4" v-for="i in 3">
+        <div class="row">
+          <div class="col-md-6" v-for="j in 10">
+            <label :for="'Skill' + i + '_' + j">{{save.skills[(i - 1) * 10 + (j - 1)].name}}</label>
+            <input type="number" class="form-control" :id="'Skill' + i + '_' + j" min="0" max="20" v-model="save.skills[(i - 1) * 10 + (j - 1)].points">
+          </div>
+        </div>
+      </div>
+    </div>
   </script>
 
   <script type="text/x-template" id="Quests">
-    <div></div>
+    <div class="form-row">
+      <div class="col-md-4" v-for="difficulty in difficulties">
+        <ul><li><i class="fa fa-angle-right rotate"></i> {{difficulty.value}}</li>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act I</li>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Den of Evil</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_i.den_of_evil.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Sisters' Burial Grounds</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_i.sisters_burial_grounds.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Search for Cain</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_i.the_search_for_cain.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>The Forgotten Tower</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_i.the_forgotten_tower.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Tools of the Trade</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_i.tools_of_the_trade.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Sisters to the Slaughter</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_i.sisters_to_the_slaughter.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+          </ul>
+        
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act II</li>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Radament's Lair</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_ii.radaments_lair.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>The Horadric Staff</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_ii.the_horadric_staff.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Tainted Sun</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_ii.tainted_sun.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Arcane Sanctuary</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_ii.arcane_sanctuary.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>The Summoner</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_ii.the_summoner.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>The Seven Tombs</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_ii.the_seven_tombs.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+          </ul>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act III</li>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>The Golden Bird</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iii.the_golden_bird.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Blade of the Old Religion</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iii.blade_of_the_old_religion.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Khalim's Will</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iii.khalims_will.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Lam Esen's Tome</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iii.lam_esens_tome.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>The Blackened Temple</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iii.the_blackened_temple.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>The Guardian</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iii.the_guardian.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+          </ul>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act IV</li>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Fallen Angel</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iv.the_fallen_angel.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Hell's Forge</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iv.hellforge.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Terror's End</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_iv.terrors_end.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+          </ul>
+          <ul class="col-md-offset-1"><li><i class="fa fa-angle-right rotate"></i> Act V</li>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Siege on Harrogath</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_v.siege_on_harrogath.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Rescue on Mount Arreat</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_v.rescue_on_mount_arreat.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Prison of Ice</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_v.prison_of_ice.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Betrayal of Harrogath</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_v.betrayal_of_harrogath.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Rite of Passage</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_v.rite_of_passage.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+            <ul class="col-md-offset-2"><li><i class="fa fa-angle-right rotate"></i>Eve of Destruction</li>
+              <ul class="col-md-offset-3">
+                <label><input class="form-check-input" type="checkbox" v-model="save.header[difficulty.key].act_v.eve_of_destruction.is_completed">Completed</label></li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+      </div>
+    </div>
   </script>
 
   <script type="text/x-template" id="Grid">
@@ -737,27 +1023,38 @@
   <script type="text/x-template" id="ItemEditor">
       <div>
         <div class="form-row">
-          <div class="col">
+          <div class="col-md-2">
             <label for="ILvl">Item Level</label>
             <input type="number" class="form-control" id="ILvl" v-model="item.level">
           </div>
-          <div class="col">
+          <!--
+          <div class="col-md-2">
             <label for="Rarity">Rarity</label>
             <select class="form-control" id="Rarity" v-model="item.quality">
               <option v-for="rarity in rarities" :value="rarity.key" :key="rarity.key">{{rarity.value}}</option>
             </select>
           </div>
+          -->
         </div>
         <div class="form-row" v-for="(stat, statIdx) in item.magic_attributes">
-          <div class="col">
+          <div class="col-md-2">
             <label :for="'Stat' + statIdx">Stat</label>
             <select class="form-control" :id="'Stat' + statIdx" v-model="stat.id">
               <option v-for="(s, idx) in stats" :value="idx" :key="idx">{{s.s}}</option>
             </select>
           </div>
-          <div class="col" v-for="(value, valueIndex) in stat.values">
-            <label :for="'Stat' + statIdx + 'Value'+ valueIndex">Value</label>
-            <input type="number" class="form-control" :id="'Stat' + statIdx + 'Value'+ valueIndex" v-model="value">
+          <div class="col-md-2" v-for="i in numValues(stat.id)">
+            <label :for="'Stat' + statIdx + 'Value'+ i">Value</label>
+            <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-if="isClass(stat.id, i)">
+              <option v-for="(c, idx) in classes" :value="idx" :key="idx">{{c.co}}</option>
+            </select>
+            <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else-if="isClassSkill(stat.id, i)">
+              <option v-for="(t, idx) in classes[stat.values[i]].ts" :value="idx" :key="idx">{{t}}</option>
+            </select>
+            <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else-if="isSkill(stat.id, i)">
+              <option v-for="(s, idx) in skills" v-if="s != null" :value="idx" :key="idx">{{s.s}}</option>
+            </select>
+            <input type="number" class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else>
           </div>
         </div>
       </div>
@@ -841,10 +1138,50 @@
   </script>
 
   <script type="text/x-template" id="Mercenary">
-    <div></div>
+    <div>
+      <div class="inventory">
+        <span class="head"><Item v-if="head" :item.sync="head" /></span>
+        <span class="torso"><Item v-if="torso" :item.sync="torso" /></span>
+        <span class="right-hand weapon"><Item v-if="right_hand" :item.sync="right_hand" /></span>
+        <span class="left-hand weapon"><Item v-if="left_hand" :item.sync="left_hand" /></span>
+      </div>
+    </div>
   </script>
 
   <script>
+
+    const colormaps = {
+        1: 'data/global/items/Palette/grey.dat',
+        2: 'data/global/items/Palette/grey2.dat',
+        5: 'data/global/items/Palette/greybrown.dat',
+        6: 'data/global/items/Palette/invgrey.dat',
+        7: 'data/global/items/Palette/invgrey2.dat',
+        8: 'data/global/items/Palette/invgreybrown.dat',
+    };
+
+    const colors = {
+        whit: 0,
+        lgry: 1,
+        dgry: 2,
+        blac: 3,
+        lblu: 4,
+        dblu: 5,
+        cblu: 6,
+        lred: 7,
+        dred: 8,
+        cred: 9,
+        lgrn: 10,
+        dgrn: 11,
+        cgrn: 12,
+        lyel: 13,
+        dyel: 14,
+        lgld: 15,
+        dgld: 16,
+        lpur: 17,
+        dpur: 18,
+        oran: 19,
+        bwht: 20,
+    };
 
     async function b64PNGFromDC6(item) {
       const response = await fetch(`data/global/items/${item.inv_file}.dc6`);
@@ -891,7 +1228,13 @@
           if(paletteIdx === 255) { //transparent
             continue;
           }
-          const rgb = window.palette[paletteIdx];
+          if(item.transform_color && item.inv_transform) {
+            let transformIdx = colors[item.transform_color];
+            if(transformIdx >= 0 && window.palettes[item.inv_transform]) {
+                paletteIdx = window.palettes[item.inv_transform][transformIdx][paletteIdx];
+            }
+          }
+          const rgb = window.palettes["ACT1"][paletteIdx];
           data.data[offset] = rgb[0];
           data.data[offset + 1] = rgb[1];
           data.data[offset + 2] = rgb[2];
@@ -920,6 +1263,11 @@
       template: '#Waypoints',
       props: {
         save: Object,
+      },
+      data() {
+        return {
+          difficulties: [{ key: 'normal', value: "Normal"}, { key: 'nm', value: "Nightmare"}, { key: 'hell', value: "Hell" }]
+        };
       }
     });
 
@@ -934,6 +1282,11 @@
       template: '#Quests',
       props: {
         save: Object,
+      },
+      data() {
+        return {
+          difficulties: [{ key: 'quests_normal', value: "Normal"}, { key: 'quests_nm', value: "Nightmare"}, { key: 'quests_hell', value: "Hell" }]
+        };
       }
     });
 
@@ -964,8 +1317,53 @@
       data() {
         return {
           rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
-          stats: window.constants.constants.magical_properties
+          stats: window.constants.constants.magical_properties,
+          skills: window.constants.constants.skills,
+          classes: window.constants.constants.classes,
         };
+      },
+      methods: {
+        isClass(id, idx) {
+          let stat = this.stats[id];
+          if((stat.dF == 14) && idx == 2) {
+            return true;
+          }
+          return false;
+        },
+        isClassSkill(id, idx) {
+          let stat = this.stats[id];
+          if((stat.dF == 14) && idx == 1) {
+            return true;
+          }
+          return false;
+        },
+        isSkill(id, idx) {
+          let stat = this.stats[id];
+          if(stat.dF == 14) {
+            return false;
+          }
+          if(stat.sP) {
+            if(stat.e == 3 || stat.e == 2) {
+              return idx == 2;
+            } else {
+              return idx == 1;
+            }
+          }
+          return false;
+        },
+        numValues(id) {
+          let stat = this.stats[id];
+          if(stat.dF == 14 || stat.e == 2) {
+            return 3;
+          }
+          if(stat.e == 3) {
+            return 4;
+          }
+          if(stat.sP) {
+            return 2;
+          }
+          return 1;
+        }
       }
     });
 
@@ -1163,6 +1561,10 @@
       },
       data() {
         return {
+          head: this.items.find(e => e.equipped_id === 1),
+          torso: this.items.find(e => e.equipped_id === 3),
+          right_hand: this.items.find(e => e.equipped_id === 4),
+          left_hand: this.items.find(e => e.equipped_id === 5),
           selected: null
         };
       }
@@ -1184,12 +1586,21 @@
           s.src = "https://github.com/dschu012/d2s/releases/latest/download/d2s.bundle.min.js";
           document.querySelector('body').appendChild(s);
         }
-        if(window.palette == undefined) {
-          window.palette = [];
-          const response = await fetch(`data/global/palette/ACT1/pal.dat`);
-          const buffer = new Uint8Array(await response.arrayBuffer());
+        if(window.palettes == undefined) {
+          window.palettes = {};
+          window.palettes["ACT1"] = [];
+          let response = await fetch(`data/global/palette/ACT1/pal.dat`);
+          let buffer = new Uint8Array(await response.arrayBuffer());
           for (let i = 0; i < 256; i += 1) {
-            window.palette.push([buffer[i * 3 + 2], buffer[i * 3 + 1], buffer[i * 3]]);
+            window.palettes["ACT1"].push([buffer[i * 3 + 2], buffer[i * 3 + 1], buffer[i * 3]]);
+          }
+          for(const [k, v] of Object.entries(colormaps)) {
+            response = await fetch(v);
+            buffer = new Uint8Array(await response.arrayBuffer());
+            window.palettes[k] = [];
+            for (let i = 0; i < Object.keys(colors).length; i += 1) {
+              window.palettes[k].push(buffer.slice(0 + (i * 256), 256 + (i * 256)));
+            }
           }
         }
       },
@@ -1245,11 +1656,18 @@
           reader.readAsArrayBuffer(event.target.files[0]);
           event.target.value = null;
         },
-        saveD2() {
-
-        },
-        saveD2R() {
-
+        saveFile() {
+          let link = document.createElement('a');
+          let that = this;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          d2s.write(this.save, constants.constants).then(function(response) {
+            let blob = new Blob([response], { type: "octet/stream" });
+            link.href = window.URL.createObjectURL(blob);
+            link.download = that.save.header.name + '.d2s';
+            link.click();
+            link.remove();
+          });
         }
       }
     });

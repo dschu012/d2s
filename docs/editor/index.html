@@ -610,7 +610,7 @@
         <div class="card bg-light">
           <div class="card-body">
             <p>Extract your mpq data into a <code>data</code> folder in the same directory as this html file for images to load. It will create the images
-              from the DC6 files directly in the browser.
+              from the DC6 files directly in the browser. No validations are done on input, if something is too big/small of a value your results will vary.
             </p>
             <form id="d2sForm">
               <fieldset>
@@ -1415,8 +1415,21 @@
       },
       data() {
         return {
+          dirty: false,
           rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
         };
+      },
+      watch: {
+        item: {
+          handler(val) {
+            //this seems hackish. basically it is to prevent infinite loop.
+            this.dirty = !this.dirty;
+            if(this.dirty) {
+              val = d2s.enhanceItem(val, window.constants.constants);
+            }
+          },
+          deep: true
+        },
       }
     });
 

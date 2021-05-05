@@ -185,9 +185,8 @@ function _enhanceAttributeDescription(
       let count = 0;
       descString = prop.dR;
 
-      //TODO: (ga) fix issue with posion damage
       if (prop.s === "poisonmindam") {
-        //poisonmindam
+        //poisonmindam see https://user.xmission.com/~trevin/DiabloIIv1.09_Magic_Properties.shtml for reference
         const min = Math.floor((property.values[0] * property.values[2]) / 256);
         const max = Math.floor((property.values[1] * property.values[2]) / 256);
         const seconds = Math.floor(property.values[2] / 25);
@@ -211,7 +210,6 @@ function _enhanceAttributeDescription(
     }
   }
 
-  //TODO: (ga) fix issue with sorting creating different output in d2s
   magic_attributes.sort((a, b) => constants.magical_properties[b.id].so - constants.magical_properties[a.id].so);
 
   for (let i = magic_attributes.length - 1; i > 0; i--) {

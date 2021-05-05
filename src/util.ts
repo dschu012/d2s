@@ -19,7 +19,6 @@ export function _readBits(reader: BinaryReader, start: number, bitoffset: number
  * A lot of the structures arent byte aligned. this aids writing arbitrary sized fields at
  * arbitrary positions within a byte. It "should" respect the endianness of the writer.
  */
-//TODO (ga) remove debug info
 export function _writeBits(writer: BinaryWriter, value: number | Uint8Array, start: number, bitoffset: number, size: number) {
   writer.Seek(start + Math.floor(bitoffset / 8));
   const bytes = Math.ceil((size + (bitoffset % 8)) / 8);

@@ -168,6 +168,11 @@
         background: rgba(0, 0, 45, 0.5);
     }
 
+    .item-edit {
+        position: relative;
+        background: rgba(0, 0, 45, 0.5);
+    }
+
     .item:hover {
         background-color: rgb(105, 105, 255);
     }
@@ -1021,7 +1026,7 @@
   <script type="text/x-template" id="Grid">
     <div>
       <div class="grid" :class="gridClass">
-        <Item v-for="(item, idx) in items" :key="idx" :item.sync="item" @click.native="selected = item"></Item>
+        <Item v-for="(item, idx) in items" :key="idx" :item.sync="item" @click.native="selected = item" />
       </div>
       <ItemEditor v-if="selected" :item.sync="selected" />
     </div>
@@ -1029,6 +1034,9 @@
 
   <script type="text/x-template" id="ItemEditor">
       <div>
+        <div class="form-row mt-2">
+          <Item :item.sync="item" clazz="item-edit" />
+        </div>
         <div class="form-row">
           <div class="col-md-2">
             <label for="ILvl">Item Level</label>
@@ -1043,10 +1051,15 @@
           </div>
           -->
         </div>
+        <div>Item Stats</div>
         <ItemStatsEditor :itemStats.sync="item.magic_attributes" />
-        <div v-if="item.runeword_attributes"><ItemStatsEditor :itemStats.sync="item.runeword_attributes" /></div>
+        <div v-if="item.runeword_attributes">
+          <div>Runeword Stats</div>
+          <ItemStatsEditor :itemStats.sync="item.runeword_attributes" />
+        </div>
         <div v-if="item.set_attributes">
-          <div v-for="set_attribute in item.set_attributes">
+          <div v-for="(set_attribute, index) in item.set_attributes">
+            <div>Set Stats List {{index}}</div>
             <ItemStatsEditor :itemStats.sync="set_attribute" />
           </div>
         </div>
@@ -1058,15 +1071,19 @@
 
   <script type="text/x-template" id="ItemStatsEditor">
     <div>
+      <div class="form-row">
+        <div class="col-md-2">Stat</div>
+        <div class="col-md-2">Value</div>
+      </div>
       <div class="form-row" v-for="(stat, statIdx) in itemStats">
         <div class="col-md-2">
-          <label :for="'Stat' + statIdx">Stat</label>
+          <!-- <label :for="'Stat' + statIdx">Stat</label> -->
           <select class="form-control" :id="'Stat' + statIdx" v-model="stat.id">
             <option v-for="(s, idx) in stats" :value="idx" :key="idx">{{s.s}}</option>
           </select>
         </div>
         <div class="col-md-2" v-for="i in numValues(stat.id)">
-          <label :for="'Stat' + statIdx + 'Value'+ i">Value</label>
+          <!-- <label :for="'Stat' + statIdx + 'Value'+ i">Value</label> -->
           <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-if="isClass(stat.id, i)">
             <option v-for="(c, idx) in classes" :value="idx" :key="idx">{{c.co}}</option>
           </select>
@@ -1349,6 +1366,9 @@
           if((stat.dF == 14) && idx == 2) {
             return true;
           }
+          if((stat.dF == 13) && idx == 1) { 
+            return true;
+          }
           return false;
         },
         isClassSkill(id, idx) {
@@ -1412,14 +1432,15 @@
       },
       props: {
         item: Object,
+        clazz: String
       },
       async mounted() {
         this.createPopper();
       },
       computed: {
         itemClass() {
-          let clazz = `item w-${this.item.inv_width} h-${this.item.inv_height}`;
-          if (this.item.location_id !== 1) {
+          let clazz = `${this.clazz ? this.clazz : 'item'} w-${this.item.inv_width} h-${this.item.inv_height}`;
+          if (this.item.location_id !== 1 && !this.clazz) {
             clazz += ` x-${this.item.position_x} y-${this.item.position_y}`;
           }
           return clazz;

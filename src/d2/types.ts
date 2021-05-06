@@ -1,6 +1,7 @@
 //todo define types for these
 export interface IConfig {
   extendedStash?: boolean;
+  sortProperties?: boolean;
 }
 
 export interface IConstantData {

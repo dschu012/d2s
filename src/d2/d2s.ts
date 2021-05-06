@@ -9,6 +9,7 @@ import { enhanceAttributes, enhanceItem } from "./attribute_enhancer";
 
 const defaultConfig = {
   extendedStash: false,
+  sortProperties: true,
 } as types.IConfig;
 
 function reader(buffer: Uint8Array) {
@@ -30,7 +31,7 @@ async function read(buffer: Uint8Array, constants: types.IConstantData, userConf
     await items.readMercItems(char, reader, constants, config);
     await items.readGolemItems(char, reader, constants, config);
   }
-  await enhanceAttributes(char, constants);
+  await enhanceAttributes(char, constants, config);
   return char;
 }
 

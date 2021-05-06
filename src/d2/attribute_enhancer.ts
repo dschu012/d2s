@@ -5,15 +5,15 @@ import * as types from "./types";
 //enhanced def/durability/weapon damage.
 //lookup socketed compact items (runes/gems) properties for the slot they are in
 //compute attributes like str/resists/etc..
-export async function enhanceAttributes(char: types.ID2S, constants: types.IConstantData) {
-  enhanceItems(char.items, constants, char.attributes.level);
-  enhanceItems([char.golem_item], constants, char.attributes.level);
-  enhanceItems(char.merc_items, constants, char.attributes.level);
-  enhanceItems(char.corpse_items, constants, char.attributes.level);
-  enhancePlayerAttributes(char, constants);
+export async function enhanceAttributes(char: types.ID2S, constants: types.IConstantData, config?: types.IConfig) {
+  enhanceItems(char.items, constants, char.attributes.level, config);
+  enhanceItems([char.golem_item], constants, char.attributes.level, config);
+  enhanceItems(char.merc_items, constants, char.attributes.level, config);
+  enhanceItems(char.corpse_items, constants, char.attributes.level, config);
+  enhancePlayerAttributes(char, constants, config);
 }
 
-export async function enhancePlayerAttributes(char: types.ID2S, constants: types.IConstantData) {
+export async function enhancePlayerAttributes(char: types.ID2S, constants: types.IConstantData, config?: types.IConfig) {
   const items = char.items.filter((item) => {
     return item.location_id === 1 && item.equipped_id !== 13 && item.equipped_id !== 14;
   });
@@ -25,10 +25,16 @@ export async function enhancePlayerAttributes(char: types.ID2S, constants: types
     )
     .filter((attribute) => attribute != null);
   char.item_bonuses = _groupAttributes(char.item_bonuses, constants);
-  _enhanceAttributeDescription(char.item_bonuses, constants, char.attributes.level);
+  _enhanceAttributeDescription(char.item_bonuses, constants, char.attributes.level, config);
 }
 
-export async function enhanceItems(items: types.IItem[], constants: types.IConstantData, level = 1, parent?: types.IItem) {
+export async function enhanceItems(
+  items: types.IItem[],
+  constants: types.IConstantData,
+  level = 1,
+  config?: types.IConfig,
+  parent?: types.IItem
+) {
   if (!items) {
     return;
   }
@@ -37,13 +43,13 @@ export async function enhanceItems(items: types.IItem[], constants: types.IConst
       continue;
     }
     if (item.socketed_items && item.socketed_items.length) {
-      enhanceItems(item.socketed_items, constants, level, item);
+      enhanceItems(item.socketed_items, constants, level, config, item);
     }
-    enhanceItem(item, constants, level, parent);
+    enhanceItem(item, constants, level, config, parent);
   }
 }
 
-export function enhanceItem(item: types.IItem, constants: types.IConstantData, level = 1, parent?: types.IItem) {
+export function enhanceItem(item: types.IItem, constants: types.IConstantData, level = 1, config?: types.IConfig, parent?: types.IItem) {
   if (parent) {
     //socket item.
     const pt = constants.armor_items[parent.type] || constants.weapon_items[parent.type] || constants.other_items[item.type];
@@ -112,21 +118,20 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
   }
 
   if (item.magic_attributes || item.runeword_attributes || item.socketed_items) {
-    item.displayed_magic_attributes = _enhanceAttributeDescription(item.magic_attributes, constants, level);
-    item.displayed_runeword_attributes = _enhanceAttributeDescription(item.runeword_attributes, constants, level);
+    item.displayed_magic_attributes = _enhanceAttributeDescription(item.magic_attributes, constants, level, config);
+    item.displayed_runeword_attributes = _enhanceAttributeDescription(item.runeword_attributes, constants, level, config);
     item.combined_magic_attributes = _groupAttributes(_allAttributes(item, constants), constants);
-    item.displayed_combined_magic_attributes = _enhanceAttributeDescription(item.combined_magic_attributes, constants, level);
+    item.displayed_combined_magic_attributes = _enhanceAttributeDescription(item.combined_magic_attributes, constants, level, config);
   }
 }
 
 function _enhanceAttributeDescription(
   _magic_attributes: types.IMagicProperty[],
   constants: types.IConstantData,
-  level = 1
+  level = 1,
+  config?: types.IConfig
 ): types.IMagicProperty[] {
-  if (!_magic_attributes) {
-    return [];
-  }
+  if (!_magic_attributes) return [];
 
   const magic_attributes: types.IMagicProperty[] = [..._magic_attributes.map((attr) => ({ ...attr }))];
   const dgrps = [0, 0, 0];
@@ -210,11 +215,16 @@ function _enhanceAttributeDescription(
     }
   }
 
-  magic_attributes.sort((a, b) => constants.magical_properties[b.id].so - constants.magical_properties[a.id].so);
+  if (config?.sortProperties) {
+    //sort using sort order from game.
+    magic_attributes.sort((a, b) => constants.magical_properties[b.id].so - constants.magical_properties[a.id].so);
+  }
 
-  for (let i = magic_attributes.length - 1; i > 0; i--) {
-    if (magic_attributes[i].description === magic_attributes[i - 1].description) {
-      magic_attributes[i - 1].visible = false;
+  for (let i = magic_attributes.length - 1; i >= 1; i--) {
+    for (let j = i - 1; j >= 0; j--) {
+      if (magic_attributes[i].description === magic_attributes[j].description) {
+        magic_attributes[j].visible = false;
+      }
     }
   }
 

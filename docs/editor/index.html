@@ -25,7 +25,6 @@
         font-family: 'Avenir', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        text-align: center;
         color: #2c3e50;
     }
 
@@ -1038,19 +1037,85 @@
           <Item :item.sync="item" clazz="item-edit" />
         </div>
         <div class="form-row">
+          <div class="col-md-12">
+            <div class="form-check form-check-inline">
+              <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.identified">Identified</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.socketed">Socketed</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.ethereal">Ethereal</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.given_runeword">Runeword</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
           <div class="col-md-2">
             <label for="ILvl">Item Level</label>
             <input type="number" class="form-control" id="ILvl" v-model="item.level">
           </div>
-          <!--
           <div class="col-md-2">
             <label for="Rarity">Rarity</label>
             <select class="form-control" id="Rarity" v-model="item.quality">
               <option v-for="rarity in rarities" :value="rarity.key" :key="rarity.key">{{rarity.value}}</option>
             </select>
           </div>
-          -->
+          <div class="col-md-2" v-if="item.socketed">
+            <label for="Sockets">Sockets</label>
+            <input type="number" class="form-control" id="Sockets" v-model="item.total_nr_of_sockets">
+          </div>
         </div>
+        <div class="form-row" v-if="item.quality == 4">
+          <div class="col-md-3">
+            <label for="Prefix">Prefix</label>
+            <select class="form-control" id="Prefix" v-model="item.magic_prefix">
+              <option value="0">None</option>
+              <option v-for="(p, idx) in prefixes" v-if="p != null && p.n != null" :value="idx" :key="idx">{{p.n}}</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="Suffix">Suffix</label>
+            <select class="form-control" id="Suffix" v-model="item.magic_suffix">
+              <option value="0">None</option>
+              <option v-for="(s, idx) in suffixes" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" v-if="item.quality == 6 || item.quality == 8">
+          <div class="col-md-3">
+            <label for="RareName1">Rare Name 1</label>
+            <select class="form-control" id="RareName1" v-model="item.rare_name">
+              <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="RareName1">Rare Name 2</label>
+            <select class="form-control" id="RareName1" v-model="item.rare_name2">
+              <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
+        </div>
+        <!-- crashes game -->
+        <div class="form-row" v-if="false && item.quality == 5">
+          <div class="col-md-3">
+            <label for="SetName">Set Name</label>
+            <select class="form-control" id="SetName" v-model="item.set_id">
+              <option v-for="(s, idx) in set_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" v-if="false && item.quality == 7">
+          <div class="col-md-3">
+            <label for="UniqueName">Unique Name</label>
+            <select class="form-control" id="UniqueName" v-model="item.unique_id">
+              <option v-for="(s, idx) in unq_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
+        </div>
+
         <div>Item Stats</div>
         <ItemStatsEditor :itemStats.sync="item.magic_attributes" />
         <div v-if="item.runeword_attributes">
@@ -1430,6 +1495,11 @@
       data() {
         return {
           rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
+          prefixes: window.constants.constants.magic_prefixes,
+          suffixes: window.constants.constants.magic_suffixes,
+          rare_names: window.constants.constants.rare_names,
+          unq_items: window.constants.constants.unq_items,
+          set_items: window.constants.constants.set_items,
           timeout: null,
         };
       },

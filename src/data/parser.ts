@@ -431,6 +431,7 @@ function _readItemStatCosts(tsv: any, strings: any): any[] {
   const cCSvParam = tsv.header.indexOf("CSvParam");
   const cCSvSigned = tsv.header.indexOf("CSvSigned");
   const cEncode = tsv.header.indexOf("Encode");
+  const cValShift = tsv.header.indexOf("ValShift");
   const cSigned = tsv.header.indexOf("Signed");
   const cSaveBits = tsv.header.indexOf("Save Bits");
   const cSaveAdd = tsv.header.indexOf("Save Add");
@@ -463,7 +464,8 @@ function _readItemStatCosts(tsv: any, strings: any): any[] {
       if (tsv.lines[i][cCSvParam]) o.cP = +tsv.lines[i][cCSvParam];
       if (tsv.lines[i][cCSvSigned]) o.cS = +tsv.lines[i][cCSvSigned];
       if (tsv.lines[i][cEncode]) o.e = +tsv.lines[i][cEncode];
-      if (tsv.lines[i][cSigned]) o.s = +tsv.lines[i][cSigned];
+      if (tsv.lines[i][cValShift]) o.vS = +tsv.lines[i][cValShift];
+      if (tsv.lines[i][cSigned]) o.sS = +tsv.lines[i][cSigned];
       if (tsv.lines[i][cSaveBits]) o.sB = +tsv.lines[i][cSaveBits];
       if (tsv.lines[i][cSaveAdd]) o.sA = +tsv.lines[i][cSaveAdd];
       if (tsv.lines[i][cSaveParamBits]) o.sP = +tsv.lines[i][cSaveParamBits];

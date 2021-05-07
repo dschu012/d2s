@@ -1162,7 +1162,8 @@
           <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else-if="isSkill(stat.id, i)">
             <option v-for="(s, idx) in skills" v-if="s != null" :value="idx" :key="idx">{{s.s}}</option>
           </select>
-          <input type="number" class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else>
+          <input type="number" class="form-control" :min="min(stat.id)" :max="max(stat.id)" @input="change(stat.id, stat.values, i-1)"
+            :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else>
         </div>
       </div>
       <div class="form-row">
@@ -1433,6 +1434,22 @@
         }
       },
       methods: {
+        max(id) {
+          return (1 << this.stats[id].sB) - 1;
+        },
+        min(id) {
+          //for the stat to be present need value > 0
+          return 1;
+        },
+        change(id, values, idx) {
+          let maxValue = this.max(id),
+            minValue = this.min(id); 
+          if(values[idx] > maxValue) {
+            values[idx] = maxValue;
+          } else if(values[idx] < minValue) {
+            values[idx] = minValue;
+          }
+        },
         add() {
           this.itemStats.push({ id: 0, values: []});
         },

@@ -230,7 +230,7 @@ export async function readItem(
         item.runeword_id = 48;
       }
       offset += 12;
-      if(constants.runewords[item.runeword_id]) {
+      if (constants.runewords[item.runeword_id]) {
         item.runeword_name = constants.runewords[item.runeword_id]!.n!;
       }
       offset += 4; //always 5

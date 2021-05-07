@@ -715,71 +715,71 @@
       <div class="form-row">
         <div class="col-md-2">
           <label for="Level">Level</label>
-          <input type="number" class="form-control" id="Level" v-model="save.attributes.level">
+          <input type="number" class="form-control" id="Level" v-model.number=="save.attributes.level">
         </div>
         <div class="col-md-2">
           <label for="Level">Experience</label>
-          <input type="number" class="form-control" id="Level" v-model="save.attributes.experience">
+          <input type="number" class="form-control" id="Level" v-model.number="save.attributes.experience">
         </div>
       </div>
       <div class="form-row">
         <div class="col-md-2">
           <label for="Life">Life</label>
           <div class="input-group">
-            <input class="form-control" type="number" id="Life" v-model="save.attributes.current_hp">
+            <input class="form-control" type="number" id="Life" v-model.number="save.attributes.current_hp">
             <div class="input-group-prepend input-group-append">
               <div class="input-group-text">/</div>
             </div>
-            <input class="form-control" type="number" id="MaxLife" v-model="save.attributes.max_hp">
+            <input class="form-control" type="number" id="MaxLife" v-model.number="save.attributes.max_hp">
           </div>
         </div>
         <div class="col-md-2">
           <label for="Mana">Mana</label>
           <div class="input-group">
-            <input class="form-control" type="number" id="Mana" v-model="save.attributes.current_mana">
+            <input class="form-control" type="number" id="Mana" v-model.number="save.attributes.current_mana">
             <div class="input-group-prepend input-group-append">
               <div class="input-group-text">/</div>
             </div>
-            <input class="form-control" type="number" id="MaxMana" v-model="save.attributes.max_mana">
+            <input class="form-control" type="number" id="MaxMana" v-model.number="save.attributes.max_mana">
           </div>
         </div>
       </div>
       <div class="form-row">
         <div class="col-md-2">
           <label for="Strength">Strength</label>
-          <input type="number" class="form-control" id="Strength" v-model="save.attributes.strength">
+          <input type="number" class="form-control" id="Strength" v-model.number="save.attributes.strength">
         </div>
         <div class="col-md-2">
           <label for="Dexterity">Dexterity</label>
-          <input type="number" class="form-control" id="Dexterity" v-model="save.attributes.dexterity">
+          <input type="number" class="form-control" id="Dexterity" v-model.number="save.attributes.dexterity">
         </div>
         <div class="col-md-2">
           <label for="Vitality">Vitality</label>
-          <input type="number" class="form-control" id="Vitality" v-model="save.attributes.vitality">
+          <input type="number" class="form-control" id="Vitality" v-model.number="save.attributes.vitality">
         </div>
         <div class="col-md-2">
           <label for="Energy">Energy</label>
-          <input type="number" class="form-control" id="Energy" v-model="save.attributes.energy">
+          <input type="number" class="form-control" id="Energy" v-model.number="save.attributes.energy">
         </div>
       </div>
       <div class="form-row">
         <div class="col-md-2">
           <label for="UnusedStatPoints">Unused Stat Points</label>
-          <input type="number" class="form-control" id="UnusedStatPoints" v-model="save.attributes.unused_stats">
+          <input type="number" class="form-control" id="UnusedStatPoints" v-model.number="save.attributes.unused_stats">
         </div>
         <div class="col-md-2">
           <label for="UnusedSkillPoints">Unused Skilled Points</label>
-          <input type="number" class="form-control" id="UnusedSkillPoints" v-model="save.attributes.unused_skill_points">
+          <input type="number" class="form-control" id="UnusedSkillPoints" v-model.number="save.attributes.unused_skill_points">
         </div>
       </div>
       <div class="form-row">
         <div class="col-md-2">
           <label for="Gold">Gold</label>
-          <input type="number" class="form-control" id="Gold" v-model="save.attributes.gold">
+          <input type="number" class="form-control" id="Gold" v-model.number="save.attributes.gold">
         </div>
         <div class="col-md-2">
           <label for="StashedGold">Stashed Gold</label>
-          <input type="number" class="form-control" id="StashedGold" v-model="save.attributes.stashed_gold">
+          <input type="number" class="form-control" id="StashedGold" v-model.number="save.attributes.stashed_gold">
         </div>
       </div>
     </div>
@@ -859,7 +859,7 @@
         <div class="row">
           <div class="col-md-6" v-for="j in 10">
             <label :for="'Skill' + i + '_' + j">{{save.skills[(i - 1) * 10 + (j - 1)].name}}</label>
-            <input type="number" class="form-control" :id="'Skill' + i + '_' + j" min="0" max="20" v-model="save.skills[(i - 1) * 10 + (j - 1)].points">
+            <input type="number" class="form-control" :id="'Skill' + i + '_' + j" min="0" max="20" v-model.number="save.skills[(i - 1) * 10 + (j - 1)].points">
           </div>
         </div>
       </div>
@@ -1054,30 +1054,30 @@
         <div class="form-row">
           <div class="col-md-2">
             <label for="ILvl">Item Level</label>
-            <input type="number" class="form-control" id="ILvl" v-model="item.level">
+            <input type="number" class="form-control" id="ILvl" v-model.number="item.level">
           </div>
           <div class="col-md-2">
             <label for="Rarity">Rarity</label>
-            <select class="form-control" id="Rarity" v-model="item.quality">
+            <select class="form-control" id="Rarity" v-model.number="item.quality">
               <option v-for="rarity in rarities" :value="rarity.key" :key="rarity.key">{{rarity.value}}</option>
             </select>
           </div>
           <div class="col-md-2" v-if="item.socketed">
             <label for="Sockets">Sockets</label>
-            <input type="number" class="form-control" id="Sockets" v-model="item.total_nr_of_sockets">
+            <input type="number" class="form-control" id="Sockets" v-model.number="item.total_nr_of_sockets">
           </div>
         </div>
         <div class="form-row" v-if="item.quality == 4">
           <div class="col-md-3">
             <label for="Prefix">Prefix</label>
-            <select class="form-control" id="Prefix" v-model="item.magic_prefix">
+            <select class="form-control" id="Prefix" v-model.number="item.magic_prefix">
               <option value="0">None</option>
               <option v-for="(p, idx) in prefixes" v-if="p != null && p.n != null" :value="idx" :key="idx">{{p.n}}</option>
             </select>
           </div>
           <div class="col-md-3">
             <label for="Suffix">Suffix</label>
-            <select class="form-control" id="Suffix" v-model="item.magic_suffix">
+            <select class="form-control" id="Suffix" v-model.number="item.magic_suffix">
               <option value="0">None</option>
               <option v-for="(s, idx) in suffixes" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
@@ -1086,13 +1086,13 @@
         <div class="form-row" v-if="item.quality == 6 || item.quality == 8">
           <div class="col-md-3">
             <label for="RareName1">Rare Name 1</label>
-            <select class="form-control" id="RareName1" v-model="item.rare_name">
+            <select class="form-control" id="RareName1" v-model.number="item.rare_name">
               <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
           </div>
           <div class="col-md-3">
             <label for="RareName1">Rare Name 2</label>
-            <select class="form-control" id="RareName1" v-model="item.rare_name2">
+            <select class="form-control" id="RareName1" v-model.number="item.rare_name2">
               <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
           </div>
@@ -1101,7 +1101,7 @@
         <div class="form-row" v-if="false && item.quality == 5">
           <div class="col-md-3">
             <label for="SetName">Set Name</label>
-            <select class="form-control" id="SetName" v-model="item.set_id">
+            <select class="form-control" id="SetName" v-model.number="item.set_id">
               <option v-for="(s, idx) in set_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
           </div>
@@ -1109,7 +1109,7 @@
         <div class="form-row" v-if="false && item.quality == 7">
           <div class="col-md-3">
             <label for="UniqueName">Unique Name</label>
-            <select class="form-control" id="UniqueName" v-model="item.unique_id">
+            <select class="form-control" id="UniqueName" v-model.number="item.unique_id">
               <option v-for="(s, idx) in unq_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
           </div>
@@ -1144,7 +1144,7 @@
           <div class="form-row">
             <div class="col-md-2"><button type="button" class="btn btn-link red" @click="remove(statIdx)">&times;</button></div>
             <div class="col-md-10">
-              <select class="form-control" :id="'Stat' + statIdx" v-model="stat.id">
+              <select class="form-control" :id="'Stat' + statIdx" v-model.number="stat.id">
                 <option v-for="(s, idx) in stats" :value="idx" :key="idx">{{s.s}}</option>
               </select>
             </div>
@@ -1153,16 +1153,16 @@
         </div>
         <div class="col-md-2" v-for="i in numValues(stat.id)">
           <!-- <label :for="'Stat' + statIdx + 'Value'+ i">Value</label> -->
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-if="isClass(stat.id, i)">
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-if="isClass(stat.id, i)">
             <option v-for="(c, idx) in classes" :value="idx" :key="idx">{{c.co}}</option>
           </select>
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else-if="isClassSkill(stat.id, i)">
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else-if="isClassSkill(stat.id, i)">
             <option v-for="(t, idx) in classes[stat.values[i]].ts" :value="idx" :key="idx">{{t}}</option>
           </select>
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else-if="isSkill(stat.id, i)">
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else-if="isSkill(stat.id, i)">
             <option v-for="(s, idx) in skills" v-if="s != null" :value="idx" :key="idx">{{s.s}}</option>
           </select>
-          <input type="number" class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model="stat.values[i-1]" v-else>
+          <input type="number" class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else>
         </div>
       </div>
       <div class="form-row">

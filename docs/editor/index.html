@@ -607,6 +607,9 @@
       <div class="col-8 mt-2">
         <div class="card bg-light">
           <div class="card-body">
+            <div class="alert alert-primary" role="alert">
+              This editor is still a work in progress. Some things may not work.
+            </div>
             <p>Extract your mpq data into a <code>data</code> folder in the same directory as this html file for images to load. It will create the images
               from the DC6 files directly in the browser. No validations are done on input, if something is too big/small of a value your results will vary.
             </p>
@@ -704,6 +707,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jimp/0.16.1/jimp.min.js" integrity="sha512-CwJxtyYUXii1/F1YLND+mdqhu6ffU3MazNXwYnN3uJrCyt7yR2S24r4JePCday1oz8vSEJBJ9ofzJsKPDqSAjg==" crossorigin="anonymous"></script>
   <script src="../../dist/constants.bundle.js"></script>
   <script src="../../dist/d2s.bundle.js"></script>
+  <script src="itempack.js"></script>
 
   <script type="text/x-template" id="Stats">
     <div>
@@ -1024,9 +1028,9 @@
   <script type="text/x-template" id="Grid">
     <div>
       <div class="grid" :class="gridClass">
-        <Item v-for="(item, idx) in items" :key="idx" :item.sync="item" @click.native="selected = item" />
+        <Item v-for="(item, idx) in items" :key="idx" :item.sync="item" @click.native="onSelect(item)" />
       </div>
-      <ItemEditor v-if="selected" :item.sync="selected" />
+      <ItemEditor ref="itemEditor" v-if="selected" :item.sync="selected" />
     </div>
   </script>
 
@@ -1049,6 +1053,40 @@
             <div class="form-check form-check-inline">
               <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.given_runeword">Runeword</label>
             </div>
+          </div>
+        </div>
+        <div class="form-row" ref="moveItemErrors">
+        </div>
+        <div class="form-row">
+          <div class="col-md-2">
+            <label for="Location">Location</label>
+            <select class="form-control" id="Location" v-model.number="target.location">
+              <option v-for="l in locations" :value="l.key" :key="l.key">{{l.value}}</option>
+            </select>
+          </div>
+          <div class="col-md-2" v-if="target.location == 1">
+            <label for="EquippedLocation">Equipped Location</label>
+            <select class="form-control" id="EquippedLocation" v-model.number="target.equipped_location">
+              <option v-for="l in equipped_locations" :value="l.key" :key="l.key">{{l.value}}</option>
+            </select>
+          </div>
+          <div class="col-md-2" v-if="target.location == 0">
+            <label for="StorageLocation">Storage Location</label>
+            <select class="form-control" id="StorageLocation" v-model.number="target.storage_page">
+              <option v-for="l in storage_pages" :value="l.key" :key="l.key">{{l.value}}</option>
+            </select>
+          </div>
+          <div class="col-md-2" v-if="target.location == 0">
+            <label for="X">X</label>
+            <input type="number" class="form-control" id="X" v-model.number="target.x">
+          </div>
+          <div class="col-md-2" v-if="target.location == 0">
+            <label for="Y">Y</label>
+            <input type="number" class="form-control" id="Y" v-model.number="target.y">
+          </div>
+          <div class="col-md-2">
+            <label>&nbsp;</label>
+            <button type="button" class="form-control btn btn-primary" @click="moveToTarget(item)">Move Item</button>
           </div>
         </div>
         <div class="form-row">
@@ -1128,7 +1166,7 @@
           </div>
         </div>
         <div v-for="socketed_item in item.socketed_items">
-          <ItemEditor :item.sync="socketed_item" />
+          <ItemEditor ref="itemEditor" :item.sync="socketed_item" />
         </div>
       </div>
   </script>
@@ -1216,46 +1254,46 @@
   <script type="text/x-template" id="Equipped">
     <div>
       <div class="inventory">
-        <span class="head"><Item v-if="head" :item.sync="head" @click.native="selected = head" /></span>
-        <span class="neck"><Item v-if="neck" :item.sync="neck" @click.native="selected = neck" /></span>
-        <span class="torso"><Item v-if="torso" :item.sync="torso" @click.native="selected = torso" /></span>
+        <span class="head"><Item v-if="head" :item.sync="head" @click.native="onSelect(head)" /></span>
+        <span class="neck"><Item v-if="neck" :item.sync="neck" @click.native="onSelect(neck)" /></span>
+        <span class="torso"><Item v-if="torso" :item.sync="torso" @click.native="onSelect(torso)" /></span>
         <span class="right-tab tabs">
           <span class="tab" @click="setAltDisplayed(false)">I</span>
           <span class="tab" @click="setAltDisplayed(true)">II</span>
         </span>
         <span v-show="!alt_displayed" class="right-hand weapon">
-          <Item v-if="right_hand" :item.sync="right_hand" @click.native="selected = right_hand" />
+          <Item v-if="right_hand" :item.sync="right_hand" @click.native="onSelect(right_hand)" />
         </span>
         <span v-show="alt_displayed" class="alt-right-hand weapon">
-          <Item v-if="alt_right_hand" :item.sync="alt_right_hand" @click.native="selected = alt_right_hand" />
+          <Item v-if="alt_right_hand" :item.sync="alt_right_hand" @click.native="onSelect(alt_right_hand)" />
         </span>
         <span class="left-tab tabs">
           <span class="tab" @click="setAltDisplayed(false)">I</span>
           <span class="tab" @click="setAltDisplayed(true)">II</span>
         </span>
         <span v-show="!alt_displayed" class="left-hand weapon">
-          <Item v-if="left_hand" :item.sync="left_hand" @click.native="selected = left_hand" />
+          <Item v-if="left_hand" :item.sync="left_hand" @click.native="onSelect(left_hand)" />
         </span>
         <span v-show="alt_displayed" class="alt-left-hand weapon">
-          <Item v-if="alt_left_hand" :item.sync="alt_left_hand" @click.native="selected = alt_left_hand" />
+          <Item v-if="alt_left_hand" :item.sync="alt_left_hand" @click.native="onSelect(alt_left_hand)" />
         </span>
-        <span class="right-finger ring"><Item v-if="right_finger" :item.sync="right_finger" @click.native="selected = right_finger" /></span>
-        <span class="left-finger ring"><Item v-if="left_finger" :item.sync="left_finger" @click.native="selected = left_finger" /></span>
-        <span class="waist"><Item v-if="waist" :item.sync="waist" @click.native="selected = waist" /></span>
-        <span class="feet"><Item v-if="feet" :item.sync="feet" @click.native="selected = feet" /></span>
-        <span class="hands"><Item v-if="hands" :item.sync="hands" @click.native="selected = hands" /></span>
+        <span class="right-finger ring"><Item v-if="right_finger" :item.sync="right_finger" @click.native="onSelect(right_finger)" /></span>
+        <span class="left-finger ring"><Item v-if="left_finger" :item.sync="left_finger" @click.native="onSelect(left_finger)" /></span>
+        <span class="waist"><Item v-if="waist" :item.sync="waist" @click.native="onSelect(waist)" /></span>
+        <span class="feet"><Item v-if="feet" :item.sync="feet" @click.native="onSelect(feet)" /></span>
+        <span class="hands"><Item v-if="hands" :item.sync="hands" @click.native="onSelect(hands)" /></span>
       </div>
-      <ItemEditor v-if="selected" :item.sync="selected" />
+      <ItemEditor ref="itemEditor" v-if="selected" :item.sync="selected" />
     </div>
   </script>
 
   <script type="text/x-template" id="Mercenary">
     <div>
       <div class="inventory">
-        <span class="head"><Item v-if="head" :item.sync="head" /></span>
-        <span class="torso"><Item v-if="torso" :item.sync="torso" /></span>
-        <span class="right-hand weapon"><Item v-if="right_hand" :item.sync="right_hand" /></span>
-        <span class="left-hand weapon"><Item v-if="left_hand" :item.sync="left_hand" /></span>
+        <span class="head"><Item v-if="head" :item.sync="head" @click.native="onSelect(head)" /></span>
+        <span class="torso"><Item v-if="torso" :item.sync="torso" @click.native="onSelect(torso)" /></span>
+        <span class="right-hand weapon"><Item v-if="right_hand" :item.sync="right_hand" @click.native="onSelect(right_hand)" /></span>
+        <span class="left-hand weapon"><Item v-if="left_hand" :item.sync="left_hand" @click.native="onSelect(left_hand)" /></span>
       </div>
     </div>
   </script>
@@ -1451,6 +1489,12 @@
           return `w-${this.width} h-${this.height}`;
         },
       },
+      methods: {
+        onSelect(item) {
+          this.selected = item;
+          if(this.$refs.itemEditor) this.$refs.itemEditor.updateTarget(this.selected);
+        }
+      }
     });
 
     Vue.component('ItemStatsEditor', {
@@ -1544,12 +1588,22 @@
       data() {
         return {
           rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
+          locations: [{key: 0, value: 'Stored'},{key: 1, value: 'Equipped'},{key: 4, value: 'Cursor'}],
+          equipped_locations: [{key: 1, value: 'Head'},{key: 2, value: 'Neck'},{key: 3, value: 'Torso'},{key: 4, value: 'Right Hand'}, {key: 5, value: 'Left Hand'}, {key: 6, value: 'Right Finger'}, {key: 7, value: 'Left Finger'}, {key: 8, value: 'Waist'}, {key: 9, value: 'Boots'}, {key: 10, value: 'Gloves'}, {key: 11, value: 'Alternate Right Hand'}, {key: 12, value: 'Alternate Left Hand'}],
+          storage_pages: [{key: 1, value: 'Inventory'},{key: 4, value: 'Cube'},{key: 5, value: 'Stash'}],
           prefixes: window.constants.constants.magic_prefixes,
           suffixes: window.constants.constants.magic_suffixes,
           rare_names: window.constants.constants.rare_names,
           unq_items: window.constants.constants.unq_items,
           set_items: window.constants.constants.set_items,
           timeout: null,
+          target: {
+            location: this.item.location_id,
+            equipped_location: this.item.equipped_id,
+            x: this.item.position_x,
+            y: this.item.position_y,
+            storage_page: this.item.alt_position_id
+          }
         };
       },
       watch: {
@@ -1567,6 +1621,38 @@
           },
           deep: true
         },
+      },
+      methods: {
+        updateTarget(val) {
+          this.target = {
+            location: val.location_id,
+            equipped_location: val.equipped_id,
+            x: val.position_x,
+            y: val.position_y,
+            storage_page: val.alt_position_id
+          }
+        },
+        moveToTarget(item) {
+          if(this.target.location == 1) {
+            item.location_id = this.target.location;
+            item.equipped_id = this.target.equipped_location;
+            item.position_x = 0;
+            item.position_y = 0;
+            item.alt_position_id = 0;
+          } else if(this.target.location == 0) {
+            item.location_id = this.target.location;
+            item.equipped_id = 0;
+            item.position_x = this.target.x;
+            item.position_y = this.target.y;
+            item.alt_position_id = this.target.storage_page;
+          } else if(this.target.location == 4) {
+            item.location_id = this.target.location;
+            item.equipped_id = 0;
+            item.position_x = 0;
+            item.position_y = 0;
+            item.alt_position_id = 0;
+          }
+        }
       }
     });
 
@@ -1755,6 +1841,10 @@
         setAltDisplayed(value) {
           this.alt_displayed = value;
         },
+        onSelect(item) {
+          this.selected = item;
+          if(this.$refs.itemEditor) this.$refs.itemEditor.updateTarget(this.selected);
+        }
       },
     });
 
@@ -1771,6 +1861,12 @@
           left_hand: this.items.find(e => e.equipped_id === 5),
           selected: null
         };
+      },
+      methods: {
+        onSelect(item) {
+          this.selected = item;
+          if(this.$refs.itemEditor) this.$refs.itemEditor.updateTarget(this.selected);
+        }
       }
     });
 

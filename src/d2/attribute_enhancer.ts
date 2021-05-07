@@ -96,9 +96,9 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
       for (let i = 0; i < 6; i++) {
         const id = item.magical_name_ids[i];
         if (id) {
-          if (i % 5 == 0 && constants.magic_suffixes[id].tc) {
+          if (i % 5 == 0 && constants.magic_suffixes[id]?.tc) {
             item.transform_color = constants.magic_suffixes[id].tc;
-          } else if (constants.magic_prefixes[id].tc) {
+          } else if (constants.magic_prefixes[id]?.tc) {
             item.transform_color = constants.magic_prefixes[id].tc;
           }
         }
@@ -439,7 +439,9 @@ function _allAttributes(item: types.IItem, constants: types.IConstantData): type
   let socketed_attributes = [] as types.IMagicProperty[];
   if (item.socketed_items) {
     for (const i of item.socketed_items) {
-      socketed_attributes = socketed_attributes.concat(...JSON.parse(JSON.stringify(i.magic_attributes)));
+      if(i.magic_attributes) {
+        socketed_attributes = socketed_attributes.concat(...JSON.parse(JSON.stringify(i.magic_attributes)));
+      }
     }
   }
   const magic_attributes = item.magic_attributes || [];

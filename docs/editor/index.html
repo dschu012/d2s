@@ -1966,6 +1966,13 @@
         async previewItem(e) {
           let bytes = b64ToArrayBuffer(this.previewModel.value);
           this.preview = await d2s.readItem(bytes, 0x60, window.constants.constants);
+          b64PNGFromDC6(this.preview).then(src => Vue.set(this.preview, 'src', src));
+          if(!this.preview.socketed_items) {
+            return;
+          }
+          this.preview.socketed_items.forEach(item => {
+            b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
+          });
         },
         loadItem() {
           this.preview.location_id = 4;

@@ -1841,20 +1841,22 @@
       template: '#Equipped',
       data() {
         return {
-          head: this.items.find(e => e.equipped_id === 1),
-          neck: this.items.find(e => e.equipped_id === 2),
-          torso: this.items.find(e => e.equipped_id === 3),
-          right_hand: this.items.find(e => e.equipped_id === 4),
-          left_hand: this.items.find(e => e.equipped_id === 5),
-          right_finger: this.items.find(e => e.equipped_id === 6),
-          left_finger: this.items.find(e => e.equipped_id === 7),
-          waist: this.items.find(e => e.equipped_id === 8),
-          feet: this.items.find(e => e.equipped_id === 9),
-          hands: this.items.find(e => e.equipped_id === 10),
-          alt_right_hand: this.items.find(e => e.equipped_id === 11),
-          alt_left_hand: this.items.find(e => e.equipped_id === 12),
           alt_displayed: false
         };
+      },
+      computed: {
+        head() { return this.items.find(e => e.equipped_id === 1); },
+        neck() { return this.items.find(e => e.equipped_id === 2); },
+        torso() { return this.items.find(e => e.equipped_id === 3); },
+        right_hand() { return this.items.find(e => e.equipped_id === 4); },
+        left_hand() { return this.items.find(e => e.equipped_id === 5); },
+        right_finger() { return this.items.find(e => e.equipped_id === 6); },
+        left_finger() { return this.items.find(e => e.equipped_id === 7); },
+        waist() { return this.items.find(e => e.equipped_id === 8); },
+        feet() { return this.items.find(e => e.equipped_id === 9); },
+        hands() { return this.items.find(e => e.equipped_id === 10); },
+        alt_right_hand() { return this.items.find(e => e.equipped_id === 11); },
+        alt_left_hand() { return this.items.find(e => e.equipped_id === 12); }
       },
       props: {
         items: Array,
@@ -1874,13 +1876,19 @@
       props: {
         items: Array,
       },
-      data() {
-        return {
-          head: this.items.find(e => e.equipped_id === 1),
-          torso: this.items.find(e => e.equipped_id === 3),
-          right_hand: this.items.find(e => e.equipped_id === 4),
-          left_hand: this.items.find(e => e.equipped_id === 5),
-        };
+      computed: {
+        head() { return this.items.find(e => e.equipped_id === 1); },
+        neck() { return this.items.find(e => e.equipped_id === 2); },
+        torso() { return this.items.find(e => e.equipped_id === 3); },
+        right_hand() { return this.items.find(e => e.equipped_id === 4); },
+        left_hand() { return this.items.find(e => e.equipped_id === 5); },
+        right_finger() { return this.items.find(e => e.equipped_id === 6); },
+        left_finger() { return this.items.find(e => e.equipped_id === 7); },
+        waist() { return this.items.find(e => e.equipped_id === 8); },
+        feet() { return this.items.find(e => e.equipped_id === 9); },
+        hands() { return this.items.find(e => e.equipped_id === 10); },
+        alt_right_hand() { return this.items.find(e => e.equipped_id === 11); },
+        alt_left_hand() { return this.items.find(e => e.equipped_id === 12); }
       },
       methods: {
         onSelect(item) {
@@ -1984,7 +1992,10 @@
           this.selected = this.preview;
         },
         setPropertiesOnSave() {
-          this.save.items.forEach(item => {
+          [... this.save.items, ... this.save.merc_items, ... this.save.corpse_items, this.save.golem_item].forEach(item => {
+            if(!item) {
+              return;
+            }
             b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
             if(!item.socketed_items) {
               return;

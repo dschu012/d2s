@@ -639,20 +639,9 @@
                       <a class="nav-link" id="skills-tab" data-toggle="tab" data-target="#skills-content" role="tab" type="button">Skills</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                      <a class="nav-link" id="equipped-tab" data-toggle="tab" data-target="#equipped-content" role="tab" type="button">Equipped</a>
+                      <a class="nav-link" id="items-tab" data-toggle="tab" data-target="#items-content" role="tab" type="button">Items</a>
                     </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" id="inventory-tab" data-toggle="tab" data-target="#inventory-content" role="tab" type="button">Inventory</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" id="stash-tab" data-toggle="tab" data-target="#stash-content" role="tab" type="button">Stash</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" id="cube-tab" data-toggle="tab" data-target="#cube-content" role="tab" type="button">Cube</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" id="mercenary-tab" data-toggle="tab" data-target="#mercenary-content" role="tab" type="button">Mercenary</a>
-                    </li>
+                    
                   </ul>
                   <div class="tab-content" id="tabs-content">
                     <div class="tab-pane show active" id="stats-content" role="tabpanel"><Stats v-bind:save.sync="save" /></div>
@@ -660,16 +649,52 @@
                     <div class="tab-pane" id="quests-content" role="tabpanel"><Quests v-bind:save.sync="save" /></div>
                     <div class="tab-pane" id="skills-content" role="tabpanel"><Skills v-bind:save.sync="save" /></div>
                     <div class="tab-pane" id="equipped-content" role="tabpanel"><Equipped v-bind:items.sync="equipped" /></div>
-                    <div class="tab-pane" id="inventory-content" role="tabpanel">
-                      <Grid :width="10" :height="4" :items.sync="inventory" />
+                    <div class="tab-pane" id="items-content" role="tabpanel">
+                      <div class="modal" tabindex="-1" role="dialog" id="LoadItem">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">Select an Item</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <div class="row d-flex justify-content-center mt-3 pl-5 pr-5">
+                                <Item v-if="preview" :item.sync="preview" clazz="item-edit"></Item>
+                              </div>
+                              <label for="Item">Item</label>
+                              <select class="form-control" id="Item" v-model="previewModel" @change="previewItem">
+                                <option v-for="item in itempack" :value="item" :key="item.key">{{item.key}}</option>
+                              </select>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-primary" @click="loadItem" data-dismiss="modal">Load</button>
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row d-flex justify-content-between mt-3 pl-5 pr-5">
+                        <div></div>
+                        <div class="btn-group" role="group">
+                          <button type="button" class="btn btn-secondary" :class="{ active: activeTab == 1 }" @click="changeTab(1)">Equipped</button>
+                          <button type="button" class="btn btn-secondary" :class="{ active: activeTab == 2 }" @click="changeTab(2)">Inventory</button>
+                          <button type="button" class="btn btn-secondary" :class="{ active: activeTab == 3 }" @click="changeTab(3)">Stash</button>
+                          <button type="button" class="btn btn-secondary" :class="{ active: activeTab == 4 }" @click="changeTab(4)">Cube</button>
+                          <button type="button" class="btn btn-secondary" :class="{ active: activeTab == 5 }" @click="changeTab(5)">Mercenary</button>
+                        </div>
+                        <div class="btn-group" role="group">
+                          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#LoadItem">Load Item</button>
+                        </div>
+                      </div>
+                      <Equipped v-if="activeTab == 1" :items.sync="equipped" @item-selected="onSelect"></Equipped>
+                      <Grid v-if="activeTab == 2" :width="10" :height="4" :items.sync="inventory" @item-selected="onSelect"></Grid>
+                      <Grid v-if="activeTab == 3" :width="10" :height="10" :items.sync="stash" @item-selected="onSelect"></Grid>
+                      <Grid v-if="activeTab == 4" :width="3" :height="4" :items.sync="cube" @item-selected="onSelect"></Grid>
+                      <Mercenary v-if="activeTab == 5" :items.sync="mercenary" @item-selected="onSelect"></Mercenary>
+                      <Editor v-if="selected" :item.sync="selected"></Editor>
                     </div>
-                    <div class="tab-pane" id="stash-content" role="tabpanel">
-                      <Grid :width="10" :height="10" :items.sync="stash" />
-                    </div>
-                    <div class="tab-pane" id="cube-content" role="tabpanel">
-                      <Grid :width="3" :height="4" :items.sync="cube" />
-                    </div>
-                    <div class="tab-pane" id="mercenary-content" role="tabpanel"><Mercenary v-bind:items.sync="mercenary" /></div>
                   </div>
                 </div>
               </fieldset>
@@ -1026,149 +1051,147 @@
   </script>
 
   <script type="text/x-template" id="Grid">
-    <div>
-      <div class="grid" :class="gridClass">
-        <Item v-for="(item, idx) in items" :key="idx" :item.sync="item" @click.native="onSelect(item)" />
-      </div>
-      <ItemEditor ref="itemEditor" v-if="selected" :item.sync="selected" />
+    <div class="grid" :class="gridClass">
+      <Item v-for="(item, idx) in items" :key="idx" :item.sync="item" @click.native="onSelect(item)" />
     </div>
   </script>
 
-  <script type="text/x-template" id="ItemEditor">
-      <div>
-        <div class="form-row mt-2">
-          <Item :item.sync="item" clazz="item-edit" />
-        </div>
-        <div class="form-row">
-          <div class="col-md-12">
-            <div class="form-check form-check-inline">
-              <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.identified">Identified</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.socketed">Socketed</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.ethereal">Ethereal</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.given_runeword">Runeword</label>
-            </div>
-          </div>
-        </div>
-        <div class="form-row" ref="moveItemErrors">
-        </div>
-        <div class="form-row">
-          <div class="col-md-2">
-            <label for="Location">Location</label>
-            <select class="form-control" id="Location" v-model.number="target.location">
-              <option v-for="l in locations" :value="l.key" :key="l.key">{{l.value}}</option>
-            </select>
-          </div>
-          <div class="col-md-2" v-if="target.location == 1">
-            <label for="EquippedLocation">Equipped Location</label>
-            <select class="form-control" id="EquippedLocation" v-model.number="target.equipped_location">
-              <option v-for="l in equipped_locations" :value="l.key" :key="l.key">{{l.value}}</option>
-            </select>
-          </div>
-          <div class="col-md-2" v-if="target.location == 0">
-            <label for="StorageLocation">Storage Location</label>
-            <select class="form-control" id="StorageLocation" v-model.number="target.storage_page">
-              <option v-for="l in storage_pages" :value="l.key" :key="l.key">{{l.value}}</option>
-            </select>
-          </div>
-          <div class="col-md-2" v-if="target.location == 0">
-            <label for="X">X</label>
-            <input type="number" class="form-control" id="X" v-model.number="target.x">
-          </div>
-          <div class="col-md-2" v-if="target.location == 0">
-            <label for="Y">Y</label>
-            <input type="number" class="form-control" id="Y" v-model.number="target.y">
-          </div>
-          <div class="col-md-2">
-            <label>&nbsp;</label>
-            <button type="button" class="form-control btn btn-primary" @click="moveToTarget(item)">Move Item</button>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="col-md-2">
-            <label for="ILvl">Item Level</label>
-            <input type="number" class="form-control" id="ILvl" v-model.number="item.level">
-          </div>
-          <div class="col-md-2">
-            <label for="Rarity">Rarity</label>
-            <select class="form-control" id="Rarity" v-model.number="item.quality">
-              <option v-for="rarity in rarities" :value="rarity.key" :key="rarity.key">{{rarity.value}}</option>
-            </select>
-          </div>
-          <div class="col-md-2" v-if="item.socketed">
-            <label for="Sockets">Sockets</label>
-            <input type="number" class="form-control" id="Sockets" v-model.number="item.total_nr_of_sockets">
-          </div>
-        </div>
-        <div class="form-row" v-if="item.quality == 4">
-          <div class="col-md-3">
-            <label for="Prefix">Prefix</label>
-            <select class="form-control" id="Prefix" v-model.number="item.magic_prefix">
-              <option value="0">None</option>
-              <option v-for="(p, idx) in prefixes" v-if="p != null && p.n != null" :value="idx" :key="idx">{{p.n}}</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="Suffix">Suffix</label>
-            <select class="form-control" id="Suffix" v-model.number="item.magic_suffix">
-              <option value="0">None</option>
-              <option v-for="(s, idx) in suffixes" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row" v-if="item.quality == 6 || item.quality == 8">
-          <div class="col-md-3">
-            <label for="RareName1">Rare Name 1</label>
-            <select class="form-control" id="RareName1" v-model.number="item.rare_name">
-              <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="RareName1">Rare Name 2</label>
-            <select class="form-control" id="RareName1" v-model.number="item.rare_name2">
-              <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-            </select>
-          </div>
-        </div>
-        <!-- crashes game -->
-        <div class="form-row" v-if="false && item.quality == 5">
-          <div class="col-md-3">
-            <label for="SetName">Set Name</label>
-            <select class="form-control" id="SetName" v-model.number="item.set_id">
-              <option v-for="(s, idx) in set_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row" v-if="false && item.quality == 7">
-          <div class="col-md-3">
-            <label for="UniqueName">Unique Name</label>
-            <select class="form-control" id="UniqueName" v-model.number="item.unique_id">
-              <option v-for="(s, idx) in unq_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-            </select>
-          </div>
-        </div>
 
-        <div>Item Stats</div>
-        <ItemStatsEditor :itemStats.sync="item.magic_attributes" />
-        <div v-if="item.runeword_attributes">
-          <div>Runeword Stats</div>
-          <ItemStatsEditor :itemStats.sync="item.runeword_attributes" />
-        </div>
-        <div v-if="item.set_attributes">
-          <div v-for="(set_attribute, index) in item.set_attributes">
-            <div>Set Stats List {{index}}</div>
-            <ItemStatsEditor :itemStats.sync="set_attribute" />
+  <script type="text/x-template" id="Editor">
+    <div>
+      <div class="form-row mt-2">
+        <Item :item.sync="item" clazz="item-edit"></Item>
+      </div>
+      <div class="form-row">
+        <div class="col-md-12">
+          <div class="form-check form-check-inline">
+            <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.identified">Identified</label>
           </div>
-        </div>
-        <div v-for="socketed_item in item.socketed_items">
-          <ItemEditor ref="itemEditor" :item.sync="socketed_item" />
+          <div class="form-check form-check-inline">
+            <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.socketed">Socketed</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.ethereal">Ethereal</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.given_runeword">Runeword</label>
+          </div>
         </div>
       </div>
+      <div class="form-row" ref="moveItemErrors">
+      </div>
+      <div class="form-row">
+        <div class="col-md-2">
+          <label for="Location">Location</label>
+          <select class="form-control" id="Location" v-model.number="target.location">
+            <option v-for="l in locations" :value="l.key" :key="l.key">{{l.value}}</option>
+          </select>
+        </div>
+        <div class="col-md-2" v-if="target.location == 1">
+          <label for="EquippedLocation">Equipped Location</label>
+          <select class="form-control" id="EquippedLocation" v-model.number="target.equipped_location">
+            <option v-for="l in equipped_locations" :value="l.key" :key="l.key">{{l.value}}</option>
+          </select>
+        </div>
+        <div class="col-md-2" v-if="target.location == 0">
+          <label for="StorageLocation">Storage Location</label>
+          <select class="form-control" id="StorageLocation" v-model.number="target.storage_page">
+            <option v-for="l in storage_pages" :value="l.key" :key="l.key">{{l.value}}</option>
+          </select>
+        </div>
+        <div class="col-md-2" v-if="target.location == 0">
+          <label for="X">X</label>
+          <input type="number" class="form-control" id="X" v-model.number="target.x">
+        </div>
+        <div class="col-md-2" v-if="target.location == 0">
+          <label for="Y">Y</label>
+          <input type="number" class="form-control" id="Y" v-model.number="target.y">
+        </div>
+        <div class="col-md-2">
+          <label>&nbsp;</label>
+          <button type="button" class="form-control btn btn-primary" @click="moveToTarget(item)">Move Item</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-2">
+          <label for="ILvl">Item Level</label>
+          <input type="number" class="form-control" id="ILvl" v-model.number="item.level">
+        </div>
+        <div class="col-md-2">
+          <label for="Rarity">Rarity</label>
+          <select class="form-control" id="Rarity" v-model.number="item.quality">
+            <option v-for="rarity in rarities" :value="rarity.key" :key="rarity.key">{{rarity.value}}</option>
+          </select>
+        </div>
+        <div class="col-md-2" v-if="item.socketed">
+          <label for="Sockets">Sockets</label>
+          <input type="number" class="form-control" id="Sockets" v-model.number="item.total_nr_of_sockets">
+        </div>
+      </div>
+      <div class="form-row" v-if="item.quality == 4">
+        <div class="col-md-3">
+          <label for="Prefix">Prefix</label>
+          <select class="form-control" id="Prefix" v-model.number="item.magic_prefix">
+            <option value="0">None</option>
+            <option v-for="(p, idx) in prefixes" v-if="p != null && p.n != null" :value="idx" :key="idx">{{p.n}}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="Suffix">Suffix</label>
+          <select class="form-control" id="Suffix" v-model.number="item.magic_suffix">
+            <option value="0">None</option>
+            <option v-for="(s, idx) in suffixes" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" v-if="item.quality == 6 || item.quality == 8">
+        <div class="col-md-3">
+          <label for="RareName1">Rare Name 1</label>
+          <select class="form-control" id="RareName1" v-model.number="item.rare_name">
+            <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="RareName1">Rare Name 2</label>
+          <select class="form-control" id="RareName1" v-model.number="item.rare_name2">
+            <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+          </select>
+        </div>
+      </div>
+      <!-- crashes game -->
+      <div class="form-row" v-if="false && item.quality == 5">
+        <div class="col-md-3">
+          <label for="SetName">Set Name</label>
+          <select class="form-control" id="SetName" v-model.number="item.set_id">
+            <option v-for="(s, idx) in set_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" v-if="false && item.quality == 7">
+        <div class="col-md-3">
+          <label for="UniqueName">Unique Name</label>
+          <select class="form-control" id="UniqueName" v-model.number="item.unique_id">
+            <option v-for="(s, idx) in unq_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+          </select>
+        </div>
+      </div>
+
+      <div>Item Stats</div>
+      <ItemStatsEditor :itemStats.sync="item.magic_attributes"></ItemStatsEditor>
+      <div v-if="item.runeword_attributes">
+        <div>Runeword Stats</div>
+        <ItemStatsEditor :itemStats.sync="item.runeword_attributes"></ItemStatsEditor>
+      </div>
+      <div v-if="item.set_attributes">
+        <div v-for="(set_attribute, index) in item.set_attributes">
+          <div>Set Stats List {{index}}</div>
+          <ItemStatsEditor :itemStats.sync="set_attribute"></ItemStatsEditor>
+        </div>
+      </div>
+      <div v-for="socketed_item in item.socketed_items">
+        <Editor ref="itemEditor" :item.sync="socketed_item"></Editor>
+      </div>
+    </div>
   </script>
 
   <script type="text/x-template" id="ItemStatsEditor">
@@ -1252,49 +1275,45 @@
   </script>
 
   <script type="text/x-template" id="Equipped">
-    <div>
-      <div class="inventory">
-        <span class="head"><Item v-if="head" :item.sync="head" @click.native="onSelect(head)" /></span>
-        <span class="neck"><Item v-if="neck" :item.sync="neck" @click.native="onSelect(neck)" /></span>
-        <span class="torso"><Item v-if="torso" :item.sync="torso" @click.native="onSelect(torso)" /></span>
-        <span class="right-tab tabs">
-          <span class="tab" @click="setAltDisplayed(false)">I</span>
-          <span class="tab" @click="setAltDisplayed(true)">II</span>
-        </span>
-        <span v-show="!alt_displayed" class="right-hand weapon">
-          <Item v-if="right_hand" :item.sync="right_hand" @click.native="onSelect(right_hand)" />
-        </span>
-        <span v-show="alt_displayed" class="alt-right-hand weapon">
-          <Item v-if="alt_right_hand" :item.sync="alt_right_hand" @click.native="onSelect(alt_right_hand)" />
-        </span>
-        <span class="left-tab tabs">
-          <span class="tab" @click="setAltDisplayed(false)">I</span>
-          <span class="tab" @click="setAltDisplayed(true)">II</span>
-        </span>
-        <span v-show="!alt_displayed" class="left-hand weapon">
-          <Item v-if="left_hand" :item.sync="left_hand" @click.native="onSelect(left_hand)" />
-        </span>
-        <span v-show="alt_displayed" class="alt-left-hand weapon">
-          <Item v-if="alt_left_hand" :item.sync="alt_left_hand" @click.native="onSelect(alt_left_hand)" />
-        </span>
-        <span class="right-finger ring"><Item v-if="right_finger" :item.sync="right_finger" @click.native="onSelect(right_finger)" /></span>
-        <span class="left-finger ring"><Item v-if="left_finger" :item.sync="left_finger" @click.native="onSelect(left_finger)" /></span>
-        <span class="waist"><Item v-if="waist" :item.sync="waist" @click.native="onSelect(waist)" /></span>
-        <span class="feet"><Item v-if="feet" :item.sync="feet" @click.native="onSelect(feet)" /></span>
-        <span class="hands"><Item v-if="hands" :item.sync="hands" @click.native="onSelect(hands)" /></span>
-      </div>
-      <ItemEditor ref="itemEditor" v-if="selected" :item.sync="selected" />
+    <div class="inventory">
+      <span class="head"><Item v-if="head" :item.sync="head" @click.native="onSelect(head)" /></span>
+      <span class="neck"><Item v-if="neck" :item.sync="neck" @click.native="onSelect(neck)" /></span>
+      <span class="torso"><Item v-if="torso" :item.sync="torso" @click.native="onSelect(torso)" /></span>
+      <span class="right-tab tabs">
+        <span class="tab" @click="setAltDisplayed(false)">I</span>
+        <span class="tab" @click="setAltDisplayed(true)">II</span>
+      </span>
+      <span v-show="!alt_displayed" class="right-hand weapon">
+        <Item v-if="right_hand" :item.sync="right_hand" @click.native="onSelect(right_hand)" />
+      </span>
+      <span v-show="alt_displayed" class="alt-right-hand weapon">
+        <Item v-if="alt_right_hand" :item.sync="alt_right_hand" @click.native="onSelect(alt_right_hand)" />
+      </span>
+      <span class="left-tab tabs">
+        <span class="tab" @click="setAltDisplayed(false)">I</span>
+        <span class="tab" @click="setAltDisplayed(true)">II</span>
+      </span>
+      <span v-show="!alt_displayed" class="left-hand weapon">
+        <Item v-if="left_hand" :item.sync="left_hand" @click.native="onSelect(left_hand)" />
+      </span>
+      <span v-show="alt_displayed" class="alt-left-hand weapon">
+        <Item v-if="alt_left_hand" :item.sync="alt_left_hand" @click.native="onSelect(alt_left_hand)" />
+      </span>
+      <span class="right-finger ring"><Item v-if="right_finger" :item.sync="right_finger" @click.native="onSelect(right_finger)" /></span>
+      <span class="left-finger ring"><Item v-if="left_finger" :item.sync="left_finger" @click.native="onSelect(left_finger)" /></span>
+      <span class="waist"><Item v-if="waist" :item.sync="waist" @click.native="onSelect(waist)" /></span>
+      <span class="feet"><Item v-if="feet" :item.sync="feet" @click.native="onSelect(feet)" /></span>
+      <span class="hands"><Item v-if="hands" :item.sync="hands" @click.native="onSelect(hands)" /></span>
     </div>
   </script>
 
   <script type="text/x-template" id="Mercenary">
-    <div>
-      <div class="inventory">
-        <span class="head"><Item v-if="head" :item.sync="head" @click.native="onSelect(head)" /></span>
-        <span class="torso"><Item v-if="torso" :item.sync="torso" @click.native="onSelect(torso)" /></span>
-        <span class="right-hand weapon"><Item v-if="right_hand" :item.sync="right_hand" @click.native="onSelect(right_hand)" /></span>
-        <span class="left-hand weapon"><Item v-if="left_hand" :item.sync="left_hand" @click.native="onSelect(left_hand)" /></span>
-      </div>
+
+    <div class="inventory">
+      <span class="head"><Item v-if="head" :item.sync="head" @click.native="onSelect(head)" /></span>
+      <span class="torso"><Item v-if="torso" :item.sync="torso" @click.native="onSelect(torso)" /></span>
+      <span class="right-hand weapon"><Item v-if="right_hand" :item.sync="right_hand" @click.native="onSelect(right_hand)" /></span>
+      <span class="left-hand weapon"><Item v-if="left_hand" :item.sync="left_hand" @click.native="onSelect(left_hand)" /></span>
     </div>
   </script>
 
@@ -1336,6 +1355,16 @@
 
     function shift(number, shift) {
       return number * Math.pow(2, shift);
+    }
+
+    function b64ToArrayBuffer(base64) {
+        var bin = window.atob(base64);
+        var len = bin.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+            bytes[i] = bin.charCodeAt(i);
+        }
+        return bytes.buffer;
     }
 
     async function b64PNGFromDC6(item) {
@@ -1472,17 +1501,88 @@
       }
     });
 
+    Vue.component('Editor', {
+      template: '#Editor',
+      props: {
+        item: Object,
+      },
+      data() {
+        return {
+          rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
+          locations: [{key: 0, value: 'Stored'},{key: 1, value: 'Equipped'},{key: 4, value: 'Cursor'}],
+          equipped_locations: [{key: 1, value: 'Head'},{key: 2, value: 'Neck'},{key: 3, value: 'Torso'},{key: 4, value: 'Right Hand'}, {key: 5, value: 'Left Hand'}, {key: 6, value: 'Right Finger'}, {key: 7, value: 'Left Finger'}, {key: 8, value: 'Waist'}, {key: 9, value: 'Boots'}, {key: 10, value: 'Gloves'}, {key: 11, value: 'Alternate Right Hand'}, {key: 12, value: 'Alternate Left Hand'}],
+          storage_pages: [{key: 1, value: 'Inventory'},{key: 4, value: 'Cube'},{key: 5, value: 'Stash'}],
+          prefixes: window.constants.constants.magic_prefixes,
+          suffixes: window.constants.constants.magic_suffixes,
+          rare_names: window.constants.constants.rare_names,
+          unq_items: window.constants.constants.unq_items,
+          set_items: window.constants.constants.set_items,
+          timeout: null,
+          target: {
+            location: this.item.location_id,
+            equipped_location: this.item.equipped_id,
+            x: this.item.position_x,
+            y: this.item.position_y,
+            storage_page: this.item.alt_position_id
+          }
+        };
+      },
+      watch: {
+        item: {
+          handler(val) {
+            //this seems hackish. basically it is to prevent infinite loop since we modify item here.
+            if(this.timeout) {
+              clearTimeout(this.timeout);
+              this.timeout = null;
+              return;
+            }
+            this.timeout = setTimeout(() => {
+              val = d2s.enhanceItem(val, window.constants.constants);
+            }, 0);
+          },
+          deep: true
+        },
+      },
+      methods: {
+        updateTarget(val) {
+          this.target = {
+            location: val.location_id,
+            equipped_location: val.equipped_id,
+            x: val.position_x,
+            y: val.position_y,
+            storage_page: val.alt_position_id
+          }
+        },
+        moveToTarget(item) {
+          if(this.target.location == 1) {
+            item.location_id = this.target.location;
+            item.equipped_id = this.target.equipped_location;
+            item.position_x = 0;
+            item.position_y = 0;
+            item.alt_position_id = 0;
+          } else if(this.target.location == 0) {
+            item.location_id = this.target.location;
+            item.equipped_id = 0;
+            item.position_x = this.target.x;
+            item.position_y = this.target.y;
+            item.alt_position_id = this.target.storage_page;
+          } else if(this.target.location == 4) {
+            item.location_id = this.target.location;
+            item.equipped_id = 0;
+            item.position_x = 4; //why?
+            item.position_y = 0;
+            item.alt_position_id = 0;
+          }
+        }
+      }
+    });
+
     Vue.component('Grid', {
       template: '#Grid',
       props: {
         items: Array,
         width: Number,
         height: Number,
-      },
-      data() {
-        return {
-          selected: null
-        };
       },
       computed: {
         gridClass() {
@@ -1491,8 +1591,7 @@
       },
       methods: {
         onSelect(item) {
-          this.selected = item;
-          if(this.$refs.itemEditor) this.$refs.itemEditor.updateTarget(this.selected);
+          this.$emit('item-selected', item);
         }
       }
     });
@@ -1576,82 +1675,6 @@
             return 2;
           }
           return 1;
-        }
-      }
-    });
-
-    Vue.component('ItemEditor', {
-      template: '#ItemEditor',
-      props: {
-        item: Object,
-      },
-      data() {
-        return {
-          rarities: [{key: 1, value: 'Low'}, {key: 2, value: 'Normal'}, {key: 3, value: 'Superior'}, {key: 4, value: 'Magic'}, {key: 5, value: 'Set'}, {key: 6, value: 'Rare'}, {key: 7, value: 'Unique'}, {key: 8, value: 'Crafted'}],
-          locations: [{key: 0, value: 'Stored'},{key: 1, value: 'Equipped'},{key: 4, value: 'Cursor'}],
-          equipped_locations: [{key: 1, value: 'Head'},{key: 2, value: 'Neck'},{key: 3, value: 'Torso'},{key: 4, value: 'Right Hand'}, {key: 5, value: 'Left Hand'}, {key: 6, value: 'Right Finger'}, {key: 7, value: 'Left Finger'}, {key: 8, value: 'Waist'}, {key: 9, value: 'Boots'}, {key: 10, value: 'Gloves'}, {key: 11, value: 'Alternate Right Hand'}, {key: 12, value: 'Alternate Left Hand'}],
-          storage_pages: [{key: 1, value: 'Inventory'},{key: 4, value: 'Cube'},{key: 5, value: 'Stash'}],
-          prefixes: window.constants.constants.magic_prefixes,
-          suffixes: window.constants.constants.magic_suffixes,
-          rare_names: window.constants.constants.rare_names,
-          unq_items: window.constants.constants.unq_items,
-          set_items: window.constants.constants.set_items,
-          timeout: null,
-          target: {
-            location: this.item.location_id,
-            equipped_location: this.item.equipped_id,
-            x: this.item.position_x,
-            y: this.item.position_y,
-            storage_page: this.item.alt_position_id
-          }
-        };
-      },
-      watch: {
-        item: {
-          handler(val) {
-            //this seems hackish. basically it is to prevent infinite loop since we modify item here.
-            if(this.timeout) {
-              clearTimeout(this.timeout);
-              this.timeout = null;
-              return;
-            }
-            this.timeout = setTimeout(() => {
-              val = d2s.enhanceItem(val, window.constants.constants);
-            }, 0);
-          },
-          deep: true
-        },
-      },
-      methods: {
-        updateTarget(val) {
-          this.target = {
-            location: val.location_id,
-            equipped_location: val.equipped_id,
-            x: val.position_x,
-            y: val.position_y,
-            storage_page: val.alt_position_id
-          }
-        },
-        moveToTarget(item) {
-          if(this.target.location == 1) {
-            item.location_id = this.target.location;
-            item.equipped_id = this.target.equipped_location;
-            item.position_x = 0;
-            item.position_y = 0;
-            item.alt_position_id = 0;
-          } else if(this.target.location == 0) {
-            item.location_id = this.target.location;
-            item.equipped_id = 0;
-            item.position_x = this.target.x;
-            item.position_y = this.target.y;
-            item.alt_position_id = this.target.storage_page;
-          } else if(this.target.location == 4) {
-            item.location_id = this.target.location;
-            item.equipped_id = 0;
-            item.position_x = 4; //why?
-            item.position_y = 0;
-            item.alt_position_id = 0;
-          }
         }
       }
     });
@@ -1830,8 +1853,7 @@
           hands: this.items.find(e => e.equipped_id === 10),
           alt_right_hand: this.items.find(e => e.equipped_id === 11),
           alt_left_hand: this.items.find(e => e.equipped_id === 12),
-          alt_displayed: false,
-          selected: null
+          alt_displayed: false
         };
       },
       props: {
@@ -1842,8 +1864,7 @@
           this.alt_displayed = value;
         },
         onSelect(item) {
-          this.selected = item;
-          if(this.$refs.itemEditor) this.$refs.itemEditor.updateTarget(this.selected);
+          this.$emit('item-selected', item);
         }
       },
     });
@@ -1859,13 +1880,11 @@
           torso: this.items.find(e => e.equipped_id === 3),
           right_hand: this.items.find(e => e.equipped_id === 4),
           left_hand: this.items.find(e => e.equipped_id === 5),
-          selected: null
         };
       },
       methods: {
         onSelect(item) {
-          this.selected = item;
-          if(this.$refs.itemEditor) this.$refs.itemEditor.updateTarget(this.selected);
+          this.$emit('item-selected', item);
         }
       }
     });
@@ -1873,7 +1892,13 @@
     let app = new Vue({
       el: "#app",
       data: {
-        save: null
+        save: null,
+        activeTab: 1,
+        selected: null,
+        itempack: window.itempack,
+        previewModel: null,
+        preview: null,
+        load: null,
       },
       created() {
       },
@@ -1932,6 +1957,25 @@
         },
       },
       methods: {
+        changeTab(i) {
+          this.activeTab = i;
+        },
+        onSelect(e) {
+          this.selected = e;
+        },
+        async previewItem(e) {
+          let bytes = b64ToArrayBuffer(this.previewModel.value);
+          this.preview = await d2s.readItem(bytes, 0x60, window.constants.constants);
+        },
+        loadItem() {
+          this.preview.location_id = 4;
+          this.preview.equipped_id = 0;
+          this.preview.position_x = 4;
+          this.preview.position_y = 0;
+          this.preview.alt_position_id = 0;
+          this.save.items.push(this.preview);
+          this.selected = this.preview;
+        },
         setPropertiesOnSave() {
           this.save.items.forEach(item => {
             b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));

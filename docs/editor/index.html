@@ -728,7 +728,7 @@
                       <Grid v-if="activeTab == 4" :width="3" :height="4" :items.sync="cube" @item-selected="onSelect">
                       </Grid>
                       <Mercenary v-if="activeTab == 5" :items.sync="mercenary" @item-selected="onSelect"></Mercenary>
-                      <Editor v-if="selected" :item.sync="selected"></Editor>
+                      <Editor v-if="selected" :item.sync="selected" ref="editor"></Editor>
                     </div>
                   </div>
                 </div>
@@ -2031,6 +2031,7 @@
         },
         onSelect(e) {
           this.selected = e;
+          this.$refs.editor.updateTarget(e);
         },
         async previewItem(e) {
           let bytes = b64ToArrayBuffer(this.previewModel.value);

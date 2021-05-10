@@ -617,12 +617,8 @@
         <div class="card bg-light">
           <div class="card-body">
             <div class="alert alert-primary" role="alert">
-              This editor is still a work in progress. Some things may not work.
+              This editor is still a work in progress. Some things may not work. Found a bug? <a href="https://github.com/dschu012/d2s/issues/new">Report it.</a>
             </div>
-            <p>Extract your mpq data into a <code>data</code> folder in the same directory as this html file for images
-              to load. It will create the images
-              from the DC6 files directly in the browser.
-            </p>
             <form id="d2sForm">
               <fieldset>
                 <div class="form-group">
@@ -2031,7 +2027,7 @@
         },
         onSelect(e) {
           this.selected = e;
-          this.$refs.editor.updateTarget(e);
+          if(this.$refs.editor) this.$refs.editor.updateTarget(e);
         },
         async previewItem(e) {
           let bytes = b64ToArrayBuffer(this.previewModel.value);

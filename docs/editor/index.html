@@ -685,9 +685,11 @@
                                 <Item v-if="preview" :item.sync="preview" clazz="item-edit"></Item>
                               </div>
                               <label for="Item">Item</label>
+                              <!--
                               <select class="form-control" id="Item" v-model="previewModel" @change="previewItem" v-select>
                                 <option v-for="item in itempack" :value="item" :key="item.key">{{item.key}}</option>
                               </select>
+                              -->
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-primary" @click="loadItem"

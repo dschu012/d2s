@@ -719,11 +719,11 @@
                                 <div class="col-md-12">
                                   <label>Inventory</label>
                                   <div class="input-group">
-                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.inv.w">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.inv.w" @input="gridChange">
                                     <div class="input-group-prepend input-group-append">
                                       <div class="input-group-text">,</div>
                                     </div>
-                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.inv.h">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.inv.h" @input="gridChange">
                                   </div>
                                 </div>
                               </div>
@@ -731,11 +731,11 @@
                                 <div class="col-md-12">
                                   <label>Stash</label>
                                   <div class="input-group">
-                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.stash.w">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.stash.w" @input="gridChange">
                                     <div class="input-group-prepend input-group-append">
                                       <div class="input-group-text">,</div>
                                     </div>
-                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.stash.h">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.stash.h" @input="gridChange">
                                   </div>
                                 </div>
                               </div>
@@ -743,11 +743,11 @@
                                 <div class="col-md-12">
                                   <label>Cube</label>
                                   <div class="input-group">
-                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.cube.w">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.cube.w" @input="gridChange">
                                     <div class="input-group-prepend input-group-append">
                                       <div class="input-group-text">,</div>
                                     </div>
-                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.cube.h">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.cube.h" @input="gridChange">
                                   </div>
                                 </div>
                               </div>
@@ -2034,6 +2034,9 @@
             }
           }
         }
+        if(localStorage.grid) {
+          this.grid = JSON.parse(localStorage.getItem('grid'));
+        }
       },
       filters: {
       },
@@ -2063,6 +2066,9 @@
         },
       },
       methods: {
+        gridChange() {
+          localStorage.setItem('grid', JSON.stringify(this.grid));
+        },
         changeTab(i) {
           this.activeTab = i;
         },

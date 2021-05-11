@@ -711,17 +711,57 @@
                           <button type="button" class="btn btn-secondary" :class="{ active: activeTab == 5 }"
                             @click="changeTab(5)">Mercenary</button>
                         </div>
-                        <div class="btn-group" role="group">
-                          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#LoadItem">Load
-                            Item</button>
+                        <div>
+                          <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"></button>
+                          <div class="dropdown-menu dropdown-menu-right">
+                            <div class="p-3 form-group">
+                              <div class="form-row">
+                                <div class="col-md-12">
+                                  <label>Inventory</label>
+                                  <div class="input-group">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.inv.w">
+                                    <div class="input-group-prepend input-group-append">
+                                      <div class="input-group-text">,</div>
+                                    </div>
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.inv.h">
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="form-row">
+                                <div class="col-md-12">
+                                  <label>Stash</label>
+                                  <div class="input-group">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.stash.w">
+                                    <div class="input-group-prepend input-group-append">
+                                      <div class="input-group-text">,</div>
+                                    </div>
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.stash.h">
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="form-row">
+                                <div class="col-md-12">
+                                  <label>Cube</label>
+                                  <div class="input-group">
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.cube.w">
+                                    <div class="input-group-prepend input-group-append">
+                                      <div class="input-group-text">,</div>
+                                    </div>
+                                    <input type="number" min="1" max="20" class="form-control" v-model.number="grid.cube.h">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#LoadItem">Load Item</button>
                         </div>
                       </div>
                       <Equipped v-if="activeTab == 1" :items.sync="equipped" @item-selected="onSelect"></Equipped>
-                      <Grid v-if="activeTab == 2" :width="10" :height="4" :items.sync="inventory"
+                      <Grid v-if="activeTab == 2" :width="grid.inv.w" :height="grid.inv.h" :items.sync="inventory"
                         @item-selected="onSelect"></Grid>
-                      <Grid v-if="activeTab == 3" :width="10" :height="10" :items.sync="stash"
+                      <Grid v-if="activeTab == 3" :width="grid.stash.w" :height="grid.stash.h" :items.sync="stash"
                         @item-selected="onSelect"></Grid>
-                      <Grid v-if="activeTab == 4" :width="3" :height="4" :items.sync="cube" @item-selected="onSelect">
+                      <Grid v-if="activeTab == 4" :width="grid.cube.w" :height="grid.cube.h" :items.sync="cube" @item-selected="onSelect">
                       </Grid>
                       <Mercenary v-if="activeTab == 5" :items.sync="mercenary" @item-selected="onSelect"></Mercenary>
                       <Editor v-if="selected" :item.sync="selected" ref="editor"></Editor>
@@ -1964,6 +2004,7 @@
         previewModel: null,
         preview: null,
         load: null,
+        grid: { inv: {w:10,h:4}, stash:{w:10,h:10}, cube:{w:3,h:4} }
       },
       created() {
       },

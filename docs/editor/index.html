@@ -2090,14 +2090,16 @@
             b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
           });
         },
-        loadItem() {
+        async loadItem() {
           this.preview.location_id = 4;
           this.preview.equipped_id = 0;
           this.preview.position_x = 4;
           this.preview.position_y = 0;
           this.preview.alt_position_id = 0;
-          this.save.items.push(this.preview);
-          this.selected = this.preview;
+          let copy = JSON.parse(JSON.stringify(this.preview));
+          this.save.items.push(copy);
+          this.selected = copy;
+          if(this.$refs.editor) this.$refs.editor.updateTarget(copy);
         },
         setPropertiesOnSave() {
           [... this.save.items, ... this.save.merc_items, ... this.save.corpse_items, this.save.golem_item].forEach(item => {

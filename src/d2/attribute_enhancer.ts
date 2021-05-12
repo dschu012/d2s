@@ -446,7 +446,9 @@ function _allAttributes(item: types.IItem, constants: types.IConstantData): type
   let socketed_attributes = [] as types.IMagicProperty[];
   if (item.socketed_items) {
     for (const i of item.socketed_items) {
-      socketed_attributes = socketed_attributes.concat(...JSON.parse(JSON.stringify(i.magic_attributes)));
+      if (i.magic_attributes) {
+        socketed_attributes = socketed_attributes.concat(...JSON.parse(JSON.stringify(i.magic_attributes)));
+      }
     }
   }
   const magic_attributes = item.magic_attributes || [];

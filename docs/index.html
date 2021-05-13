@@ -140,6 +140,8 @@
       let j = editor.get();
       if(d2r) {
         j.header.version = 0x61;
+      }  else {
+        j.header.version = 0x60;
       }
       try {
         d2s.write(j, constants.constants).then(function(response) {

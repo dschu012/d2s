@@ -366,6 +366,25 @@ export interface IItem {
   transform_color: string;
   item_quality: EItemQuality;
   categories: string[];
+  file_index: number;
+  auto_affix_id: number;
+  _unknown_data: {
+    b0_3?: number;
+    b5_10?: number;
+    b12?: number;
+    b14_15?: number;
+    b18_20?: number;
+    b23?: number;
+    b25?: number;
+    b27_31?: number;
+    aft_max_dura?: number;
+    plist_flag?: number;
+  };
+  rare_name_id: number;
+  rare_name_id2: number;
+  displayed_magic_attributes: IMagicProperty[];
+  displayed_runeword_attributes: IMagicProperty[];
+  displayed_combined_magic_attributes: IMagicProperty[];
 }
 
 export interface IWeaponDamage {

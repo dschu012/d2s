@@ -167,7 +167,7 @@ export async function readItem(
     item.class_specific = _readBits(reader, start, offset, 1);
     offset += 1;
     if (item.class_specific) {
-      //skip this data
+      item.auto_affix_id = _readBits(reader, start, offset, 11);
       offset += 11;
     }
     switch (item.quality) {
@@ -178,6 +178,7 @@ export async function readItem(
       case Quality.Normal:
         break;
       case Quality.Superior:
+        item.file_index = _readBits(reader, start, offset, 3);
         offset += 3;
         break;
       case Quality.Magic:
@@ -202,12 +203,13 @@ export async function readItem(
         break;
       case Quality.Rare:
       case Quality.Crafted:
-        const rare_name_id = _readBits(reader, start, offset, 8);
+        item.rare_name_id = _readBits(reader, start, offset, 8);
         offset += 8;
-        if (rare_name_id) item.rare_name = constants.rare_names[rare_name_id] ? constants.rare_names[rare_name_id].n : null;
-        const rare_name_id2 = _readBits(reader, start, offset, 8);
+        if (item.rare_name_id) item.rare_name = constants.rare_names[item.rare_name_id] ? constants.rare_names[item.rare_name_id].n : null;
+        item.rare_name_id2 = _readBits(reader, start, offset, 8);
         offset += 8;
-        if (rare_name_id2) item.rare_name2 = constants.rare_names[rare_name_id2] ? constants.rare_names[rare_name_id2].n : null;
+        if (item.rare_name_id2)
+          item.rare_name2 = constants.rare_names[item.rare_name_id2] ? constants.rare_names[item.rare_name_id2].n : null;
         item.magical_name_ids = [];
         for (let i = 0; i < 6; i++) {
           const prefix = _readBits(reader, start, offset, 1);
@@ -267,6 +269,7 @@ export async function readItem(
         item.current_durability = _readBits(reader, start, offset, 8);
         offset += 8;
         //some random extra bit according to nokka go code...
+        item._unknown_data.aft_max_dura = unkData(_readBits(reader, start, offset, 1));
         offset += 1;
       }
     }
@@ -288,6 +291,7 @@ export async function readItem(
     let plist_flag = 0;
     if (item.quality === Quality.Set) {
       plist_flag = _readBits(reader, start, offset, 5);
+      item._unknown_data.plist_flag = unkData(plist_flag);
       item.set_list_count = 0;
       offset += 5;
     }
@@ -340,6 +344,10 @@ export async function writeItem(
   constants: types.IConstantData,
   config: types.IConfig
 ): Promise<Uint8Array> {
+  if (item._unknown_data === undefined) {
+    item._unknown_data = {};
+  }
+
   const writer = new BinaryWriter().SetLittleEndian();
   if (version <= 0x60) {
     writer.WriteString("JM");
@@ -361,7 +369,8 @@ export async function writeItem(
     }
     _writeBits(writer, item.class_specific, start, offset, 1);
     offset += 1;
-    if (item.class_specific) {
+    if (item.class_specific === 1) {
+      _writeBits(writer, item.auto_affix_id || 0, start, offset, 11);
       offset += 11; //????
     }
     switch (item.quality) {
@@ -372,6 +381,7 @@ export async function writeItem(
       case Quality.Normal:
         break;
       case Quality.Superior:
+        _writeBits(writer, item.file_index || 0, start, offset, 3);
         offset += 3;
         break;
       case Quality.Magic:
@@ -390,9 +400,21 @@ export async function writeItem(
         break;
       case Quality.Rare:
       case Quality.Crafted:
-        _writeBits(writer, _lookupRareId(item.rare_name, constants), start, offset, 8);
+        _writeBits(
+          writer,
+          item.rare_name_id !== undefined ? item.rare_name_id : _lookupRareId(item.rare_name, constants),
+          start,
+          offset,
+          8
+        );
         offset += 8;
-        _writeBits(writer, _lookupRareId(item.rare_name2, constants), start, offset, 8);
+        _writeBits(
+          writer,
+          item.rare_name_id2 !== undefined ? item.rare_name_id2 : _lookupRareId(item.rare_name2, constants),
+          start,
+          offset,
+          8
+        );
         offset += 8;
 
         for (let i = 0; i < 6; i++) {
@@ -456,6 +478,7 @@ export async function writeItem(
         _writeBits(writer, item.current_durability, start, offset, 8);
         offset += 8;
         //some random extra bit according to nokka go code...
+        _writeBits(writer, item._unknown_data.aft_max_dura || 0, start, offset, 1);
         offset += 1;
       }
     }
@@ -472,8 +495,9 @@ export async function writeItem(
 
     if (item.quality === Quality.Set) {
       const set_attribute_count = item.set_attributes != null ? item.set_attributes.length : 0;
+      //reduced by -1 removed as this seems to be wrong
       const plist_flag = (1 << set_attribute_count) - 1;
-      _writeBits(writer, plist_flag, start, offset, 5);
+      _writeBits(writer, item._unknown_data.plist_flag || plist_flag, start, offset, 5);
       offset += 5;
     }
 
@@ -507,20 +531,29 @@ function _readSimpleBits(
   config: types.IConfig
 ): number {
   const start = reader.Position();
+  //init so we do not have npe's
+  item._unknown_data = {};
   //1.10-1.14d
   //[flags:32][version:10][mode:3]([invloc:4][x:4][y:4][page:3])([itemcode:32])([sockets:3])
   //1.15
   //[flags:32][version:3][mode:3]([invloc:4][x:4][y:4][page:3])([itemcode:variable])([sockets:3])
+  item._unknown_data.b0_3 = unkData(_readBits(reader, start, 0, 4));
   item.identified = _readBits(reader, start, 4, 1);
+  item._unknown_data.b5_10 = unkData(_readBits(reader, start, 5, 6));
   item.socketed = _readBits(reader, start, 11, 1);
+  item._unknown_data.b12 = unkData(_readBits(reader, start, 12, 1));
   item.new = _readBits(reader, start, 13, 1);
+  item._unknown_data.b14_15 = unkData(_readBits(reader, start, 14, 2));
   item.is_ear = _readBits(reader, start, 16, 1);
   item.starter_item = _readBits(reader, start, 17, 1);
+  item._unknown_data.b18_20 = unkData(_readBits(reader, start, 18, 3));
   item.simple_item = _readBits(reader, start, 21, 1);
   item.ethereal = _readBits(reader, start, 22, 1);
-  _readBits(reader, start, 23, 1); //always 1
+  item._unknown_data.b23 = unkData(_readBits(reader, start, 23, 1));
   item.personalized = _readBits(reader, start, 24, 1);
+  item._unknown_data.b25 = unkData(_readBits(reader, start, 25, 1));
   item.given_runeword = _readBits(reader, start, 26, 1);
+  item._unknown_data.b27_31 = unkData(_readBits(reader, start, 27, 5));
   let offset = 32;
   if (version <= 0x60) {
     item.version = _readBits(reader, start, offset, 10).toString(10);
@@ -614,16 +647,23 @@ function _writeSimpleBits(
   config: types.IConfig
 ): number {
   const start = writer.Position();
+  _writeBits(writer, item._unknown_data.b0_3 || 0, start, 0, 3);
   _writeBits(writer, item.identified, start, 4, 1);
+  _writeBits(writer, item._unknown_data.b5_10 || 0, start, 5, 6);
   _writeBits(writer, item.socketed, start, 11, 1);
+  _writeBits(writer, item._unknown_data.b12 || 0, start, 12, 1);
   _writeBits(writer, item.new, start, 13, 1);
+  _writeBits(writer, item._unknown_data.b14_15 || 0, start, 14, 2);
   _writeBits(writer, item.is_ear, start, 16, 1);
   _writeBits(writer, item.starter_item, start, 17, 1);
+  _writeBits(writer, item._unknown_data.b18_20 || 0, start, 18, 3);
   _writeBits(writer, item.simple_item, start, 21, 1);
   _writeBits(writer, item.ethereal, start, 22, 1);
-  _writeBits(writer, 1, start, 23, 1); //always 1
+  _writeBits(writer, item._unknown_data.b23 !== undefined ? item._unknown_data.b23 : 0x01, start, 23, 1);
   _writeBits(writer, item.personalized, start, 24, 1);
+  _writeBits(writer, item._unknown_data.b25 || 0, start, 25, 1);
   _writeBits(writer, item.given_runeword, start, 26, 1);
+  _writeBits(writer, item._unknown_data.b27_31 || 0, start, 27, 5);
   let offset = 32;
   const itemVersion = item.version != null ? item.version : "101";
   if (version <= 0x60) {
@@ -807,4 +847,11 @@ export function _writeMagicProperties(
   _writeBits(writer, 0x1ff, start, offset, 9);
   offset += 9;
   return offset;
+}
+
+function unkData(value: number): number | undefined {
+  if (value > 0) {
+    return value;
+  }
+  return undefined;
 }

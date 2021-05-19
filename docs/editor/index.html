@@ -723,6 +723,8 @@
                             @click="changeTab(4)">Cube</button>
                           <button type="button" class="btn btn-secondary" :class="{ active: activeTab == 5 }"
                             @click="changeTab(5)">Mercenary</button>
+                            <button type="button" class="btn btn-secondary" :class="{ active: activeTab == 6 }"
+                            @click="changeTab(6)">All</button>
                         </div>
                         <div>
                           <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"></button>
@@ -771,14 +773,14 @@
                           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#LoadItem">Load Item</button>
                         </div>
                       </div>
-                      <Equipped v-if="activeTab == 1" :items.sync="equipped" @item-selected="onSelect"></Equipped>
-                      <Grid v-if="activeTab == 2" :width="grid.inv.w" :height="grid.inv.h" :items.sync="inventory"
+                      <Equipped v-if="activeTab == 1 || activeTab == 6" :items.sync="equipped" @item-selected="onSelect"></Equipped>
+                      <Grid v-if="activeTab == 2 || activeTab == 6" :width="grid.inv.w" :height="grid.inv.h" :items.sync="inventory"
                         @item-selected="onSelect"></Grid>
-                      <Grid v-if="activeTab == 3" :width="grid.stash.w" :height="grid.stash.h" :items.sync="stash"
+                      <Grid v-if="activeTab == 3 || activeTab == 6" :width="grid.stash.w" :height="grid.stash.h" :items.sync="stash"
                         @item-selected="onSelect"></Grid>
-                      <Grid v-if="activeTab == 4" :width="grid.cube.w" :height="grid.cube.h" :items.sync="cube" @item-selected="onSelect">
+                      <Grid v-if="activeTab == 4 || activeTab == 6" :width="grid.cube.w" :height="grid.cube.h" :items.sync="cube" @item-selected="onSelect">
                       </Grid>
-                      <Mercenary v-if="activeTab == 5" :items.sync="mercenary" @item-selected="onSelect"></Mercenary>
+                      <Mercenary v-if="activeTab == 5 || activeTab == 6" :items.sync="mercenary" @item-selected="onSelect"></Mercenary>
                       <Editor v-if="selected" :item.sync="selected" ref="editor"></Editor>
                     </div>
                   </div>

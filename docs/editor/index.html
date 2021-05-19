@@ -766,6 +766,8 @@
                               </div>
                             </div>
                           </div>
+                          <button type="button" class="btn btn-primary" :disabled="!selected" @click="copy(selected)">Copy</button>
+                          <button type="button" class="btn btn-primary" :disabled="!clipboard" @click="paste()">Paste</button>
                           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#LoadItem">Load Item</button>
                         </div>
                       </div>
@@ -2027,6 +2029,7 @@
         itempack: window.itempack,
         previewModel: null,
         preview: null,
+        clipboard: null,
         load: null,
         notifications: [],
         grid: { inv: {w:10,h:4}, stash:{w:10,h:10}, cube:{w:3,h:4} }
@@ -2112,14 +2115,21 @@
             b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
           });
         },
-        async loadItem() {
-          let copy = JSON.parse(JSON.stringify(this.preview));
-          let pos = this.findSafeLocation(this.preview);
+        loadItem() {
+          this.paste(this.preview);
+        },
+        copy(item) {
+          this.clipboard = JSON.parse(JSON.stringify(item));
+        },
+        paste(item) {
+          let copy = JSON.parse(JSON.stringify(item != null ? item : this.clipboard));
+          let pos = this.findSafeLocation(copy);
           copy.location_id = pos[0];
           copy.equipped_id = pos[1];
           copy.position_x = pos[2];
           copy.position_y = pos[3];
           copy.alt_position_id = pos[4];
+          this.notifications = [];
           if(copy.location_id == 4) {
             this.notifications.push({ alert: "alert alert-warning", message: `Could not find safe location to place item. Placed in mouse buffer.`});
           } else {

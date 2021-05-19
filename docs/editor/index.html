@@ -146,19 +146,20 @@
     }
 
     .right-tab {
-      top: calc(var(--grid-size) * .75);
+      top: calc(var(--grid-size) * .50);
       left: calc((var(--grid-size) * 5) - (var(--grid-size) * 4.5));
       position: absolute;
     }
 
     .left-tab {
-      top: calc(var(--grid-size) * .75);
+      top: calc(var(--grid-size) * .50);
       left: calc((var(--grid-size) * 5) + (var(--grid-size) * 2.5));
       position: absolute;
     }
 
     .tab {
-      padding: 10px;
+      padding: 0 12px;
+      height: 22px;
     }
 
     .inventory .item {
@@ -1362,8 +1363,12 @@
       <span class="neck"><Item v-if="neck" :item.sync="neck" @click.native="onSelect(neck)" /></span>
       <span class="torso"><Item v-if="torso" :item.sync="torso" @click.native="onSelect(torso)" /></span>
       <span class="right-tab tabs">
-        <span class="tab" @click="setAltDisplayed(false)">I</span>
-        <span class="tab" @click="setAltDisplayed(true)">II</span>
+        <div class="btn-group" role="group">
+          <button type="button" class="tab btn btn-secondary" :class="{ active: !alt_displayed }"
+            @click="setAltDisplayed(false)">I</button>
+            <button type="button" class="tab btn btn-secondary" :class="{ active: alt_displayed }"
+            @click="setAltDisplayed(true)">II</button>
+        </div>
       </span>
       <span v-show="!alt_displayed" class="right-hand weapon">
         <Item v-if="right_hand" :item.sync="right_hand" @click.native="onSelect(right_hand)" />
@@ -1372,8 +1377,12 @@
         <Item v-if="alt_right_hand" :item.sync="alt_right_hand" @click.native="onSelect(alt_right_hand)" />
       </span>
       <span class="left-tab tabs">
-        <span class="tab" @click="setAltDisplayed(false)">I</span>
-        <span class="tab" @click="setAltDisplayed(true)">II</span>
+        <div class="btn-group" role="group">
+          <button type="button" class="tab btn btn-secondary" :class="{ active: !alt_displayed }"
+            @click="setAltDisplayed(false)">I</button>
+            <button type="button" class="tab btn btn-secondary" :class="{ active: alt_displayed }"
+            @click="setAltDisplayed(true)">II</button>
+        </div>
       </span>
       <span v-show="!alt_displayed" class="left-hand weapon">
         <Item v-if="left_hand" :item.sync="left_hand" @click.native="onSelect(left_hand)" />

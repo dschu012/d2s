@@ -626,6 +626,32 @@
     </div>
   </nav>
   <div class="container-fluid" id="app">
+    <div class="modal" tabindex="-1" role="dialog" id="LoadItem">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Select an Item</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row d-flex justify-content-center mt-3 pl-5 pr-5">
+              <Item v-if="preview" :item="preview" clazz="item-edit"></Item>
+            </div>
+            <label for="Item">Item</label>
+            <select class="form-control" v-model="previewModel" @change="previewItem" v-select>
+              <option v-for="item in itempack" :value="item" :key="item.key">{{item.key}}</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" @click="loadItem"
+              data-dismiss="modal">Load</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="col-2 d-none d-md-block"></div>
       <div class="col-8 mt-2">
@@ -700,32 +726,6 @@
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
                         </button>
-                      </div>
-                      <div class="modal" tabindex="-1" role="dialog" id="LoadItem">
-                        <div class="modal-dialog" role="document">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title">Select an Item</h5>
-                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                              </button>
-                            </div>
-                            <div class="modal-body">
-                              <div class="row d-flex justify-content-center mt-3 pl-5 pr-5">
-                                <Item v-if="preview" :item="preview" clazz="item-edit"></Item>
-                              </div>
-                              <label for="Item">Item</label>
-                              <select class="form-control" v-model="previewModel" @change="previewItem" v-select>
-                                <option v-for="item in itempack" :value="item" :key="item.key">{{item.key}}</option>
-                              </select>
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-primary" @click="loadItem"
-                                data-dismiss="modal">Load</button>
-                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            </div>
-                          </div>
-                        </div>
                       </div>
                       <div class="row d-flex justify-content-between mt-3 pl-5 pr-5">
                         <div></div>

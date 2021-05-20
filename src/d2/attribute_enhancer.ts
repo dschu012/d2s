@@ -1,5 +1,12 @@
 import * as types from "./types";
 
+enum ItemType {
+  Armor = 0x01,
+  Shield = 0x02, //treated the same as armor... only here to be able to parse nokkas jsons
+  Weapon = 0x03,
+  Other = 0x04,
+}
+
 //do nice stuff
 //combine group properties (all resists/all stats) and build friendly strings for a ui
 //enhanced def/durability/weapon damage.
@@ -61,8 +68,10 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
   let details = null;
   if (constants.armor_items[item.type]) {
     details = constants.armor_items[item.type];
+    item.type_id = ItemType.Armor;
   } else if (constants.weapon_items[item.type]) {
     details = constants.weapon_items[item.type];
+    item.type_id = ItemType.Weapon;
     const base_damage = {} as types.IWeaponDamage;
     if (details.mind) base_damage.mindam = details.mind;
     if (details.maxd) base_damage.maxdam = details.maxd;
@@ -70,9 +79,11 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
     if (details.max2d) base_damage.twohandmaxdam = details.max2d;
     item.base_damage = base_damage;
   } else if (constants.other_items[item.type]) {
+    item.type_id = ItemType.Other;
     details = constants.other_items[item.type];
   }
   if (details) {
+    if (details.n) item.type_name = details.n;
     if (details.rs) item.reqstr = details.rs;
     if (details.rd) item.reqdex = details.rd;
     if (details.i) item.inv_file = details.i;

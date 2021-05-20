@@ -798,7 +798,7 @@
                       <Grid v-if="activeTab == 4 || activeTab == 6" :width="grid.cube.w" :height="grid.cube.h" :items.sync="cube" @item-selected="onSelect">
                       </Grid>
                       <Mercenary v-if="activeTab == 5 || activeTab == 6" :items.sync="mercenary" @item-selected="onSelect"></Mercenary>
-                      <Editor v-if="selected" :item.sync="selected" ref="editor"></Editor>
+                      <Editor v-if="selected" :item.sync="selected" ref="editor" @item-changed="onChanged"></Editor>
                     </div>
                   </div>
                 </div>
@@ -1221,32 +1221,42 @@
       </div>
       <span v-if="!item.simple_item">
         <div class="form-row">
+          <div class="col-md-6">
+            <label for="Type">Type</label>
+            <select class="form-control" id="Type" v-model="item.type" @change="onChange">
+              <option v-for="(s, v) in armor_items" v-if="s != null && s.n != null" :value="v" :key="v">{{s.n}}</option>
+              <option v-for="(s, v) in weapon_items" v-if="s != null && s.n != null" :value="v" :key="v">{{s.n}}</option>
+              <option v-for="(s, v) in other_items" v-if="s != null && s.n != null" :value="v" :key="v">{{s.n}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
           <div class="col-md-2">
             <label for="ILvl">Item Level</label>
-            <input type="number" class="form-control" id="ILvl" v-model.number="item.level">
+            <input type="number" class="form-control" id="ILvl" v-model.number="item.level" @input="onChange">
           </div>
           <div class="col-md-2">
             <label for="Rarity">Rarity</label>
-            <select class="form-control" id="Rarity" v-model.number="item.quality">
+            <select class="form-control" id="Rarity" v-model.number="item.quality" @change="onChange">
               <option v-for="rarity in rarities" :value="rarity.key" :key="rarity.key">{{rarity.value}}</option>
             </select>
           </div>
           <div class="col-md-2" v-if="item.socketed">
             <label for="Sockets">Sockets</label>
-            <input type="number" class="form-control" id="Sockets" v-model.number="item.total_nr_of_sockets">
+            <input type="number" class="form-control" id="Sockets" v-model.number="item.total_nr_of_sockets" @input="onChange">
           </div>
         </div>
         <div class="form-row" v-if="item.quality == 4">
           <div class="col-md-3">
             <label for="Prefix">Prefix</label>
-            <select class="form-control" id="Prefix" v-model.number="item.magic_prefix">
+            <select class="form-control" id="Prefix" v-model.number="item.magic_prefix" @change="onChange">
               <option value="0">None</option>
               <option v-for="(p, idx) in prefixes" v-if="p != null && p.n != null" :value="idx" :key="idx">{{p.n}}</option>
             </select>
           </div>
           <div class="col-md-3">
             <label for="Suffix">Suffix</label>
-            <select class="form-control" id="Suffix" v-model.number="item.magic_suffix">
+            <select class="form-control" id="Suffix" v-model.number="item.magic_suffix" @change="onChange">
               <option value="0">None</option>
               <option v-for="(s, idx) in suffixes" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
@@ -1255,13 +1265,13 @@
         <div class="form-row" v-if="item.quality == 6 || item.quality == 8">
           <div class="col-md-3">
             <label for="RareName1">Rare Name 1</label>
-            <select class="form-control" id="RareName1" v-model.number="item.rare_name">
+            <select class="form-control" id="RareName1" v-model.number="item.rare_name" @change="onChange">
               <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
           </div>
           <div class="col-md-3">
             <label for="RareName1">Rare Name 2</label>
-            <select class="form-control" id="RareName1" v-model.number="item.rare_name2">
+            <select class="form-control" id="RareName1" v-model.number="item.rare_name2" @change="onChange">
               <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
           </div>
@@ -1270,7 +1280,7 @@
         <div class="form-row" v-if="false && item.quality == 5">
           <div class="col-md-3">
             <label for="SetName">Set Name</label>
-            <select class="form-control" id="SetName" v-model.number="item.set_id">
+            <select class="form-control" id="SetName" v-model.number="item.set_id" @change="onChange">
               <option v-for="(s, idx) in set_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
           </div>
@@ -1278,7 +1288,7 @@
         <div class="form-row" v-if="false && item.quality == 7">
           <div class="col-md-3">
             <label for="UniqueName">Unique Name</label>
-            <select class="form-control" id="UniqueName" v-model.number="item.unique_id">
+            <select class="form-control" id="UniqueName" v-model.number="item.unique_id" @change="onChange">
               <option v-for="(s, idx) in unq_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
             </select>
           </div>
@@ -1286,20 +1296,20 @@
 
         <div v-if="item.magic_attributes">
           <div>Item Stats</div>
-          <ItemStatsEditor :item-stats.sync="item.magic_attributes"></ItemStatsEditor>
+          <ItemStatsEditor :item-stats.sync="item.magic_attributes" @stat-change="onChange"></ItemStatsEditor>
         </div>
         <div v-if="item.runeword_attributes">
           <div>Runeword Stats</div>
-          <ItemStatsEditor :item-stats.sync="item.runeword_attributes"></ItemStatsEditor>
+          <ItemStatsEditor :item-stats.sync="item.runeword_attributes" @stat-change="onChange"></ItemStatsEditor>
         </div>
         <div v-if="item.set_attributes">
           <div v-for="(set_attribute, index) in item.set_attributes">
             <div>Set Stats List {{index}}</div>
-            <ItemStatsEditor :item-stats.sync="set_attribute"></ItemStatsEditor>
+            <ItemStatsEditor :item-stats.sync="set_attribute" @stat-change="onChange"></ItemStatsEditor>
           </div>
         </div>
         <div v-for="socketed_item in item.socketed_items">
-          <Editor ref="itemEditor" :item.sync="socketed_item"></Editor>
+          <Editor ref="itemEditor" :item.sync="socketed_item" @item-changed="onChanged"></Editor>
         </div>
       </span>
     </div>
@@ -1317,7 +1327,7 @@
           <div class="form-row">
             <div class="col-md-2"><button type="button" class="btn btn-link red" @click="remove(statIdx)">&times;</button></div>
             <div class="col-md-10">
-              <select class="form-control" :id="'Stat' + statIdx" v-model.number="s.id">
+              <select class="form-control" :id="'Stat' + statIdx" v-model.number="s.id" @change="onChange">
                 <option v-for="(stat, idx) in stats" :value="idx" :key="idx">{{stat.s}}</option>
               </select>
             </div>
@@ -1326,13 +1336,13 @@
         </div>
         <div class="col-md-2" v-for="i in numValues(s.id)">
           <!-- <label :for="'Stat' + statIdx + 'Value'+ i">Value</label> -->
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-if="isClass(s.id, i)">
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-if="isClass(s.id, i)" @change="onChange">
             <option v-for="(c, idx) in classes" :value="idx" :key="idx">{{c.co}}</option>
           </select>
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-else-if="isClassSkill(s.id, i)">
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-else-if="isClassSkill(s.id, i)" @change="onChange">
             <option v-for="(t, idx) in classes[s.values[i]].ts" :value="idx" :key="idx">{{t}}</option>
           </select>
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-else-if="isSkill(s.id, i)">
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-else-if="isSkill(s.id, i)" @change="onChange">
             <option v-for="(s, idx) in skills" v-if="s != null" :value="idx" :key="idx">{{s.s}}</option>
           </select>
           <input type="number" class="form-control" :min="min(s.id)" :max="max(s.id)" @input="change(s.id, s.values, i-1)"
@@ -1675,7 +1685,9 @@
           rare_names: window.constants.constants.rare_names,
           unq_items: window.constants.constants.unq_items,
           set_items: window.constants.constants.set_items,
-          timeout: null,
+          armor_items: window.constants.constants.armor_items,
+          weapon_items: window.constants.constants.weapon_items,
+          other_items: window.constants.constants.other_items,
           target: {
             location: this.item.location_id,
             equipped_location: this.item.equipped_id,
@@ -1685,23 +1697,23 @@
           }
         };
       },
-      watch: {
-        item: {
-          handler(val) {
-            //this seems hackish. basically it is to prevent infinite loop since we modify item here.
-            if (this.timeout) {
-              clearTimeout(this.timeout);
-              this.timeout = null;
-              return;
-            }
-            this.timeout = setTimeout(() => {
-              val = d2s.enhanceItem(val, window.constants.constants);
-            }, 0);
-          },
-          deep: true
-        },
-      },
       methods: {
+        onChange() {
+          this.$emit('item-changed', this.item);
+        },
+        setPropertiesOnItem(item) {
+          if (!item) {
+            return;
+          }
+          if(!item.magic_attributes) Vue.set(item, 'magic_attributes', []);
+          b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
+          if (!item.socketed_items) {
+            return;
+          }
+          item.socketed_items.forEach(item => {
+            b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
+          });
+        },
         updateTarget(val) {
           this.target = {
             location: val.location_id,
@@ -1767,6 +1779,9 @@
         }
       },
       methods: {
+        onChange() {
+          this.$emit('stat-change', this.itemStats);
+        },
         max(id) {
           let stat = this.stats[id];
           let add = stat.sA ? stat.sA : 0;
@@ -1786,6 +1801,7 @@
           } else if (values[idx] < minValue) {
             values[idx] = minValue;
           }
+          this.onChange();
         },
         add() {
           this.itemStats.push({ id: 0, values: [] });
@@ -2141,6 +2157,10 @@
         onSelect(e) {
           this.selected = e;
           if(this.$refs.editor) this.$refs.editor.updateTarget(e);
+        },
+        onChanged(e) {
+          d2s.enhanceItem(this.selected, window.constants.constants);
+          this.setPropertiesOnItem(this.selected);
         },
         async previewItem(e) {
           let bytes = b64ToArrayBuffer(this.previewModel.value);

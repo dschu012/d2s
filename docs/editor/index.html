@@ -642,6 +642,18 @@
                       <input type="file" name="d2sFile" @change="onFileChange" id="d2sFile">
                       <label class="custom-file-label" for="d2sFile">*.d2s</label>
                     </div>
+                    <div>
+                      <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">Create New</button>
+                      <div class="dropdown-menu dropdown-menu-right">
+                        <button class="dropdown-item" type="button" @click="newChar(0)">Amazon</button>
+                        <button class="dropdown-item" type="button" @click="newChar(1)">Sorceress</button>
+                        <button class="dropdown-item" type="button" @click="newChar(2)">Necromancer</button>
+                        <button class="dropdown-item" type="button" @click="newChar(3)">Paladin</button>
+                        <button class="dropdown-item" type="button" @click="newChar(4)">Barbarian</button>
+                        <button class="dropdown-item" type="button" @click="newChar(5)">Druid</button>
+                        <button class="dropdown-item" type="button" @click="newChar(6)">Assassin</button>
+                      </div>
+                    </div>
                     <div class="input-group-append"><span>&nbsp;</span></div>
                   </div>
                 </div>
@@ -1157,6 +1169,9 @@
       <div class="form-row">
         <div class="col-md-12">
           <div class="form-check form-check-inline">
+            <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.simple_item">Compact</label>
+          </div>
+          <div class="form-check form-check-inline">
             <label class="form-check-label"><input class="form-check-input" type="checkbox" v-model="item.identified">Identified</label>
           </div>
           <div class="form-check form-check-inline">
@@ -1204,85 +1219,89 @@
           <button type="button" class="form-control btn btn-primary" @click="moveToTarget(item)">Move Item</button>
         </div>
       </div>
-      <div class="form-row">
-        <div class="col-md-2">
-          <label for="ILvl">Item Level</label>
-          <input type="number" class="form-control" id="ILvl" v-model.number="item.level">
+      <span v-if="!item.simple_item">
+        <div class="form-row">
+          <div class="col-md-2">
+            <label for="ILvl">Item Level</label>
+            <input type="number" class="form-control" id="ILvl" v-model.number="item.level">
+          </div>
+          <div class="col-md-2">
+            <label for="Rarity">Rarity</label>
+            <select class="form-control" id="Rarity" v-model.number="item.quality">
+              <option v-for="rarity in rarities" :value="rarity.key" :key="rarity.key">{{rarity.value}}</option>
+            </select>
+          </div>
+          <div class="col-md-2" v-if="item.socketed">
+            <label for="Sockets">Sockets</label>
+            <input type="number" class="form-control" id="Sockets" v-model.number="item.total_nr_of_sockets">
+          </div>
         </div>
-        <div class="col-md-2">
-          <label for="Rarity">Rarity</label>
-          <select class="form-control" id="Rarity" v-model.number="item.quality">
-            <option v-for="rarity in rarities" :value="rarity.key" :key="rarity.key">{{rarity.value}}</option>
-          </select>
+        <div class="form-row" v-if="item.quality == 4">
+          <div class="col-md-3">
+            <label for="Prefix">Prefix</label>
+            <select class="form-control" id="Prefix" v-model.number="item.magic_prefix">
+              <option value="0">None</option>
+              <option v-for="(p, idx) in prefixes" v-if="p != null && p.n != null" :value="idx" :key="idx">{{p.n}}</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="Suffix">Suffix</label>
+            <select class="form-control" id="Suffix" v-model.number="item.magic_suffix">
+              <option value="0">None</option>
+              <option v-for="(s, idx) in suffixes" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
         </div>
-        <div class="col-md-2" v-if="item.socketed">
-          <label for="Sockets">Sockets</label>
-          <input type="number" class="form-control" id="Sockets" v-model.number="item.total_nr_of_sockets">
+        <div class="form-row" v-if="item.quality == 6 || item.quality == 8">
+          <div class="col-md-3">
+            <label for="RareName1">Rare Name 1</label>
+            <select class="form-control" id="RareName1" v-model.number="item.rare_name">
+              <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="RareName1">Rare Name 2</label>
+            <select class="form-control" id="RareName1" v-model.number="item.rare_name2">
+              <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
         </div>
-      </div>
-      <div class="form-row" v-if="item.quality == 4">
-        <div class="col-md-3">
-          <label for="Prefix">Prefix</label>
-          <select class="form-control" id="Prefix" v-model.number="item.magic_prefix">
-            <option value="0">None</option>
-            <option v-for="(p, idx) in prefixes" v-if="p != null && p.n != null" :value="idx" :key="idx">{{p.n}}</option>
-          </select>
+        <!-- crashes game -->
+        <div class="form-row" v-if="false && item.quality == 5">
+          <div class="col-md-3">
+            <label for="SetName">Set Name</label>
+            <select class="form-control" id="SetName" v-model.number="item.set_id">
+              <option v-for="(s, idx) in set_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
         </div>
-        <div class="col-md-3">
-          <label for="Suffix">Suffix</label>
-          <select class="form-control" id="Suffix" v-model.number="item.magic_suffix">
-            <option value="0">None</option>
-            <option v-for="(s, idx) in suffixes" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-          </select>
+        <div class="form-row" v-if="false && item.quality == 7">
+          <div class="col-md-3">
+            <label for="UniqueName">Unique Name</label>
+            <select class="form-control" id="UniqueName" v-model.number="item.unique_id">
+              <option v-for="(s, idx) in unq_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
+            </select>
+          </div>
         </div>
-      </div>
-      <div class="form-row" v-if="item.quality == 6 || item.quality == 8">
-        <div class="col-md-3">
-          <label for="RareName1">Rare Name 1</label>
-          <select class="form-control" id="RareName1" v-model.number="item.rare_name">
-            <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label for="RareName1">Rare Name 2</label>
-          <select class="form-control" id="RareName1" v-model.number="item.rare_name2">
-            <option v-for="(s, idx) in rare_names" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-          </select>
-        </div>
-      </div>
-      <!-- crashes game -->
-      <div class="form-row" v-if="false && item.quality == 5">
-        <div class="col-md-3">
-          <label for="SetName">Set Name</label>
-          <select class="form-control" id="SetName" v-model.number="item.set_id">
-            <option v-for="(s, idx) in set_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row" v-if="false && item.quality == 7">
-        <div class="col-md-3">
-          <label for="UniqueName">Unique Name</label>
-          <select class="form-control" id="UniqueName" v-model.number="item.unique_id">
-            <option v-for="(s, idx) in unq_items" v-if="s != null && s.n != null" :value="idx" :key="idx">{{s.n}}</option>
-          </select>
-        </div>
-      </div>
 
-      <div>Item Stats</div>
-      <ItemStatsEditor :itemStats.sync="item.magic_attributes"></ItemStatsEditor>
-      <div v-if="item.runeword_attributes">
-        <div>Runeword Stats</div>
-        <ItemStatsEditor :itemStats.sync="item.runeword_attributes"></ItemStatsEditor>
-      </div>
-      <div v-if="item.set_attributes">
-        <div v-for="(set_attribute, index) in item.set_attributes">
-          <div>Set Stats List {{index}}</div>
-          <ItemStatsEditor :itemStats.sync="set_attribute"></ItemStatsEditor>
+        <div v-if="item.magic_attributes">
+          <div>Item Stats</div>
+          <ItemStatsEditor :item-stats.sync="item.magic_attributes"></ItemStatsEditor>
         </div>
-      </div>
-      <div v-for="socketed_item in item.socketed_items">
-        <Editor ref="itemEditor" :item.sync="socketed_item"></Editor>
-      </div>
+        <div v-if="item.runeword_attributes">
+          <div>Runeword Stats</div>
+          <ItemStatsEditor :item-stats.sync="item.runeword_attributes"></ItemStatsEditor>
+        </div>
+        <div v-if="item.set_attributes">
+          <div v-for="(set_attribute, index) in item.set_attributes">
+            <div>Set Stats List {{index}}</div>
+            <ItemStatsEditor :item-stats.sync="set_attribute"></ItemStatsEditor>
+          </div>
+        </div>
+        <div v-for="socketed_item in item.socketed_items">
+          <Editor ref="itemEditor" :item.sync="socketed_item"></Editor>
+        </div>
+      </span>
     </div>
   </script>
 
@@ -1292,31 +1311,32 @@
         <div class="col-md-2">Stat</div>
         <div class="col-md-2">Value</div>
       </div>
-      <div class="form-row" v-for="(stat, statIdx) in itemStats">
+      
+      <div class="form-row"v-if="itemStats && itemStats.length > 0" v-for="(s, statIdx) in itemStats" :key="statIdx">
         <div class="col-md-2">
           <div class="form-row">
             <div class="col-md-2"><button type="button" class="btn btn-link red" @click="remove(statIdx)">&times;</button></div>
             <div class="col-md-10">
-              <select class="form-control" :id="'Stat' + statIdx" v-model.number="stat.id">
-                <option v-for="(s, idx) in stats" :value="idx" :key="idx">{{s.s}}</option>
+              <select class="form-control" :id="'Stat' + statIdx" v-model.number="s.id">
+                <option v-for="(stat, idx) in stats" :value="idx" :key="idx">{{stat.s}}</option>
               </select>
             </div>
           </div>
           <!-- <label :for="'Stat' + statIdx">Stat</label> -->
         </div>
-        <div class="col-md-2" v-for="i in numValues(stat.id)">
+        <div class="col-md-2" v-for="i in numValues(s.id)">
           <!-- <label :for="'Stat' + statIdx + 'Value'+ i">Value</label> -->
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-if="isClass(stat.id, i)">
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-if="isClass(s.id, i)">
             <option v-for="(c, idx) in classes" :value="idx" :key="idx">{{c.co}}</option>
           </select>
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else-if="isClassSkill(stat.id, i)">
-            <option v-for="(t, idx) in classes[stat.values[i]].ts" :value="idx" :key="idx">{{t}}</option>
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-else-if="isClassSkill(s.id, i)">
+            <option v-for="(t, idx) in classes[s.values[i]].ts" :value="idx" :key="idx">{{t}}</option>
           </select>
-          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else-if="isSkill(stat.id, i)">
+          <select class="form-control" :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-else-if="isSkill(s.id, i)">
             <option v-for="(s, idx) in skills" v-if="s != null" :value="idx" :key="idx">{{s.s}}</option>
           </select>
-          <input type="number" class="form-control" :min="min(stat.id)" :max="max(stat.id)" @input="change(stat.id, stat.values, i-1)"
-            :id="'Stat' + statIdx + 'Value'+ i" v-model.number="stat.values[i-1]" v-else>
+          <input type="number" class="form-control" :min="min(s.id)" :max="max(s.id)" @input="change(s.id, s.values, i-1)"
+            :id="'Stat' + statIdx + 'Value'+ i" v-model.number="s.values[i-1]" v-else>
         </div>
       </div>
       <div class="form-row">
@@ -1418,6 +1438,16 @@
   </script>
 
   <script>
+    const newbies = [
+    "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"
+    ]
+
     const xp = [0,500,1500,3750,7875,14175,22680,32886,44396,57715,72144,90180,112725,140906,176132,220165,275207,344008,430010,537513,671891,839864,1049830,1312287,1640359,2050449,2563061,3203826,3902260,4663553,5493363,6397855,7383752,8458379,9629723,10906488,12298162,13815086,15468534,17270791,19235252,21376515,23710491,26254525,29027522,32050088,35344686,38935798,42850109,47116709,51767302,56836449,62361819,68384473,74949165,82104680,89904191,98405658,107672256,117772849,128782495,140783010,153863570,168121381,183662396,200602101,219066380,239192444,261129853,285041630,311105466,339515048,370481492,404234916,441026148,481128591,524840254,572485967,624419793,681027665,742730244,809986056,883294891,963201521,1050299747,1145236814,1248718217,1361512946,1484459201,1618470619,1764543065,1923762030,2097310703,2286478756,2492671933,2717422497,2962400612,3229426756,3520485254,3837739017];
 
     const colormaps = {
@@ -2115,13 +2145,7 @@
         async previewItem(e) {
           let bytes = b64ToArrayBuffer(this.previewModel.value);
           this.preview = await d2s.readItem(bytes, 0x60, window.constants.constants);
-          b64PNGFromDC6(this.preview).then(src => Vue.set(this.preview, 'src', src));
-          if (!this.preview.socketed_items) {
-            return;
-          }
-          this.preview.socketed_items.forEach(item => {
-            b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
-          });
+          this.setPropertiesOnItem(this.preview);
         },
         loadItem() {
           this.paste(this.preview);
@@ -2214,22 +2238,34 @@
           return true;
         },
         setPropertiesOnSave() {
+          let that = this;
           [... this.save.items, ... this.save.merc_items, ... this.save.corpse_items, this.save.golem_item].forEach(item => {
-            if (!item) {
-              return;
-            }
-            b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
-            if (!item.socketed_items) {
-              return;
-            }
-            item.socketed_items.forEach(item => {
-              b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
-            });
+            that.setPropertiesOnItem(item);
           });
         },
+        setPropertiesOnItem(item) {
+          if (!item) {
+            return;
+          }
+          if(!item.magic_attributes) Vue.set(item, 'magic_attributes', []);
+          b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
+          if (!item.socketed_items) {
+            return;
+          }
+          item.socketed_items.forEach(item => {
+            b64PNGFromDC6(item).then(src => Vue.set(item, 'src', src));
+          });
+        },
+        newChar(index) {
+          let bytes = b64ToArrayBuffer(newbies[index]);
+          this.readBuffer(bytes);
+        },
         onFileLoad(event) {
+          this.readBuffer(event.target.result);
+        },
+        readBuffer(bytes) {
           let that = this;
-          d2s.read(event.target.result, constants.constants).then(response => {
+          d2s.read(bytes, constants.constants).then(response => {
             that.save = response;
             that.setPropertiesOnSave();
           });

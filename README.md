@@ -6,7 +6,7 @@ The goal of this project is to create an es6 compliant reader/writer of Diablo I
 
 ##### Examples
 * [Viewer](https://dschu012.github.io/d2s/)  [[Source](docs/index.html)]
-* [Editor](https://d2s.dschu012.dev/)  [[Source](docs/editor/index.html)]
+* [Editor](https://d2s.dschu012.dev/)  [[Source](https://github.com/dschu012/d2s-editor)]
 
 Using [d2s-ui](https://github.com/dschu012/d2s-ui) for a frontend: 
 * https://diablo.dannyschumacher.com/#/

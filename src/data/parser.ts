@@ -405,7 +405,8 @@ function _readSetOrUnqItems(tsv: any, strings: any): any[] {
   const arr = [] as any[];
   const cIndex = tsv.header.indexOf("index");
   const cInvfile = tsv.header.indexOf("invfile");
-  const cCode = tsv.header.indexOf("code");
+  let cCode = tsv.header.indexOf("code");
+  if(cCode < 0) cCode = tsv.header.indexOf("item");
   const cInvtransform = tsv.header.indexOf("invtransform");
   let id = 0;
   for (let i = 1; i < tsv.lines.length; i++) {

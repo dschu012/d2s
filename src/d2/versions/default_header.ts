@@ -1,59 +1,57 @@
 import * as types from "../types";
-import { BinaryReader } from "../../binary/binaryreader";
-import { BinaryWriter } from "../../binary/binarywriter";
-import { _writeBits, _readBits } from "../../util";
+import { BitReader } from "../../binary/bitreader";
+import { BitWriter } from "../../binary/bitwriter";
 
 const difficulties = ["normal", "nm", "hell"];
 
-export function readHeader(char: types.ID2S, reader: BinaryReader, constants: types.IConstantData) {
+export function readHeader(char: types.ID2S, reader: BitReader, constants: types.IConstantData) {
   char.header.filesize = reader.ReadUInt32(); //0x0008
   char.header.checksum = reader.ReadUInt32().toString(16).padStart(8, "0"); //0x000c
-  reader.Skip(4); //0x0010
+  reader.SkipBytes(4); //0x0010
   char.header.name = reader.ReadString(16).replace(/\0/g, ""); //0x0014
   char.header.status = _readStatus(reader.ReadUInt8()); //0x0024
   char.header.progression = reader.ReadUInt8(); //0x0025
   char.header.active_arms = reader.ReadUInt16(); //0x0026 [unk = 0x0, 0x0]
   char.header.class = constants.classes[reader.ReadUInt8()]!.n; //0x0028
-  reader.Skip(2); //0x0029 [unk = 0x10, 0x1E]
+  reader.SkipBytes(2); //0x0029 [unk = 0x10, 0x1E]
   char.header.level = reader.ReadUInt8(); //0x002b
   char.header.created = reader.ReadUInt32(); //0x002c
   char.header.last_played = reader.ReadUInt32(); //0x0030
-  reader.Skip(4); //0x0034 [unk = 0xff, 0xff, 0xff, 0xff]
+  reader.SkipBytes(4); //0x0034 [unk = 0xff, 0xff, 0xff, 0xff]
   char.header.assigned_skills = _readAssignedSkills(reader.ReadArray(64), constants); //0x0038
-  char.header.left_skill = constants.skills[reader.ReadUInt32()]!.s; //0x0078
-  char.header.right_skill = constants.skills[reader.ReadUInt32()]!.s; //0x007c
-  char.header.left_swap_skill = constants.skills[reader.ReadUInt32()]!.s; //0x0080
-  char.header.right_swap_skill = constants.skills[reader.ReadUInt32()]!.s; //0x0084
+  char.header.left_skill = constants.skills[reader.ReadUInt32()]?.s; //0x0078
+  char.header.right_skill = constants.skills[reader.ReadUInt32()]?.s; //0x007c
+  char.header.left_swap_skill = constants.skills[reader.ReadUInt32()]?.s; //0x0080
+  char.header.right_swap_skill = constants.skills[reader.ReadUInt32()]?.s; //0x0084
   char.header.menu_appearance = _readCharMenuAppearance(reader.ReadArray(32), constants); //0x0088 [char menu appearance]
   char.header.difficulty = _readDifficulty(reader.ReadArray(3)); //0x00a8
   char.header.map_id = reader.ReadUInt32(); //0x00ab
-  reader.Skip(2); //0x00af [unk = 0x0, 0x0]
+  reader.SkipBytes(2); //0x00af [unk = 0x0, 0x0]
   char.header.dead_merc = reader.ReadUInt16(); //0x00b1
   char.header.merc_id = reader.ReadUInt32().toString(16); //0x00b3
   char.header.merc_name_id = reader.ReadUInt16(); //0x00b7
   char.header.merc_type = reader.ReadUInt16(); //0x00b9
   char.header.merc_experience = reader.ReadUInt32(); //0x00bb
-  reader.Skip(144); //0x00bf [unk]
-  reader.Skip(4); //0x014f [quests header identifier = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
-  reader.Skip(4); //0x0153 [version = 0x6, 0x0, 0x0, 0x0]
-  reader.Skip(2); //0x0153 [quests header length = 0x2a, 0x1]
+  reader.SkipBytes(144); //0x00bf [unk]
+  reader.SkipBytes(4); //0x014f [quests header identifier = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
+  reader.SkipBytes(4); //0x0153 [version = 0x6, 0x0, 0x0, 0x0]
+  reader.SkipBytes(2); //0x0153 [quests header length = 0x2a, 0x1]
   char.header.quests_normal = _readQuests(reader.ReadArray(96)); //0x0159
   char.header.quests_nm = _readQuests(reader.ReadArray(96)); //0x01b9
   char.header.quests_hell = _readQuests(reader.ReadArray(96)); //0x0219
-  reader.Skip(2); //0x0279 [waypoint header identifier = 0x57, 0x53 "WS"]
-  reader.Skip(4); //0x027b [waypoint header version = 0x1, 0x0, 0x0, 0x0]
-  reader.Skip(2); //0x027f [waypoint header length = 0x50, 0x0]
+  reader.SkipBytes(2); //0x0279 [waypoint header identifier = 0x57, 0x53 "WS"]
+  reader.SkipBytes(4); //0x027b [waypoint header version = 0x1, 0x0, 0x0, 0x0]
+  reader.SkipBytes(2); //0x027f [waypoint header length = 0x50, 0x0]
   char.header.waypoints = _readWaypointData(reader.ReadArray(0x48)); //0x0281
-  reader.Skip(2); //0x02c9 [npc header identifier  = 0x01, 0x77 ".w"]
-  reader.Skip(2); //0x02ca [npc header length = 0x34]
+  reader.SkipBytes(2); //0x02c9 [npc header identifier  = 0x01, 0x77 ".w"]
+  reader.SkipBytes(2); //0x02ca [npc header length = 0x34]
   char.header.npcs = _readNPCData(reader.ReadArray(0x30)); //0x02cc
 }
 
-export function writeHeader(char: types.ID2S, writer: BinaryWriter, constants: types.IConstantData) {
+export function writeHeader(char: types.ID2S, writer: BitWriter, constants: types.IConstantData) {
   writer
-    .SetLittleEndian()
-    .Skip(4) //0x0008 (filesize. needs to be writen after all data)
-    .Skip(4) //0x000c (checksum. needs to be calculated after all data writer)
+    .WriteUInt32(0x0) //0x0008 (filesize. needs to be writen after all data)
+    .WriteUInt32(0x0) //0x000c (checksum. needs to be calculated after all data writer)
     .WriteUInt32(char.header.active_arms) //0x0010
     .WriteString(char.header.name, 16) //0x0014
     .WriteArray(_writeStatus(char.header.status)) //0x0024
@@ -79,14 +77,14 @@ export function writeHeader(char: types.ID2S, writer: BinaryWriter, constants: t
     .WriteUInt16(char.header.merc_name_id) //0x00b7
     .WriteUInt16(char.header.merc_type) //0x00b9
     .WriteUInt32(char.header.merc_experience) //0x00bb
-    .Skip(140) //0x00bf [unk]
+    .WriteArray(new Uint8Array(140)) //0x00bf [unk]
     .WriteUInt32(0x1) //0x014b [unk = 0x1, 0x0, 0x0, 0x0]
-    .WriteString("Woo!") //0x014f [quests = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
+    .WriteString("Woo!", 4) //0x014f [quests = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
     .WriteArray(new Uint8Array([0x06, 0x00, 0x00, 0x00, 0x2a, 0x01])) //0x0153 [unk = 0x6, 0x0, 0x0, 0x0, 0x2a, 0x1]
     .WriteArray(_writeQuests(char.header.quests_normal)) //0x0159
     .WriteArray(_writeQuests(char.header.quests_nm)) //0x01b9
     .WriteArray(_writeQuests(char.header.quests_hell)) //0x0219
-    .WriteString("WS") //0x0279 [waypoint data = 0x57, 0x53 "WS"]
+    .WriteString("WS", 2) //0x0279 [waypoint data = 0x57, 0x53 "WS"]
     .WriteArray(new Uint8Array([0x01, 0x00, 0x00, 0x00, 0x50, 0x00])) //0x027b [unk = 0x1, 0x0, 0x0, 0x0, 0x50, 0x0]
     .WriteArray(_writeWaypointData(char.header.waypoints)) //0x0281
     .WriteArray(new Uint8Array([0x01, 0x77])) //0x02c9 [npc header = 0x01, 0x77 ".w"]
@@ -127,7 +125,7 @@ function _writeStatus(status: types.IStatus): Uint8Array {
 
 function _readCharMenuAppearance(bytes: Uint8Array, constants: types.IConstantData): types.ICharMenuAppearance {
   const appearance = {} as types.ICharMenuAppearance;
-  const reader = new BinaryReader(bytes).SetLittleEndian();
+  const reader = new BitReader(bytes);
   const graphics = reader.ReadArray(16);
   const tints = reader.ReadArray(16);
   appearance.head = { graphic: graphics[0], tint: tints[0] } as types.IMenuAppearance;
@@ -150,7 +148,8 @@ function _readCharMenuAppearance(bytes: Uint8Array, constants: types.IConstantDa
 }
 
 function _writeCharMenuAppearance(appearance: types.ICharMenuAppearance, constants: types.IConstantData): Uint8Array {
-  const writer = new BinaryWriter(32).SetLittleEndian().SetLength(32);
+  const writer = new BitWriter(32);
+  writer.length = 32 * 8;
 
   const graphics: number[] = [];
   graphics.push(appearance && appearance.head ? appearance.head.graphic : 0);
@@ -171,7 +170,7 @@ function _writeCharMenuAppearance(appearance: types.ICharMenuAppearance, constan
   graphics.push(appearance && appearance.special8 ? appearance.special8.graphic : 0);
 
   for (const g of graphics) {
-    writer.WriteUInt(g, 1);
+    writer.WriteUInt8(g);
   }
 
   const tints: number[] = [];
@@ -193,14 +192,14 @@ function _writeCharMenuAppearance(appearance: types.ICharMenuAppearance, constan
   tints.push(appearance && appearance.special8 ? appearance.special8.tint : 0);
 
   for (const t of tints) {
-    writer.WriteUInt(t, 1);
+    writer.WriteUInt8(t);
   }
-  return writer.toArray();
+  return writer.ToArray();
 }
 
 function _readAssignedSkills(bytes: Uint8Array, constants: types.IConstantData): string[] {
   const skills = [] as string[];
-  const reader = new BinaryReader(bytes).SetLittleEndian();
+  const reader = new BitReader(bytes);
   for (let i = 0; i < 16; i++) {
     const skillId = reader.ReadUInt32();
     const skill = constants.skills[skillId];
@@ -212,7 +211,8 @@ function _readAssignedSkills(bytes: Uint8Array, constants: types.IConstantData):
 }
 
 function _writeAssignedSkills(skills: string[], constants: types.IConstantData): Uint8Array {
-  const writer = new BinaryWriter(64).SetLittleEndian().SetLength(64);
+  const writer = new BitWriter(64);
+  writer.length = 64 * 8;
   skills = skills || [];
   for (let i = 0; i < 16; i++) {
     const skillId = _skillId(skills[i], constants);
@@ -223,7 +223,7 @@ function _writeAssignedSkills(skills: string[], constants: types.IConstantData):
     }
   }
 
-  return writer.toArray();
+  return writer.ToArray();
 }
 
 function _readDifficulty(bytes: Uint8Array): types.IDifficulty {
@@ -235,16 +235,17 @@ function _readDifficulty(bytes: Uint8Array): types.IDifficulty {
 }
 
 function _writeDifficulty(difficulty: types.IDifficulty): Uint8Array {
-  const writer = new BinaryWriter(3).SetLittleEndian().SetLength(3);
+  const writer = new BitWriter(3);
+  writer.length = 3 * 8;
   writer.WriteUInt8(difficulty.Normal);
   writer.WriteUInt8(difficulty.Nightmare);
   writer.WriteUInt8(difficulty.Hell);
-  return writer.toArray();
+  return writer.ToArray();
 }
 
 function _readQuests(bytes: Uint8Array): types.IQuests {
   const quests = {} as types.IQuests;
-  const reader = new BinaryReader(bytes).SetLittleEndian();
+  const reader = new BitReader(bytes);
   quests.act_i = {} as types.IActIQuests;
   quests.act_i.introduced = reader.ReadUInt16() === 0x1; //0x0000
   quests.act_i.den_of_evil = _readQuest(reader.ReadArray(2)); //0x0002
@@ -278,7 +279,7 @@ function _readQuests(bytes: Uint8Array): types.IQuests {
   quests.act_iv.terrors_end = _readQuest(reader.ReadArray(2));
   quests.act_iv.hellforge = _readQuest(reader.ReadArray(2));
   quests.act_iv.completed = reader.ReadUInt16() === 0x1; //0x0038
-  reader.Skip(10); //0x003a
+  reader.SkipBytes(10); //0x003a
   quests.act_v = {} as types.IActVQuests;
   quests.act_v.introduced = reader.ReadUInt16() === 0x1;
   quests.act_v.siege_on_harrogath = _readQuest(reader.ReadArray(2)); //0x0046
@@ -288,12 +289,13 @@ function _readQuests(bytes: Uint8Array): types.IQuests {
   quests.act_v.rite_of_passage = _readQuest(reader.ReadArray(2));
   quests.act_v.eve_of_destruction = _readQuest(reader.ReadArray(2));
   quests.act_v.completed = reader.ReadUInt16() === 0x1;
-  reader.Skip(12);
+  reader.SkipBytes(12);
   return quests; //sizeof [0x0060]
 }
 
 function _writeQuests(quests: types.IQuests): Uint8Array {
-  const writer = new BinaryWriter(96).SetLittleEndian().SetLength(96);
+  const writer = new BitWriter(96);
+  writer.length = 96 * 8;
   const difficultyCompleted = +quests.act_v.completed || +quests.act_v.eve_of_destruction.is_completed;
   return writer
     .WriteUInt16(+quests.act_i.introduced)
@@ -325,9 +327,9 @@ function _writeQuests(quests: types.IQuests): Uint8Array {
     .WriteArray(_writeQuest(quests.act_iv.terrors_end))
     .WriteArray(_writeQuest(quests.act_iv.hellforge))
     .WriteUInt16(+quests.act_iv.completed || +quests.act_iv.terrors_end.is_completed)
-    .Skip(6)
+    .WriteArray(new Uint8Array(6))
     .WriteUInt16(+quests.act_v.introduced || +quests.act_iv.terrors_end.is_completed)
-    .Skip(4)
+    .WriteArray(new Uint8Array(4))
     .WriteArray(_writeQuest(quests.act_v.siege_on_harrogath))
     .WriteArray(_writeQuest(quests.act_v.rescue_on_mount_arreat))
     .WriteArray(_writeQuest(quests.act_v.prison_of_ice))
@@ -336,58 +338,57 @@ function _writeQuests(quests: types.IQuests): Uint8Array {
     .WriteArray(_writeQuest(quests.act_v.eve_of_destruction))
     .WriteUInt8(difficultyCompleted)
     .WriteUInt8(difficultyCompleted ? 0x80 : 0x0) //is this right?
-    .Skip(12)
-    .toArray();
+    .WriteArray(new Uint8Array(12))
+    .ToArray();
 }
 
 function _readQuest(bytes: Uint8Array): types.IQuest {
   const quest = {} as types.IQuest;
-  const reader = new BinaryReader(bytes).SetLittleEndian();
-  const start = reader.Position();
-  if (_readBits(reader, start, 15, 1)) quest.unk15 = true;
-  if (_readBits(reader, start, 14, 1)) quest.unk14 = true;
-  quest.done_recently = _readBits(reader, start, 13, 1) === 1;
-  quest.closed = _readBits(reader, start, 12, 1) === 1;
-  if (_readBits(reader, start, 11, 1)) quest.unk11 = true;
-  if (_readBits(reader, start, 10, 1)) quest.unk10 = true;
-  if (_readBits(reader, start, 9, 1)) quest.unk9 = true;
-  if (_readBits(reader, start, 8, 1)) quest.unk8 = true;
-  if (_readBits(reader, start, 7, 1)) quest.consumed_scroll = true;
-  if (_readBits(reader, start, 6, 1)) quest.unk6 = true;
-  if (_readBits(reader, start, 5, 1)) quest.unk5 = true;
-  if (_readBits(reader, start, 4, 1)) quest.unk4 = true;
-  if (_readBits(reader, start, 3, 1)) quest.unk3 = true;
-  quest.is_received = _readBits(reader, start, 2, 1) === 1;
-  quest.is_requirement_completed = _readBits(reader, start, 1, 1) === 1;
-  quest.is_completed = _readBits(reader, start, 0, 1) === 1;
+  const reader = new BitReader(bytes);
+  quest.is_completed = reader.ReadBit() === 1;
+  quest.is_requirement_completed = reader.ReadBit() === 1;
+  quest.is_received = reader.ReadBit() === 1;
+  if (reader.ReadBit() === 1) quest.unk3 = true;
+  if (reader.ReadBit() === 1) quest.unk4 = true;
+  if (reader.ReadBit() === 1) quest.unk5 = true;
+  if (reader.ReadBit() === 1) quest.unk6 = true;
+  if (reader.ReadBit() === 1) quest.consumed_scroll = true;
+  if (reader.ReadBit() === 1) quest.unk8 = true;
+  if (reader.ReadBit() === 1) quest.unk9 = true;
+  if (reader.ReadBit() === 1) quest.unk10 = true;
+  if (reader.ReadBit() === 1) quest.unk11 = true;
+  quest.closed = reader.ReadBit() === 1;
+  quest.done_recently = reader.ReadBit() === 1;
+  if (reader.ReadBit() === 1) quest.unk14 = true;
+  if (reader.ReadBit() === 1) quest.unk15 = true;
   return quest;
 }
 
 function _writeQuest(quest: types.IQuest): Uint8Array {
-  const writer = new BinaryWriter(2).SetLittleEndian().SetLength(2);
-  const start = writer.Position();
-  _writeBits(writer, +quest.unk15, start, 15, 1);
-  _writeBits(writer, +quest.done_recently, start, 13, 1);
-  _writeBits(writer, +quest.closed, start, 12, 1);
-  _writeBits(writer, +quest.unk14, start, 14, 1);
-  _writeBits(writer, +quest.unk11, start, 11, 1);
-  _writeBits(writer, +quest.unk10, start, 10, 1);
-  _writeBits(writer, +quest.unk9, start, 9, 1);
-  _writeBits(writer, +quest.unk8, start, 8, 1);
-  _writeBits(writer, +quest.consumed_scroll, start, 7, 1);
-  _writeBits(writer, +quest.unk6, start, 6, 1);
-  _writeBits(writer, +quest.unk5, start, 5, 1);
-  _writeBits(writer, +quest.unk4, start, 4, 1);
-  _writeBits(writer, +quest.unk3, start, 3, 1);
-  _writeBits(writer, +quest.is_received, start, 2, 1);
-  _writeBits(writer, +quest.is_requirement_completed, start, 1, 1);
-  _writeBits(writer, +quest.is_completed, start, 0, 1);
-  return writer.toArray();
+  const writer = new BitWriter(2);
+  writer.length = 2 * 8;
+  writer.WriteBit(+quest.is_completed);
+  writer.WriteBit(+quest.is_requirement_completed);
+  writer.WriteBit(+quest.is_received);
+  writer.WriteBit(+quest.unk3);
+  writer.WriteBit(+quest.unk4);
+  writer.WriteBit(+quest.unk5);
+  writer.WriteBit(+quest.unk6);
+  writer.WriteBit(+quest.consumed_scroll);
+  writer.WriteBit(+quest.unk8);
+  writer.WriteBit(+quest.unk9);
+  writer.WriteBit(+quest.unk10);
+  writer.WriteBit(+quest.unk11);
+  writer.WriteBit(+quest.closed);
+  writer.WriteBit(+quest.done_recently);
+  writer.WriteBit(+quest.unk14);
+  writer.WriteBit(+quest.unk15);
+  return writer.ToArray();
 }
 
 function _readWaypointData(bytes: Uint8Array): types.IWaypointData {
   const waypoints = {} as types.IWaypointData;
-  const reader = new BinaryReader(bytes).SetLittleEndian();
+  const reader = new BitReader(bytes);
   for (let i = 0; i < difficulties.length; i++) {
     waypoints[difficulties[i]] = _readWaypoints(reader.ReadArray(24));
   }
@@ -396,119 +397,119 @@ function _readWaypointData(bytes: Uint8Array): types.IWaypointData {
 
 function _readWaypoints(bytes: Uint8Array): types.IWaypoints {
   const waypoints = {} as types.IWaypoints;
-  const reader = new BinaryReader(bytes).SetLittleEndian();
-  reader.Skip(2); //unk = 0x2, 0x1
-  const start = reader.Position();
+  const reader = new BitReader(bytes);
+  reader.SkipBytes(2); //unk = 0x2, 0x
   waypoints.act_i = {} as types.IActIWaypoints;
-  waypoints.act_i.rogue_encampement = _readBits(reader, start, 0, 1) === 1;
-  waypoints.act_i.cold_plains = _readBits(reader, start, 1, 1) === 1;
-  waypoints.act_i.stony_field = _readBits(reader, start, 2, 1) === 1;
-  waypoints.act_i.dark_woods = _readBits(reader, start, 3, 1) === 1;
-  waypoints.act_i.black_marsh = _readBits(reader, start, 4, 1) === 1;
-  waypoints.act_i.outer_cloister = _readBits(reader, start, 5, 1) === 1;
-  waypoints.act_i.jail_lvl_1 = _readBits(reader, start, 6, 1) === 1;
-  waypoints.act_i.inner_cloister = _readBits(reader, start, 7, 1) === 1;
-  waypoints.act_i.catacombs_lvl_2 = _readBits(reader, start, 8, 1) === 1;
+  waypoints.act_i.rogue_encampement = reader.ReadBit() === 1;
+  waypoints.act_i.cold_plains = reader.ReadBit() === 1;
+  waypoints.act_i.stony_field = reader.ReadBit() === 1;
+  waypoints.act_i.dark_woods = reader.ReadBit() === 1;
+  waypoints.act_i.black_marsh = reader.ReadBit() === 1;
+  waypoints.act_i.outer_cloister = reader.ReadBit() === 1;
+  waypoints.act_i.jail_lvl_1 = reader.ReadBit() === 1;
+  waypoints.act_i.inner_cloister = reader.ReadBit() === 1;
+  waypoints.act_i.catacombs_lvl_2 = reader.ReadBit() === 1;
   waypoints.act_ii = {} as types.IActIIWaypoints;
-  waypoints.act_ii.lut_gholein = _readBits(reader, start, 9, 1) === 1;
-  waypoints.act_ii.sewers_lvl_2 = _readBits(reader, start, 10, 1) === 1;
-  waypoints.act_ii.dry_hills = _readBits(reader, start, 11, 1) === 1;
-  waypoints.act_ii.halls_of_the_dead_lvl_2 = _readBits(reader, start, 12, 1) === 1;
-  waypoints.act_ii.far_oasis = _readBits(reader, start, 13, 1) === 1;
-  waypoints.act_ii.lost_city = _readBits(reader, start, 14, 1) === 1;
-  waypoints.act_ii.palace_cellar_lvl_1 = _readBits(reader, start, 15, 1) === 1;
-  waypoints.act_ii.arcane_sanctuary = _readBits(reader, start, 16, 1) === 1;
-  waypoints.act_ii.canyon_of_the_magi = _readBits(reader, start, 17, 1) === 1;
+  waypoints.act_ii.lut_gholein = reader.ReadBit() === 1;
+  waypoints.act_ii.sewers_lvl_2 = reader.ReadBit() === 1;
+  waypoints.act_ii.dry_hills = reader.ReadBit() === 1;
+  waypoints.act_ii.halls_of_the_dead_lvl_2 = reader.ReadBit() === 1;
+  waypoints.act_ii.far_oasis = reader.ReadBit() === 1;
+  waypoints.act_ii.lost_city = reader.ReadBit() === 1;
+  waypoints.act_ii.palace_cellar_lvl_1 = reader.ReadBit() === 1;
+  waypoints.act_ii.arcane_sanctuary = reader.ReadBit() === 1;
+  waypoints.act_ii.canyon_of_the_magi = reader.ReadBit() === 1;
   waypoints.act_iii = {} as types.IActIIIWaypoints;
-  waypoints.act_iii.kurast_docks = _readBits(reader, start, 18, 1) === 1;
-  waypoints.act_iii.spider_forest = _readBits(reader, start, 19, 1) === 1;
-  waypoints.act_iii.great_marsh = _readBits(reader, start, 20, 1) === 1;
-  waypoints.act_iii.flayer_jungle = _readBits(reader, start, 21, 1) === 1;
-  waypoints.act_iii.lower_kurast = _readBits(reader, start, 22, 1) === 1;
-  waypoints.act_iii.kurast_bazaar = _readBits(reader, start, 23, 1) === 1;
-  waypoints.act_iii.upper_kurast = _readBits(reader, start, 24, 1) === 1;
-  waypoints.act_iii.travincal = _readBits(reader, start, 25, 1) === 1;
-  waypoints.act_iii.durance_of_hate_lvl_2 = _readBits(reader, start, 26, 1) === 1;
+  waypoints.act_iii.kurast_docks = reader.ReadBit() === 1;
+  waypoints.act_iii.spider_forest = reader.ReadBit() === 1;
+  waypoints.act_iii.great_marsh = reader.ReadBit() === 1;
+  waypoints.act_iii.flayer_jungle = reader.ReadBit() === 1;
+  waypoints.act_iii.lower_kurast = reader.ReadBit() === 1;
+  waypoints.act_iii.kurast_bazaar = reader.ReadBit() === 1;
+  waypoints.act_iii.upper_kurast = reader.ReadBit() === 1;
+  waypoints.act_iii.travincal = reader.ReadBit() === 1;
+  waypoints.act_iii.durance_of_hate_lvl_2 = reader.ReadBit() === 1;
   waypoints.act_iv = {} as types.IActIVWaypoints;
-  waypoints.act_iv.the_pandemonium_fortress = _readBits(reader, start, 27, 1) === 1;
-  waypoints.act_iv.city_of_the_damned = _readBits(reader, start, 28, 1) === 1;
-  waypoints.act_iv.river_of_flame = _readBits(reader, start, 29, 1) === 1;
+  waypoints.act_iv.the_pandemonium_fortress = reader.ReadBit() === 1;
+  waypoints.act_iv.city_of_the_damned = reader.ReadBit() === 1;
+  waypoints.act_iv.river_of_flame = reader.ReadBit() === 1;
   waypoints.act_v = {} as types.IActVWaypoints;
-  waypoints.act_v.harrogath = _readBits(reader, start, 30, 1) === 1;
-  waypoints.act_v.frigid_highlands = _readBits(reader, start, 31, 1) === 1;
-  waypoints.act_v.arreat_plateau = _readBits(reader, start, 32, 1) === 1;
-  waypoints.act_v.crystalline_passage = _readBits(reader, start, 33, 1) === 1;
-  waypoints.act_v.halls_of_pain = _readBits(reader, start, 34, 1) === 1;
-  waypoints.act_v.glacial_trail = _readBits(reader, start, 35, 1) === 1;
-  waypoints.act_v.frozen_tundra = _readBits(reader, start, 36, 1) === 1;
-  waypoints.act_v.the_ancients_way = _readBits(reader, start, 37, 1) === 1;
-  waypoints.act_v.worldstone_keep_lvl_2 = _readBits(reader, start, 38, 1) === 1;
-  reader.Skip(17); //unk
+  waypoints.act_v.harrogath = reader.ReadBit() === 1;
+  waypoints.act_v.frigid_highlands = reader.ReadBit() === 1;
+  waypoints.act_v.arreat_plateau = reader.ReadBit() === 1;
+  waypoints.act_v.crystalline_passage = reader.ReadBit() === 1;
+  waypoints.act_v.halls_of_pain = reader.ReadBit() === 1;
+  waypoints.act_v.glacial_trail = reader.ReadBit() === 1;
+  waypoints.act_v.frozen_tundra = reader.ReadBit() === 1;
+  waypoints.act_v.the_ancients_way = reader.ReadBit() === 1;
+  waypoints.act_v.worldstone_keep_lvl_2 = reader.ReadBit() === 1;
+  reader.Align().SkipBytes(17);
   return waypoints;
 }
 
 function _writeWaypointData(waypoints: types.IWaypointData): Uint8Array {
-  const writer = new BinaryWriter(72).SetLittleEndian().SetLength(72);
+  const writer = new BitWriter(72);
+  writer.length = 72 * 8;
   for (let i = 0; i < difficulties.length; i++) {
     const w = waypoints != null ? waypoints[difficulties[i]] : null;
     writer.WriteArray(_writeWaypoints(w));
   }
-  return writer.toArray();
+  return writer.ToArray();
 }
 
 function _writeWaypoints(waypoints: types.IWaypoints): Uint8Array {
-  const writer = new BinaryWriter(24).SetLittleEndian().SetLength(24);
+  const writer = new BitWriter(24);
+  writer.length = 24 * 8;
   writer.WriteArray(new Uint8Array([0x02, 0x01]));
-  const start = writer.Position();
   if (waypoints) {
     if (waypoints.act_i) {
-      _writeBits(writer, +waypoints.act_i.rogue_encampement, start, 0, 1);
-      _writeBits(writer, +waypoints.act_i.cold_plains, start, 1, 1);
-      _writeBits(writer, +waypoints.act_i.stony_field, start, 2, 1);
-      _writeBits(writer, +waypoints.act_i.dark_woods, start, 3, 1);
-      _writeBits(writer, +waypoints.act_i.black_marsh, start, 4, 1);
-      _writeBits(writer, +waypoints.act_i.outer_cloister, start, 5, 1);
-      _writeBits(writer, +waypoints.act_i.jail_lvl_1, start, 6, 1);
-      _writeBits(writer, +waypoints.act_i.inner_cloister, start, 7, 1);
-      _writeBits(writer, +waypoints.act_i.catacombs_lvl_2, start, 8, 1);
+      writer.WriteBit(+waypoints.act_i.rogue_encampement);
+      writer.WriteBit(+waypoints.act_i.cold_plains);
+      writer.WriteBit(+waypoints.act_i.stony_field);
+      writer.WriteBit(+waypoints.act_i.dark_woods);
+      writer.WriteBit(+waypoints.act_i.black_marsh);
+      writer.WriteBit(+waypoints.act_i.outer_cloister);
+      writer.WriteBit(+waypoints.act_i.jail_lvl_1);
+      writer.WriteBit(+waypoints.act_i.inner_cloister);
+      writer.WriteBit(+waypoints.act_i.catacombs_lvl_2);
     }
     if (waypoints.act_ii) {
-      _writeBits(writer, +waypoints.act_ii.lut_gholein, start, 9, 1);
-      _writeBits(writer, +waypoints.act_ii.sewers_lvl_2, start, 10, 1);
-      _writeBits(writer, +waypoints.act_ii.dry_hills, start, 11, 1);
-      _writeBits(writer, +waypoints.act_ii.halls_of_the_dead_lvl_2, start, 12, 1);
-      _writeBits(writer, +waypoints.act_ii.far_oasis, start, 13, 1);
-      _writeBits(writer, +waypoints.act_ii.lost_city, start, 14, 1);
-      _writeBits(writer, +waypoints.act_ii.palace_cellar_lvl_1, start, 15, 1);
-      _writeBits(writer, +waypoints.act_ii.arcane_sanctuary, start, 16, 1);
-      _writeBits(writer, +waypoints.act_ii.canyon_of_the_magi, start, 17, 1);
+      writer.WriteBit(+waypoints.act_ii.lut_gholein);
+      writer.WriteBit(+waypoints.act_ii.sewers_lvl_2);
+      writer.WriteBit(+waypoints.act_ii.dry_hills);
+      writer.WriteBit(+waypoints.act_ii.halls_of_the_dead_lvl_2);
+      writer.WriteBit(+waypoints.act_ii.far_oasis);
+      writer.WriteBit(+waypoints.act_ii.lost_city);
+      writer.WriteBit(+waypoints.act_ii.palace_cellar_lvl_1);
+      writer.WriteBit(+waypoints.act_ii.arcane_sanctuary);
+      writer.WriteBit(+waypoints.act_ii.canyon_of_the_magi);
     }
     if (waypoints.act_iii) {
-      _writeBits(writer, +waypoints.act_iii.kurast_docks, start, 18, 1);
-      _writeBits(writer, +waypoints.act_iii.spider_forest, start, 19, 1);
-      _writeBits(writer, +waypoints.act_iii.great_marsh, start, 20, 1);
-      _writeBits(writer, +waypoints.act_iii.flayer_jungle, start, 21, 1);
-      _writeBits(writer, +waypoints.act_iii.lower_kurast, start, 22, 1);
-      _writeBits(writer, +waypoints.act_iii.kurast_bazaar, start, 23, 1);
-      _writeBits(writer, +waypoints.act_iii.upper_kurast, start, 24, 1);
-      _writeBits(writer, +waypoints.act_iii.travincal, start, 25, 1);
-      _writeBits(writer, +waypoints.act_iii.durance_of_hate_lvl_2, start, 26, 1);
+      writer.WriteBit(+waypoints.act_iii.kurast_docks);
+      writer.WriteBit(+waypoints.act_iii.spider_forest);
+      writer.WriteBit(+waypoints.act_iii.great_marsh);
+      writer.WriteBit(+waypoints.act_iii.flayer_jungle);
+      writer.WriteBit(+waypoints.act_iii.lower_kurast);
+      writer.WriteBit(+waypoints.act_iii.kurast_bazaar);
+      writer.WriteBit(+waypoints.act_iii.upper_kurast);
+      writer.WriteBit(+waypoints.act_iii.travincal);
+      writer.WriteBit(+waypoints.act_iii.durance_of_hate_lvl_2);
     }
     if (waypoints.act_iv) {
-      _writeBits(writer, +waypoints.act_iv.the_pandemonium_fortress, start, 27, 1);
-      _writeBits(writer, +waypoints.act_iv.city_of_the_damned, start, 28, 1);
-      _writeBits(writer, +waypoints.act_iv.river_of_flame, start, 29, 1);
+      writer.WriteBit(+waypoints.act_iv.the_pandemonium_fortress);
+      writer.WriteBit(+waypoints.act_iv.city_of_the_damned);
+      writer.WriteBit(+waypoints.act_iv.river_of_flame);
     }
     if (waypoints.act_v) {
-      _writeBits(writer, +waypoints.act_v.harrogath, start, 30, 1);
-      _writeBits(writer, +waypoints.act_v.frigid_highlands, start, 31, 1);
-      _writeBits(writer, +waypoints.act_v.arreat_plateau, start, 32, 1);
-      _writeBits(writer, +waypoints.act_v.crystalline_passage, start, 33, 1);
-      _writeBits(writer, +waypoints.act_v.halls_of_pain, start, 34, 1);
-      _writeBits(writer, +waypoints.act_v.glacial_trail, start, 35, 1);
-      _writeBits(writer, +waypoints.act_v.frozen_tundra, start, 36, 1);
-      _writeBits(writer, +waypoints.act_v.the_ancients_way, start, 37, 1);
-      _writeBits(writer, +waypoints.act_v.worldstone_keep_lvl_2, start, 38, 1);
+      writer.WriteBit(+waypoints.act_v.harrogath);
+      writer.WriteBit(+waypoints.act_v.frigid_highlands);
+      writer.WriteBit(+waypoints.act_v.arreat_plateau);
+      writer.WriteBit(+waypoints.act_v.crystalline_passage);
+      writer.WriteBit(+waypoints.act_v.halls_of_pain);
+      writer.WriteBit(+waypoints.act_v.glacial_trail);
+      writer.WriteBit(+waypoints.act_v.frozen_tundra);
+      writer.WriteBit(+waypoints.act_v.the_ancients_way);
+      writer.WriteBit(+waypoints.act_v.worldstone_keep_lvl_2);
     }
   } else {
     //all wps
@@ -516,15 +517,13 @@ function _writeWaypoints(waypoints: types.IWaypoints): Uint8Array {
     writer.WriteArray(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0x7f]));
     //_writeBits(writer, 0x3fffffffff, start, 0, 38);
   }
-  writer.Seek(start + 5);
-  writer.WriteArray(new Uint8Array(17));
-  return writer.toArray();
+  writer.Align().WriteArray(new Uint8Array(17));
+  return writer.ToArray();
 }
 
 function _readNPCData(bytes: Uint8Array): types.INPCData {
   const npcs = { normal: {}, nm: {}, hell: {} } as types.INPCData;
-  const reader = new BinaryReader(bytes).SetLittleEndian();
-  let start = reader.Position();
+  const reader = new BitReader(bytes);
   for (let j = 0; j < 3; j++) {
     npcs[difficulties[j]] = {
       warriv_act_ii: { intro: false, congrats: false },
@@ -558,134 +557,134 @@ function _readNPCData(bytes: Uint8Array): types.INPCData {
   //introductions
   for (let j = 0; j < 3; j++) {
     const npc = npcs[difficulties[j]];
-    npc.warriv_act_ii.intro = _readBits(reader, start, 0 + j * 8, 1) === 1;
-    npc.charsi.intro = _readBits(reader, start, 2 + j * 8, 1) === 1;
-    npc.warriv_act_i.intro = _readBits(reader, start, 3 + j * 8, 1) === 1;
-    npc.kashya.intro = _readBits(reader, start, 4 + j * 8, 1) === 1;
-    npc.akara.intro = _readBits(reader, start, 5 + j * 8, 1) === 1;
-    npc.gheed.intro = _readBits(reader, start, 6 + j * 8, 1) === 1;
-    npc.greiz.intro = _readBits(reader, start, 8 + j * 8, 1) === 1;
-    npc.jerhyn.intro = _readBits(reader, start, 9 + j * 8, 1) === 1;
-    npc.meshif_act_ii.intro = _readBits(reader, start, 10 + j * 8, 1) === 1;
-    npc.geglash.intro = _readBits(reader, start, 11 + j * 8, 1) === 1;
-    npc.lysnader.intro = _readBits(reader, start, 12 + j * 8, 1) === 1;
-    npc.fara.intro = _readBits(reader, start, 13 + j * 8, 1) === 1;
-    npc.drogan.intro = _readBits(reader, start, 14 + j * 8, 1) === 1;
-    npc.alkor.intro = _readBits(reader, start, 16 + j * 8, 1) === 1;
-    npc.hratli.intro = _readBits(reader, start, 17 + j * 8, 1) === 1;
-    npc.ashera.intro = _readBits(reader, start, 18 + j * 8, 1) === 1;
-    npc.cain_act_iii.intro = _readBits(reader, start, 21 + j * 8, 1) === 1;
-    npc.elzix.intro = _readBits(reader, start, 23 + j * 8, 1) === 1;
-    npc.malah.intro = _readBits(reader, start, 24 + j * 8, 1) === 1;
-    npc.malah.intro = _readBits(reader, start, 24 + j * 8, 1) === 1;
-    npc.anya.intro = _readBits(reader, start, 25 + j * 8, 1) === 1;
-    npc.natalya.intro = _readBits(reader, start, 27 + j * 8, 1) === 1;
-    npc.meshif_act_iii.intro = _readBits(reader, start, 28 + j * 8, 1) === 1;
-    npc.ormus.intro = _readBits(reader, start, 31 + j * 8, 1) === 1;
-    npc.cain_act_v.intro = _readBits(reader, start, 37 + j * 8, 1) === 1;
-    npc.qualkehk.intro = _readBits(reader, start, 38 + j * 8, 1) === 1;
-    npc.nihlathak.intro = _readBits(reader, start, 39 + j * 8, 1) === 1;
+    npc.warriv_act_ii.intro = reader.bits[0 + j * 8] === 1;
+    npc.charsi.intro = reader.bits[2 + j * 8] === 1;
+    npc.warriv_act_i.intro = reader.bits[3 + j * 8] === 1;
+    npc.kashya.intro = reader.bits[4 + j * 8] === 1;
+    npc.akara.intro = reader.bits[5 + j * 8] === 1;
+    npc.gheed.intro = reader.bits[6 + j * 8] === 1;
+    npc.greiz.intro = reader.bits[8 + j * 8] === 1;
+    npc.jerhyn.intro = reader.bits[9 + j * 8] === 1;
+    npc.meshif_act_ii.intro = reader.bits[10 + j * 8] === 1;
+    npc.geglash.intro = reader.bits[11 + j * 8] === 1;
+    npc.lysnader.intro = reader.bits[12 + j * 8] === 1;
+    npc.fara.intro = reader.bits[13 + j * 8] === 1;
+    npc.drogan.intro = reader.bits[14 + j * 8] === 1;
+    npc.alkor.intro = reader.bits[16 + j * 8] === 1;
+    npc.hratli.intro = reader.bits[17 + j * 8] === 1;
+    npc.ashera.intro = reader.bits[18 + j * 8] === 1;
+    npc.cain_act_iii.intro = reader.bits[21 + j * 8] === 1;
+    npc.elzix.intro = reader.bits[23 + j * 8] === 1;
+    npc.malah.intro = reader.bits[24 + j * 8] === 1;
+    npc.malah.intro = reader.bits[24 + j * 8] === 1;
+    npc.anya.intro = reader.bits[25 + j * 8] === 1;
+    npc.natalya.intro = reader.bits[27 + j * 8] === 1;
+    npc.meshif_act_iii.intro = reader.bits[28 + j * 8] === 1;
+    npc.ormus.intro = reader.bits[31 + j * 8] === 1;
+    npc.cain_act_v.intro = reader.bits[37 + j * 8] === 1;
+    npc.qualkehk.intro = reader.bits[38 + j * 8] === 1;
+    npc.nihlathak.intro = reader.bits[39 + j * 8] === 1;
   }
-  start += 24;
   //congrats
   for (let j = 0; j < 3; j++) {
     const npc = npcs[difficulties[j]];
-    npc.warriv_act_ii.congrats = _readBits(reader, start, 0 + j * 8, 1) === 1;
-    npc.charsi.congrats = _readBits(reader, start, 2 + j * 8, 1) === 1;
-    npc.warriv_act_i.congrats = _readBits(reader, start, 3 + j * 8, 1) === 1;
-    npc.kashya.congrats = _readBits(reader, start, 4 + j * 8, 1) === 1;
-    npc.akara.congrats = _readBits(reader, start, 5 + j * 8, 1) === 1;
-    npc.gheed.congrats = _readBits(reader, start, 6 + j * 8, 1) === 1;
-    npc.greiz.congrats = _readBits(reader, start, 8 + j * 8, 1) === 1;
-    npc.jerhyn.congrats = _readBits(reader, start, 9 + j * 8, 1) === 1;
-    npc.meshif_act_ii.congrats = _readBits(reader, start, 10 + j * 8, 1) === 1;
-    npc.geglash.congrats = _readBits(reader, start, 11 + j * 8, 1) === 1;
-    npc.lysnader.congrats = _readBits(reader, start, 12 + j * 8, 1) === 1;
-    npc.fara.congrats = _readBits(reader, start, 13 + j * 8, 1) === 1;
-    npc.drogan.congrats = _readBits(reader, start, 14 + j * 8, 1) === 1;
-    npc.alkor.congrats = _readBits(reader, start, 16 + j * 8, 1) === 1;
-    npc.hratli.congrats = _readBits(reader, start, 17 + j * 8, 1) === 1;
-    npc.ashera.congrats = _readBits(reader, start, 18 + j * 8, 1) === 1;
-    npc.cain_act_iii.congrats = _readBits(reader, start, 21 + j * 8, 1) === 1;
-    npc.elzix.congrats = _readBits(reader, start, 23 + j * 8, 1) === 1;
-    npc.malah.congrats = _readBits(reader, start, 24 + j * 8, 1) === 1;
-    npc.malah.congrats = _readBits(reader, start, 24 + j * 8, 1) === 1;
-    npc.anya.congrats = _readBits(reader, start, 25 + j * 8, 1) === 1;
-    npc.natalya.congrats = _readBits(reader, start, 27 + j * 8, 1) === 1;
-    npc.meshif_act_iii.congrats = _readBits(reader, start, 28 + j * 8, 1) === 1;
-    npc.ormus.congrats = _readBits(reader, start, 31 + j * 8, 1) === 1;
-    npc.cain_act_v.congrats = _readBits(reader, start, 37 + j * 8, 1) === 1;
-    npc.qualkehk.congrats = _readBits(reader, start, 38 + j * 8, 1) === 1;
-    npc.nihlathak.congrats = _readBits(reader, start, 39 + j * 8, 1) === 1;
+    npc.warriv_act_ii.congrats = reader.bits[192 + (0 + j * 8)] === 1;
+    npc.charsi.congrats = reader.bits[192 + (2 + j * 8)] === 1;
+    npc.warriv_act_i.congrats = reader.bits[192 + (3 + j * 8)] === 1;
+    npc.kashya.congrats = reader.bits[192 + (4 + j * 8)] === 1;
+    npc.akara.congrats = reader.bits[192 + (5 + j * 8)] === 1;
+    npc.gheed.congrats = reader.bits[192 + (6 + j * 8)] === 1;
+    npc.greiz.congrats = reader.bits[192 + (8 + j * 8)] === 1;
+    npc.jerhyn.congrats = reader.bits[192 + (9 + j * 8)] === 1;
+    npc.meshif_act_ii.congrats = reader.bits[192 + (10 + j * 8)] === 1;
+    npc.geglash.congrats = reader.bits[192 + (11 + j * 8)] === 1;
+    npc.lysnader.congrats = reader.bits[192 + (12 + j * 8)] === 1;
+    npc.fara.congrats = reader.bits[192 + (13 + j * 8)] === 1;
+    npc.drogan.congrats = reader.bits[192 + (14 + j * 8)] === 1;
+    npc.alkor.congrats = reader.bits[192 + (16 + j * 8)] === 1;
+    npc.hratli.congrats = reader.bits[192 + (17 + j * 8)] === 1;
+    npc.ashera.congrats = reader.bits[192 + (18 + j * 8)] === 1;
+    npc.cain_act_iii.congrats = reader.bits[192 + (21 + j * 8)] === 1;
+    npc.elzix.congrats = reader.bits[192 + (23 + j * 8)] === 1;
+    npc.malah.congrats = reader.bits[192 + (24 + j * 8)] === 1;
+    npc.malah.congrats = reader.bits[192 + (24 + j * 8)] === 1;
+    npc.anya.congrats = reader.bits[192 + (25 + j * 8)] === 1;
+    npc.natalya.congrats = reader.bits[192 + (27 + j * 8)] === 1;
+    npc.meshif_act_iii.congrats = reader.bits[192 + (28 + j * 8)] === 1;
+    npc.ormus.congrats = reader.bits[192 + (31 + j * 8)] === 1;
+    npc.cain_act_v.congrats = reader.bits[192 + (37 + j * 8)] === 1;
+    npc.qualkehk.congrats = reader.bits[192 + (38 + j * 8)] === 1;
+    npc.nihlathak.congrats = reader.bits[192 + (39 + j * 8)] === 1;
   }
   return npcs;
 }
 
 function _writeNPCData(npcs: types.INPCData): Uint8Array {
-  const writer = new BinaryWriter(0x30).SetLittleEndian().SetLength(0x30);
-  let start = writer.Position();
+  //these are wrong, will debug later
+  const writer = new BitWriter(0x30);
+  writer.length = 0x30 * 8;
   if (npcs) {
     for (let j = 0; j < 3; j++) {
       const npc = npcs[difficulties[j]];
-      _writeBits(writer, +npc.warriv_act_ii.intro, start, 0 + j * 8, 1);
-      _writeBits(writer, +npc.charsi.intro, start, 2 + j * 8, 1);
-      _writeBits(writer, +npc.warriv_act_i.intro, start, 3 + j * 8, 1);
-      _writeBits(writer, +npc.kashya.intro, start, 4 + j * 8, 1);
-      _writeBits(writer, +npc.akara.intro, start, 5 + j * 8, 1);
-      _writeBits(writer, +npc.gheed.intro, start, 6 + j * 8, 1);
-      _writeBits(writer, +npc.greiz.intro, start, 8 + j * 8, 1);
-      _writeBits(writer, +npc.jerhyn.intro, start, 9 + j * 8, 1);
-      _writeBits(writer, +npc.meshif_act_ii.intro, start, 10 + j * 8, 1);
-      _writeBits(writer, +npc.geglash.intro, start, 11 + j * 8, 1);
-      _writeBits(writer, +npc.lysnader.intro, start, 12 + j * 8, 1);
-      _writeBits(writer, +npc.fara.intro, start, 13 + j * 8, 1);
-      _writeBits(writer, +npc.drogan.intro, start, 14 + j * 8, 1);
-      _writeBits(writer, +npc.alkor.intro, start, 16 + j * 8, 1);
-      _writeBits(writer, +npc.hratli.intro, start, 17 + j * 8, 1);
-      _writeBits(writer, +npc.ashera.intro, start, 18 + j * 8, 1);
-      _writeBits(writer, +npc.cain_act_iii.intro, start, 21 + j * 8, 1);
-      _writeBits(writer, +npc.elzix.intro, start, 23 + j * 8, 1);
-      _writeBits(writer, +npc.malah.intro, start, 24 + j * 8, 1);
-      _writeBits(writer, +npc.malah.intro, start, 24 + j * 8, 1);
-      _writeBits(writer, +npc.anya.intro, start, 25 + j * 8, 1);
-      _writeBits(writer, +npc.natalya.intro, start, 27 + j * 8, 1);
-      _writeBits(writer, +npc.meshif_act_iii.intro, start, 28 + j * 8, 1);
-      _writeBits(writer, +npc.ormus.intro, start, 31 + j * 8, 1);
-      _writeBits(writer, +npc.cain_act_v.intro, start, 37 + j * 8, 1);
-      _writeBits(writer, +npc.qualkehk.intro, start, 38 + j * 8, 1);
-      _writeBits(writer, +npc.nihlathak.intro, start, 39 + j * 8, 1);
+      writer.WriteBit(+npc.warriv_act_ii.intro);
+      writer.WriteBit(+npc.charsi.intro);
+      writer.WriteBit(+npc.warriv_act_i.intro);
+      writer.WriteBit(+npc.kashya.intro);
+      writer.WriteBit(+npc.akara.intro);
+      writer.WriteBit(+npc.gheed.intro);
+      writer.WriteBit(+npc.greiz.intro);
+      writer.WriteBit(+npc.jerhyn.intro);
+      writer.WriteBit(+npc.meshif_act_ii.intro);
+      writer.WriteBit(+npc.geglash.intro);
+      writer.WriteBit(+npc.lysnader.intro);
+      writer.WriteBit(+npc.fara.intro);
+      writer.WriteBit(+npc.drogan.intro);
+      writer.WriteBit(+npc.alkor.intro);
+      writer.WriteBit(+npc.hratli.intro);
+      writer.WriteBit(+npc.ashera.intro);
+      writer.WriteBit(+npc.cain_act_iii.intro);
+      writer.WriteBit(+npc.elzix.intro);
+      writer.WriteBit(+npc.malah.intro);
+      writer.WriteBit(+npc.malah.intro);
+      writer.WriteBit(+npc.anya.intro);
+      writer.WriteBit(+npc.natalya.intro);
+      writer.WriteBit(+npc.meshif_act_iii.intro);
+      writer.WriteBit(+npc.ormus.intro);
+      writer.WriteBit(+npc.cain_act_v.intro);
+      writer.WriteBit(+npc.qualkehk.intro);
+      writer.WriteBit(+npc.nihlathak.intro);
     }
-    start += 24;
+    writer.SeekByte(0x24);
     for (let j = 0; j < 3; j++) {
       const npc = npcs[difficulties[j]];
-      _writeBits(writer, +npc.warriv_act_ii.congrats, start, 0 + j * 8, 1);
-      _writeBits(writer, +npc.charsi.congrats, start, 2 + j * 8, 1);
-      _writeBits(writer, +npc.warriv_act_i.congrats, start, 3 + j * 8, 1);
-      _writeBits(writer, +npc.kashya.congrats, start, 4 + j * 8, 1);
-      _writeBits(writer, +npc.akara.congrats, start, 5 + j * 8, 1);
-      _writeBits(writer, +npc.gheed.congrats, start, 6 + j * 8, 1);
-      _writeBits(writer, +npc.greiz.congrats, start, 8 + j * 8, 1);
-      _writeBits(writer, +npc.jerhyn.congrats, start, 9 + j * 8, 1);
-      _writeBits(writer, +npc.meshif_act_ii.congrats, start, 10 + j * 8, 1);
-      _writeBits(writer, +npc.geglash.congrats, start, 11 + j * 8, 1);
-      _writeBits(writer, +npc.lysnader.congrats, start, 12 + j * 8, 1);
-      _writeBits(writer, +npc.fara.congrats, start, 13 + j * 8, 1);
-      _writeBits(writer, +npc.drogan.congrats, start, 14 + j * 8, 1);
-      _writeBits(writer, +npc.alkor.congrats, start, 16 + j * 8, 1);
-      _writeBits(writer, +npc.hratli.congrats, start, 17 + j * 8, 1);
-      _writeBits(writer, +npc.ashera.congrats, start, 18 + j * 8, 1);
-      _writeBits(writer, +npc.cain_act_iii.congrats, start, 21 + j * 8, 1);
-      _writeBits(writer, +npc.elzix.congrats, start, 23 + j * 8, 1);
-      _writeBits(writer, +npc.malah.congrats, start, 24 + j * 8, 1);
-      _writeBits(writer, +npc.malah.congrats, start, 24 + j * 8, 1);
-      _writeBits(writer, +npc.anya.congrats, start, 25 + j * 8, 1);
-      _writeBits(writer, +npc.natalya.congrats, start, 27 + j * 8, 1);
-      _writeBits(writer, +npc.meshif_act_iii.congrats, start, 28 + j * 8, 1);
-      _writeBits(writer, +npc.ormus.congrats, start, 31 + j * 8, 1);
-      _writeBits(writer, +npc.cain_act_v.congrats, start, 37 + j * 8, 1);
-      _writeBits(writer, +npc.qualkehk.congrats, start, 38 + j * 8, 1);
-      _writeBits(writer, +npc.nihlathak.congrats, start, 39 + j * 8, 1);
+      writer.WriteBit(+npc.warriv_act_ii.congrats);
+      writer.WriteBit(+npc.charsi.congrats);
+      writer.WriteBit(+npc.warriv_act_i.congrats);
+      writer.WriteBit(+npc.kashya.congrats);
+      writer.WriteBit(+npc.akara.congrats);
+      writer.WriteBit(+npc.gheed.congrats);
+      writer.WriteBit(+npc.greiz.congrats);
+      writer.WriteBit(+npc.jerhyn.congrats);
+      writer.WriteBit(+npc.meshif_act_ii.congrats);
+      writer.WriteBit(+npc.geglash.congrats);
+      writer.WriteBit(+npc.lysnader.congrats);
+      writer.WriteBit(+npc.fara.congrats);
+      writer.WriteBit(+npc.drogan.congrats);
+      writer.WriteBit(+npc.alkor.congrats);
+      writer.WriteBit(+npc.hratli.congrats);
+      writer.WriteBit(+npc.ashera.congrats);
+      writer.WriteBit(+npc.cain_act_iii.congrats);
+      writer.WriteBit(+npc.elzix.congrats);
+      writer.WriteBit(+npc.malah.congrats);
+      writer.WriteBit(+npc.malah.congrats);
+      writer.WriteBit(+npc.anya.congrats);
+      writer.WriteBit(+npc.natalya.congrats);
+      writer.WriteBit(+npc.meshif_act_iii.congrats);
+      writer.WriteBit(+npc.ormus.congrats);
+      writer.WriteBit(+npc.cain_act_v.congrats);
+      writer.WriteBit(+npc.qualkehk.congrats);
+      writer.WriteBit(+npc.nihlathak.congrats);
     }
   }
-  return writer.toArray();
+  return writer.ToArray();
 }

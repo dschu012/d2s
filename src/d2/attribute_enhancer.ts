@@ -96,20 +96,20 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
       item.inv_file = details.ig[item.picture_id];
     }
     if (item.magic_prefix || item.magic_suffix) {
-      if (item.magic_prefix && constants.magic_prefixes[item.magic_prefix].tc) {
+      if (item.magic_prefix && constants.magic_prefixes[item.magic_prefix]?.tc) {
         item.transform_color = constants.magic_prefixes[item.magic_prefix].tc;
       }
-      if (item.magic_suffix && constants.magic_suffixes[item.magic_suffix].tc) {
+      if (item.magic_suffix && constants.magic_suffixes[item.magic_suffix]?.tc) {
         item.transform_color = constants.magic_suffixes[item.magic_suffix].tc;
       }
     } else if (item.magical_name_ids && item.magical_name_ids.length === 6) {
       for (let i = 0; i < 6; i++) {
         const id = item.magical_name_ids[i];
         if (id) {
-          if (i % 2 == 0 && constants.magic_prefixes[id] && constants.magic_prefixes[id].tc) {
+          if (i % 2 == 0 && constants.magic_prefixes[id] && constants.magic_prefixes[id]?.tc) {
             // even is prefixes
             item.transform_color = constants.magic_prefixes[id].tc;
-          } else if (constants.magic_suffixes[id] && constants.magic_suffixes[id].tc) {
+          } else if (constants.magic_suffixes[id] && constants.magic_suffixes[id]?.tc) {
             // odd is suffixes
             item.transform_color = constants.magic_suffixes[id].tc;
           }
@@ -409,12 +409,12 @@ function _descFunc(
     case 27: {
       const skill = constants.skills[property.values[0]];
       const clazz = _classFromCode(skill.c, constants);
-      property.description = `${sign}${v} to ${skill.s} ${clazz.co}`;
+      property.description = `${sign}${v} to ${skill?.s} ${clazz?.co}`;
       break;
     }
     case 28: {
       const skill = constants.skills[property.values[0]];
-      property.description = `${sign}${v} to ${skill.s}`;
+      property.description = `${sign}${v} to ${skill?.s}`;
       break;
     }
     default: {
@@ -479,6 +479,21 @@ function _groupAttributes(all_attributes: types.IMagicProperty[], constants: typ
     const properties = combined_magic_attributes.filter((e) => {
       //encoded skills need to look at those params too.
       if (prop.e === 3) {
+        return e.id === magic_attribute.id && e.values[0] === magic_attribute.values[0] && e.values[1] === magic_attribute.values[1];
+      }
+      if (prop.dF === 15) {
+        return (
+          e.id === magic_attribute.id &&
+          e.values[0] === magic_attribute.values[0] &&
+          e.values[1] === magic_attribute.values[1] &&
+          e.values[2] === magic_attribute.values[2]
+        );
+      }
+      if (prop.dF === 16 || prop.dF === 23) {
+        return e.id === magic_attribute.id && e.values[0] === magic_attribute.values[0] && e.values[1] === magic_attribute.values[1];
+      }
+      if (prop.s === "state" || prop.s === "item_nonclassskill") {
+        //state
         return e.id === magic_attribute.id && e.values[0] === magic_attribute.values[0] && e.values[1] === magic_attribute.values[1];
       }
       return e.id === magic_attribute.id;

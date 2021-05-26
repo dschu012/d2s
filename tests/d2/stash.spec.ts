@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { read, write } from "../../src/d2/stash";
-import { _writeBits } from "../../src/util";
 import { constants } from "../../src/data/versions/96_constant_data";
 import * as path from "path";
 import * as fs from "fs";

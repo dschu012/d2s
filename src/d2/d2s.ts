@@ -1,8 +1,8 @@
 import * as types from "./types";
 import { readHeader, readHeaderData, writeHeader, writeHeaderData, fixHeader } from "./header";
 import { readAttributes, writeAttributes } from "./attributes";
-import { BinaryReader } from "../binary/binaryreader";
-import { BinaryWriter } from "../binary/binarywriter";
+import { BitReader } from "../binary/bitreader";
+import { BitWriter } from "../binary/bitwriter";
 import { readSkills, writeSkills } from "./skills";
 import * as items from "./items";
 import { enhanceAttributes, enhanceItem } from "./attribute_enhancer";
@@ -13,12 +13,12 @@ const defaultConfig = {
 } as types.IConfig;
 
 function reader(buffer: Uint8Array) {
-  return new BinaryReader(buffer).SetLittleEndian();
+  return new BitReader(buffer);
 }
 
 async function read(buffer: Uint8Array, constants: types.IConstantData, userConfig?: types.IConfig): Promise<types.ID2S> {
   const char = {} as types.ID2S;
-  const reader = new BinaryReader(buffer).SetLittleEndian();
+  const reader = new BitReader(buffer);
   const config = Object.assign(defaultConfig, userConfig);
   await readHeader(char, reader);
   //could load constants based on version here
@@ -41,7 +41,7 @@ async function readItem(
   constants: types.IConstantData,
   userConfig?: types.IConfig
 ): Promise<types.IItem> {
-  const reader = new BinaryReader(buffer).SetLittleEndian();
+  const reader = new BitReader(buffer);
   const config = Object.assign(defaultConfig, userConfig);
   const item = await items.readItem(reader, version, constants, config);
   await enhanceItem(item, constants);
@@ -49,12 +49,12 @@ async function readItem(
 }
 
 function writer(buffer: Uint8Array) {
-  return new BinaryWriter().SetLittleEndian();
+  return new BitWriter();
 }
 
 async function write(data: types.ID2S, constants: types.IConstantData, userConfig?: types.IConfig): Promise<Uint8Array> {
   const config = Object.assign(defaultConfig, userConfig);
-  const writer = new BinaryWriter().SetLittleEndian();
+  const writer = new BitWriter();
   writer.WriteArray(await writeHeader(data));
   //could load constants based on version here
   writer.WriteArray(await writeHeaderData(data, constants));
@@ -67,7 +67,7 @@ async function write(data: types.ID2S, constants: types.IConstantData, userConfi
     writer.WriteArray(await items.writeGolemItems(data, constants, config));
   }
   await fixHeader(writer);
-  return writer.toArray();
+  return writer.ToArray();
 }
 
 async function writeItem(
@@ -77,9 +77,9 @@ async function writeItem(
   userConfig?: types.IConfig
 ): Promise<Uint8Array> {
   const config = Object.assign(defaultConfig, userConfig);
-  const writer = new BinaryWriter().SetLittleEndian();
+  const writer = new BitWriter();
   writer.WriteArray(await items.writeItem(item, version, constants, config));
-  return writer.toArray();
+  return writer.ToArray();
 }
 
 export { reader, writer, read, write, readItem, writeItem };

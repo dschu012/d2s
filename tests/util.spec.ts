@@ -16,16 +16,12 @@ describe("utils", () => {
 
   it("should read/write", async () => {
     const writer = new BitWriter();
-    for(let i = 0; i < 90; i ++) {
-      writer.WriteByte(125)
-        .WriteUInt16(125)
-        .WriteUInt16(125, 9)
-        .WriteUInt32(125)
-        .WriteUInt32(125, 27);
+    for (let i = 0; i < 90; i++) {
+      writer.WriteByte(125).WriteUInt16(125).WriteUInt16(125, 9).WriteUInt32(125).WriteUInt32(125, 27);
     }
 
     const reader = new BitReader(writer.ToArray());
-    for(let i = 0; i < 90; i ++) {
+    for (let i = 0; i < 90; i++) {
       expect(reader.ReadByte()).to.eq(125);
       expect(reader.ReadUInt16()).to.eq(125);
       expect(reader.ReadUInt16(9)).to.eq(125);

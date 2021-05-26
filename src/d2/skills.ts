@@ -1,13 +1,13 @@
 import * as types from "./types";
-import { BinaryReader } from "../binary/binaryreader";
-import { BinaryWriter } from "../binary/binarywriter";
+import { BitReader } from "../binary/bitreader";
+import { BitWriter } from "../binary/bitwriter";
 
-export async function readSkills(char: types.ID2S, reader: BinaryReader, constants: types.IConstantData) {
+export async function readSkills(char: types.ID2S, reader: BitReader, constants: types.IConstantData) {
   char.skills = [] as types.ISkill[];
   const offset = SkillOffset[<string>char.header.class];
   const header = reader.ReadString(2); //0x0000 [skills header = 0x69, 0x66 "if"]
   if (header !== "if") {
-    throw new Error(`Skills header 'if' not found at position ${reader.Position() - 2}`);
+    throw new Error(`Skills header 'if' not found at position ${reader.offset - 2 * 8}`);
   }
   for (let i = 0; i < 30; i++) {
     const id = offset + i;
@@ -20,13 +20,13 @@ export async function readSkills(char: types.ID2S, reader: BinaryReader, constan
 }
 
 export async function writeSkills(char: types.ID2S, constants: types.IConstantData): Promise<Uint8Array> {
-  const writer = new BinaryWriter().SetLittleEndian();
-  writer.WriteString("if"); //0x0000 [skills header = 0x69, 0x66 "if"]
+  const writer = new BitWriter();
+  writer.WriteString("if", 2); //0x0000 [skills header = 0x69, 0x66 "if"]
   //probably array length checking/sorting of skills by id...
   for (let i = 0; i < 30; i++) {
     writer.WriteUInt8(char.skills[i].points);
   }
-  return writer.toArray();
+  return writer.ToArray();
 }
 
 interface ISkillOffset {

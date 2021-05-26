@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { readItems, readItem, writeItem, _writeMagicProperties } from "../../src/d2/items";
 import * as types from "../../src/d2/types";
-import { BinaryReader } from "../../src/binary/binaryreader";
 import { _writeBits } from "../../src/util";
 import { constants } from "../../src/data/versions/96_constant_data";
-import { BinaryWriter } from "../../src/binary/binarywriter";
+import { BitWriter } from "../../src/binary/bitwriter";
+import { BitReader } from "../../src/binary/bitreader";
 
 describe("items", () => {
   const config = {
@@ -33,80 +33,16 @@ Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 79, 180, 0]
     //let buffer = new Uint8Array([16,32,130,0,13,17,0,63,30,22,187,92,65,2,2,14,14,255,1]);
     //HP5 (inv, col=9, row=3)
     const buffer = new Uint8Array([16, 0, 160, 0, 5, 228, 4, 79, 180, 0]);
-    const reader = new BinaryReader(buffer).SetLittleEndian();
+    const reader = new BitReader(buffer);
     const item = await readItem(reader, 0x61, constants, config);
 
     expect(item.type).to.eq("hp5");
   });
 
-  xit("should write custom charm", async () => {
-    // prettier-ignore
-    const buffer = new Uint8Array([16,0,128,0,5,228,68,216,79,120,250,137,117,89,210,96,199,72,0,248,12,240,17,240,25,240,57,17,155,34,118,69,108,139,216,63,207,178,80,198,195,216,8,192,80,255,31,
-    ]);
-    const reader = new BinaryReader(buffer).SetLittleEndian();
-    const item = await readItem(reader, 0x61, constants, config);
-
-    const writer = new BinaryWriter().SetLittleEndian();
-    writer.WriteArray(buffer);
-    const z = {
-      magic_attributes: [
-        { id: 151, values: [123, 31] }, //conviction
-        { id: 96, values: [107] }, //movement speed
-        { id: 99, values: [107] }, //fhr
-        { id: 105, values: [107] }, //fcr
-        { id: 0, values: [95] },
-        { id: 1, values: [95] },
-        { id: 2, values: [95] },
-        { id: 3, values: [95] }, //all stats
-        { id: 39, values: [205] },
-        { id: 40, values: [20] },
-        { id: 41, values: [205] },
-        { id: 42, values: [20] },
-        { id: 43, values: [205] },
-        { id: 44, values: [20] },
-        { id: 45, values: [205] },
-        { id: 46, values: [20] }, //all resist
-        { id: 34, values: [63] }, //pdr
-        { id: 35, values: [63] }, //mdr
-        { id: 36, values: [255] }, //pdr
-        { id: 37, values: [255] }, //mdr
-        { id: 142, values: [127] },
-        { id: 143, values: [127] },
-        { id: 144, values: [127] },
-        { id: 145, values: [127] },
-        { id: 146, values: [127] },
-        { id: 147, values: [127] },
-        { id: 148, values: [127] },
-        { id: 149, values: [127] }, //damage reduction
-        { id: 329, values: [127] },
-        { id: 330, values: [127] },
-        { id: 331, values: [127] },
-        { id: 332, values: [127] },
-        { id: 333, values: [127] },
-        { id: 334, values: [127] },
-        { id: 335, values: [127] },
-        { id: 336, values: [127] },
-        { id: 216, values: [63] }, //life
-        { id: 217, values: [63] }, //mana
-        { id: 127, values: [7] }, //all skill
-        { id: 89, values: [7] }, //light radius
-        { id: 80, values: [127] }, //mf
-        { id: 240, values: [63] }, //mf
-        { id: 97, values: [54, 31] }, //tele
-      ],
-    } as types.IItem;
-    let offset = 146; //where statlist starts on the charm
-    writer.Seek(0);
-    offset = _writeMagicProperties(writer, z.magic_attributes, 0, offset, constants);
-    const end = Math.ceil(offset / 8);
-    writer.SetLength(end).Seek(end);
-    process.stdout.write(`Charm bytes: ${writer.toArray()}`);
-  });
-
   it('should read "simple" item', async () => {
     //hp1 from game
     const buffer = new Uint8Array([74, 77, 16, 32, 34, 0, 0, 8, 0, 128, 6, 23, 3, 2]);
-    const reader = new BinaryReader(buffer).SetLittleEndian();
+    const reader = new BitReader(buffer);
     const item = await readItem(reader, 0x60, constants, config);
     expect(item.type).to.eq("hp1");
     expect(item.simple_item).to.eq(1);
@@ -142,7 +78,7 @@ Uint8Array(10) [16, 0, 160, 0, 5, 228, 4, 79, 180, 0]
     // prettier-ignore
     const buffer = new Uint8Array([74,77,8,0,74,77,16,32,162,0,101,8,0,128,6,23,3,2,74,77,16,32,162,0,101,8,2,128,6,23,3,2,74,77,16,32,162,0,101,8,4,128,6,23,3,2,74,77,16,32,162,0,101,8,6,128,6,23,3,2,74,77,16,32,162,0,101,0,114,66,55,55,6,2,74,77,16,32,162,0,101,0,82,146,54,55,6,2,74,77,16,32,130,0,101,132,8,128,22,134,7,2,73,10,205,163,128,128,131,195,127,74,77,16,32,130,0,101,164,10,32,86,55,6,2,13,71,163,205,128,224,1,12,12,254,3,
     ]);
-    const reader = new BinaryReader(buffer).SetLittleEndian();
+    const reader = new BitReader(buffer);
     const items = await readItems(reader, 0x60, constants, config);
     expect(items.length).to.eq(8);
   });

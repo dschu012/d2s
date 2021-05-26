@@ -3,8 +3,8 @@ import { readSkills, writeSkills } from "../../src/d2/skills";
 import { readHeader, writeHeader, fixHeader, writeHeaderData, readHeaderData } from "../../src/d2/header";
 import { writeAttributes, readAttributes } from "../../src/d2/attributes";
 import * as types from "../../src/d2/types";
-import { BinaryReader } from "../../src/binary/binaryreader";
-import { BinaryWriter } from "../../src/binary/binarywriter";
+import { BitReader } from "../../src/binary/bitreader";
+import { BitWriter } from "../../src/binary/bitwriter";
 import * as fs from "fs";
 import * as path from "path";
 import { constants } from "../../src/data/versions/96_constant_data";
@@ -12,9 +12,9 @@ import { constants } from "../../src/data/versions/96_constant_data";
 describe("header", () => {
   xit("should make all char classes w/ custom charm", async () => {
     for (const c of constants.classes) {
-      const writer = new BinaryWriter().SetLittleEndian();
+      const writer = new BitWriter();
       const inputstream = fs.readFileSync(path.join(__dirname, `../../examples/chars/97/${c.n}.d2s`));
-      const reader = new BinaryReader(inputstream).SetLittleEndian();
+      const reader = new BitReader(inputstream);
       const d2s = {} as types.ID2S;
       await readHeader(d2s, reader);
       writer.WriteArray(await writeHeader(d2s));
@@ -64,9 +64,9 @@ describe("header", () => {
         s.points = 20;
       }
       writer.WriteArray(await writeSkills(d2s, constants));
-      console.log(writer.Position());
+      console.log(writer.offset);
 
-      writer.Seek(853);
+      writer.SeekByte(853);
       const itemsHeaderAndCount = new Uint8Array([74, 77, 1, 0]);
       // prettier-ignore
       const charm = new Uint8Array([16,0,128,0,5,228,68,216,79,120,250,137,117,89,210,96,199,72,92,218,243,193,252,199,252,211,252,1,252,5,248,11,248,15,248,159,248,71,65,83,252,171,160,43,254,89,208,22,255,46,168,136,127,196,79,226,191,196,191,163,255,163,63,164,127,164,191,164,255,164,63,165,127,165,127,210,88,74,99,45,141,197,52,86,211,63,167,127,79,255,160,254,97,251,179,253,127,158,101,161,140,195,251,195,216,248,254,3,
@@ -76,11 +76,9 @@ describe("header", () => {
       writer.WriteArray(charm);
       writer.WriteArray(endBytes);
 
-      const end = writer.Position();
-      writer.Seek(0x000c);
+      const end = writer.offset;
       await fixHeader(writer);
 
-      console.log(`Reader: ${reader.Position()}, Writer ${end}`);
       for (const f of [
         `${process.env["USERPROFILE"]}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`,
         `${process.env["USERPROFILE"]}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.ctl`,
@@ -93,24 +91,23 @@ describe("header", () => {
       }
       fs.writeFileSync(
         `${process.env["USERPROFILE"]}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`,
-        writer.toArray()
+        writer.ToArray()
       );
     }
   });
 
   it("should calulcate checksum", async () => {
     const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/simple.d2s"));
-    const writer = new BinaryWriter().SetLittleEndian();
-    writer.WriteArray(inputstream);
-    const pre = writer.Seek(0x000c).Peek(4);
+    const writer = new BitWriter().WriteArray(inputstream);
+    const pre = writer.SeekByte(0x000c).PeekBytes(4);
     await fixHeader(writer);
-    const post = writer.Seek(0x000c).Peek(4);
-    expect(post).to.eq(pre);
+    const post = writer.SeekByte(0x000c).PeekBytes(4);
+    expect(new DataView(post.buffer).getUint32(0)).to.eq(new DataView(post.buffer).getUint32(0));
   });
 
   it("should read", async () => {
     const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/simple.d2s"));
-    const reader = new BinaryReader(inputstream).SetLittleEndian();
+    const reader = new BitReader(inputstream);
     const d2s = {} as types.ID2S;
     await readHeader(d2s, reader);
     await readHeaderData(d2s, reader, constants);
@@ -120,9 +117,9 @@ describe("header", () => {
   it("should write", async () => {
     const json = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/simple.json"), "utf-8");
     const d2s = JSON.parse(json);
-    const output = new BinaryWriter();
+    const output = new BitWriter();
     output.WriteArray(await writeHeader(d2s));
     output.WriteArray(await writeHeaderData(d2s, constants));
-    expect(output.Length()).to.eq(765);
+    expect(output.length).to.eq(765);
   });
 });

@@ -481,6 +481,13 @@ function _groupAttributes(all_attributes: types.IMagicProperty[], constants: typ
       if (prop.e === 3) {
         return e.id === magic_attribute.id && e.values[0] === magic_attribute.values[0] && e.values[1] === magic_attribute.values[1];
       }
+      if (prop.dF === 23) {
+        return e.id === magic_attribute.id && e.values[0] === magic_attribute.values[0] && e.values[1] === magic_attribute.values[1];
+      }
+      if (prop.s === "state") {
+        //state
+        return e.id === magic_attribute.id && e.values[0] === magic_attribute.values[0] && e.values[1] === magic_attribute.values[1];
+      }
       return e.id === magic_attribute.id;
     });
     if (properties && properties.length) {

@@ -369,15 +369,14 @@ export interface IItem {
   file_index: number;
   auto_affix_id: number;
   _unknown_data: {
-    b0_3?: number;
-    b5_10?: number;
-    b12?: number;
-    b14_15?: number;
-    b18_20?: number;
-    b23?: number;
-    b25?: number;
-    b27_31?: number;
-    aft_max_dura?: number;
+    b0_3?: Uint8Array;
+    b5_10?: Uint8Array;
+    b12?: Uint8Array;
+    b14_15?: Uint8Array;
+    b18_20?: Uint8Array;
+    b23?: Uint8Array;
+    b25?: Uint8Array;
+    b27_31?: Uint8Array;
     plist_flag?: number;
   };
   rare_name_id: number;

@@ -304,6 +304,7 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
   const cMaxmisdam = tsv.header.indexOf("maxmisdam");
   const cReqstr = tsv.header.indexOf("reqstr");
   const cReqdex = tsv.header.indexOf("reqdex");
+  const cHasinv = tsv.header.indexOf("hasinv");
   const cGemapplytype = tsv.header.indexOf("gemapplytype");
   const cInvfile = tsv.header.indexOf("invfile");
   const cUniqueInvfile = tsv.header.indexOf("uniqueinvfile");
@@ -340,6 +341,7 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
       if (tsv.lines[i][cMaxmisdam] && +tsv.lines[i][cMaxmisdam] > 0) item.maxmd = +tsv.lines[i][cMaxmisdam];
       if (tsv.lines[i][cReqstr]) item.rs = +tsv.lines[i][cReqstr];
       if (tsv.lines[i][cReqdex]) item.rd = +tsv.lines[i][cReqdex];
+      if (tsv.lines[i][cHasinv]) item.hi = +tsv.lines[i][cHasinv];
       if (tsv.lines[i][cGemapplytype]) item.gt = +tsv.lines[i][cGemapplytype];
       if (tsv.lines[i][cInvfile]) item.i = tsv.lines[i][cInvfile];
       if (tsv.lines[i][cUniqueInvfile]) item.ui = tsv.lines[i][cUniqueInvfile];

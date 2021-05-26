@@ -34,13 +34,13 @@ describe("d2s", () => {
     expect(save.items.length).to.eq(61);
   });
 
-  it('should write "complex" character', async () => {
+  it.only('should write "complex" character', async () => {
     const json = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/complex.json"), "utf-8");
     const d2s = JSON.parse(json) as types.ID2S;
     const output = await write(d2s, constants);
-    expect(output.length).to.eq(3244);
-    //d2s.header.version = 0x61;
-    //fs.writeFileSync(`${process.env['USERPROFILE']}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`, output);
+    //expect(output.length).to.eq(3244);
+    d2s.header.version = 0x61;
+    fs.writeFileSync(`${process.env["USERPROFILE"]}/Saved Games/Diablo II Resurrected Tech Alpha/${d2s.header.name}.d2s`, output);
   });
 
   it("should read item", async () => {

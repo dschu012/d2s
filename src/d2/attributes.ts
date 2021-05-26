@@ -1,18 +1,18 @@
 import * as types from "./types";
 import { _readBits, _writeBits } from "../util";
-import { BinaryReader } from "../binary/binaryreader";
-import { BinaryWriter } from "../binary/binarywriter";
+import { BitReader } from "../binary/bitreader";
+import { BitWriter } from "../binary/bitwriter";
+import { read } from "./stash";
 
 //todo use constants.magical_properties and csvBits
-export async function readAttributes(char: types.ID2S, reader: BinaryReader, constants: types.IConstantData) {
+export async function readAttributes(char: types.ID2S, reader: BitReader, constants: types.IConstantData) {
   char.attributes = {} as types.IAttributes;
   const header = reader.ReadString(2); //0x0000 [attributes header = 0x67, 0x66 "gf"]
   if (header != "gf") {
-    throw new Error(`Item header 'gf' not found at position ${reader.Position() - 2}`);
+    throw new Error(`Attribute header 'gf' not found at position ${reader.offset - 2 * 8}`);
   }
-  const start = reader.Position();
   let bitoffset = 0;
-  let id = _readBits(reader, start, bitoffset, 9);
+  let id = reader.ReadUInt16(9);
   //read till 0x1ff end of attributes is found
   while (id != 0x1ff) {
     bitoffset += 9;
@@ -21,21 +21,20 @@ export async function readAttributes(char: types.ID2S, reader: BinaryReader, con
       throw new Error(`Invalid attribute id: ${id}`);
     }
     const size = field.cB;
-    char.attributes[Attributes[field.s]] = _readBits(reader, start, bitoffset, size);
+    char.attributes[Attributes[field.s]] = reader.ReadUInt32(size);
     //current_hp - max_stamina need to be bit shifted
     if (id >= 6 && id <= 11) {
       char.attributes[Attributes[field.s]] >>>= 8;
     }
     bitoffset += size;
-    id = _readBits(reader, start, bitoffset, 9);
+    id = reader.ReadUInt16(9);
   }
+  reader.Align();
 }
 
 export async function writeAttributes(char: types.ID2S, constants: types.IConstantData): Promise<Uint8Array> {
-  const writer = new BinaryWriter().SetLittleEndian();
-  writer.WriteString("gf"); //0x0000 [attributes header = 0x67, 0x66 "gf"]
-  const start = writer.Position();
-  let bitoffset = 0;
+  const writer = new BitWriter();
+  writer.WriteString("gf", 2); //0x0000 [attributes header = 0x67, 0x66 "gf"]
   for (let i = 0; i < 16; i++) {
     const property = constants.magical_properties[i];
     if (property === undefined) {
@@ -49,13 +48,12 @@ export async function writeAttributes(char: types.ID2S, constants: types.IConsta
     if (i >= 6 && i <= 11) {
       value <<= 8;
     }
-    _writeBits(writer, i, start, bitoffset, 9);
-    bitoffset += 9;
-    _writeBits(writer, value, start, bitoffset, size);
-    bitoffset += size;
+    writer.WriteUInt16(i, 9);
+    writer.WriteUInt32(value, size);
   }
-  _writeBits(writer, 0x1ff, start, bitoffset, 9);
-  return writer.toArray();
+  writer.WriteUInt16(0x1ff, 9);
+  writer.Align();
+  return writer.ToArray();
 }
 
 //nokkas names

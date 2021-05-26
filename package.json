@@ -1,6 +1,6 @@
 {
   "name": "@dschu012/d2s",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -16,8 +16,7 @@
     "lint": "eslint \"*/**/*.{js,ts,tsx}\" --quiet --fix",
     "eslint": "eslint"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "^4.1.3",
     "@types/mocha": "^5.2.7",

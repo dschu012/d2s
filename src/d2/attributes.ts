@@ -1,5 +1,4 @@
 import * as types from "./types";
-import { _readBits, _writeBits } from "../util";
 import { BitReader } from "../binary/bitreader";
 import { BitWriter } from "../binary/bitwriter";
 import { read } from "./stash";

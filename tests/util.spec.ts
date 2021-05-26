@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { _readBits, _writeBits } from "../src/util";
 import { BitReader } from "../src/binary/bitreader";
 import { BitWriter } from "../src/binary/bitwriter";
 

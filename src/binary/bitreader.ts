@@ -80,11 +80,11 @@ export class BitReader {
   }
 
   public ReadNullTerminatedString(): string {
-    let start = this.offset;
-    while (this.ReadByte()) {
-      start += 8;
-    }
-    const buffer = this.ReadBytes((this.offset - start) / 8);
+    const start = this.offset;
+    while (this.ReadByte()) {}
+    const end = this.offset - 8;
+    const buffer = this.SeekBit(start).ReadBytes((end - start) / 8);
+    this.SeekBit(end + 8);
     return new TextDecoder().decode(buffer);
   }
 

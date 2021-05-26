@@ -120,6 +120,6 @@ describe("header", () => {
     const output = new BitWriter();
     output.WriteArray(await writeHeader(d2s));
     output.WriteArray(await writeHeaderData(d2s, constants));
-    expect(output.length).to.eq(765);
+    expect(output.length / 8).to.eq(765);
   });
 });

@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { readItems, readItem, writeItem, _writeMagicProperties } from "../../src/d2/items";
 import * as types from "../../src/d2/types";
-import { _writeBits } from "../../src/util";
 import { constants } from "../../src/data/versions/96_constant_data";
 import { BitWriter } from "../../src/binary/bitwriter";
 import { BitReader } from "../../src/binary/bitreader";

@@ -1,7 +1,6 @@
 import * as types from "./types";
 import { BitReader } from "../binary/bitreader";
 import { BitWriter } from "../binary/bitwriter";
-import { _readBits, _writeBits } from "../util";
 
 enum ItemType {
   Armor = 0x01,
@@ -151,7 +150,7 @@ export async function readItem(
   const item = {} as types.IItem;
   _readSimpleBits(item, reader, version, constants, config);
   if (!item.simple_item) {
-    item.id = reader.ReadUInt32();
+    item.id = reader.ReadUInt32(32);
     item.level = reader.ReadUInt8(7);
     item.quality = reader.ReadUInt8(4);
     item.multiple_pictures = reader.ReadBit();
@@ -269,9 +268,7 @@ export async function readItem(
 
     //magical properties
     let magic_attributes = _readMagicProperties(reader, constants);
-    if (magic_attributes && magic_attributes.length > 0) {
-      item.magic_attributes = magic_attributes;
-    }
+    item.magic_attributes = magic_attributes;
 
     while (plist_flag > 0) {
       if (plist_flag & 1) {
@@ -388,9 +385,7 @@ export async function writeItem(
     }
 
     if (item.type === "tbk" || item.type === "ibk") {
-      if (item.type === "ibk") {
-        writer.WriteUInt8(1, 5);
-      }
+      writer.WriteUInt8(1, 5);
     }
 
     writer.WriteUInt8(item.timestamp, 1);
@@ -535,23 +530,23 @@ function _lookupRareId(name: string, constants: types.IConstantData): number {
 }
 
 function _writeSimpleBits(writer: BitWriter, version: number, item: types.IItem, constants: types.IConstantData, config: types.IConfig) {
-  writer.WriteBits(item._unknown_data.b0_3 || new Uint8Array([0, 0, 0, 0]), 4);
+  writer.WriteBits(item._unknown_data.b0_3 || new Uint8Array(4), 4);
   writer.WriteBit(item.identified);
-  writer.WriteBits(item._unknown_data.b5_10 || new Uint8Array([0, 0, 0, 0, 0, 0]), 6);
+  writer.WriteBits(item._unknown_data.b5_10 || new Uint8Array(6), 6);
   writer.WriteBit(item.socketed);
-  writer.WriteBits(item._unknown_data.b12 || new Uint8Array([0]), 1);
+  writer.WriteBits(item._unknown_data.b12 || new Uint8Array(1), 1);
   writer.WriteBit(item.new);
-  writer.WriteBits(item._unknown_data.b14_15 || new Uint8Array([0, 0]), 2);
+  writer.WriteBits(item._unknown_data.b14_15 || new Uint8Array(2), 2);
   writer.WriteBit(item.is_ear);
   writer.WriteBit(item.starter_item);
-  writer.WriteBits(item._unknown_data.b18_20 || new Uint8Array([0, 0, 0]), 3);
+  writer.WriteBits(item._unknown_data.b18_20 || new Uint8Array(3), 3);
   writer.WriteBit(item.simple_item);
   writer.WriteBit(item.ethereal);
-  writer.WriteBits(item._unknown_data.b23 || new Uint8Array([0]), 1);
+  writer.WriteBits(item._unknown_data.b23 || new Uint8Array([1]), 1); //always 1? IFLAG_JUSTSAVED
   writer.WriteBit(item.personalized);
-  writer.WriteBits(item._unknown_data.b25 || new Uint8Array([0]), 1);
+  writer.WriteBits(item._unknown_data.b25 || new Uint8Array(1), 1); //IFLAG_LOWQUALITY
   writer.WriteBit(item.given_runeword);
-  writer.WriteBits(item._unknown_data.b27_31 || new Uint8Array([0, 0, 0, 0, 0]), 5);
+  writer.WriteBits(item._unknown_data.b27_31 || new Uint8Array(5), 5);
 
   const itemVersion = item.version != null ? item.version : "101";
   if (version <= 0x60) {

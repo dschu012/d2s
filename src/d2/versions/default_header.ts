@@ -1,7 +1,6 @@
 import * as types from "../types";
 import { BitReader } from "../../binary/bitreader";
 import { BitWriter } from "../../binary/bitwriter";
-import { _writeBits, _readBits } from "../../util";
 
 const difficulties = ["normal", "nm", "hell"];
 
@@ -518,8 +517,7 @@ function _writeWaypoints(waypoints: types.IWaypoints): Uint8Array {
     writer.WriteArray(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0x7f]));
     //_writeBits(writer, 0x3fffffffff, start, 0, 38);
   }
-  writer.Align();
-  writer.WriteArray(new Uint8Array(17));
+  writer.Align().WriteArray(new Uint8Array(17));
   return writer.ToArray();
 }
 

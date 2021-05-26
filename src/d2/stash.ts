@@ -24,12 +24,10 @@ export async function read(
 }
 
 async function readStashHeader(stash: types.IStash, reader: BitReader) {
-  const header = reader.ReadString(3);
-  if (header !== "SSS") {
+  const header = reader.ReadString(4);
+  if (header !== "SSS\0") {
     throw new Error(`shared stash header 'SSS' not found at position ${reader.offset - 3 * 8}`);
   }
-
-  reader.SkipBytes(1); //skip fixed \0 after SSS
 
   const version = reader.ReadString(2);
   stash.version = version;
@@ -63,10 +61,7 @@ async function readStashPage(stash: types.IStash, reader: BitReader, version: nu
     throw new Error(`can not read stash page header ST at position ${reader.offset - 2 * 8}`);
   }
 
-  page.type = reader.ReadUInt8();
-  reader.SkipBytes(1);
-  reader.SkipBytes(1);
-  reader.SkipBytes(1);
+  page.type = reader.ReadUInt32();
 
   page.name = reader.ReadNullTerminatedString();
   page.items = await items.readItems(reader, version, constants, defaultConfig);
@@ -122,10 +117,7 @@ async function writeStashPage(
   const writer = new BitWriter();
 
   writer.WriteString("ST", 2);
-  writer.WriteUInt8(data.type);
-  writer.WriteUInt8(0);
-  writer.WriteUInt8(0);
-  writer.WriteUInt8(0);
+  writer.WriteUInt32(data.type);
 
   writer.WriteString(data.name, data.name.length + 1);
   writer.WriteArray(await items.writeItems(data.items, version, constants, config));

@@ -14,7 +14,7 @@ describe("stash", () => {
     expect(jsonData.version, "version").to.eq("02");
   });
 
-  xit("should provide read and write consistency for plugy shared stash file", async () => {
+  it("should provide read and write consistency for plugy shared stash file", async () => {
     const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/_LOD_SharedStashSave.sss`));
     const jsonData = await read(buffer, constants, 0x60);
     const newBuffer = await write(jsonData, constants, 0x60);

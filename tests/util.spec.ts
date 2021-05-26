@@ -15,12 +15,23 @@ describe("utils", () => {
   });
 
   it("should read/write", async () => {
-    const buffer = Buffer.from("4a4d100880", "hex");
-    const reader = new BitReader(buffer);
     const writer = new BitWriter();
-    writer.WriteByte(reader.ReadByte()).WriteUInt16(reader.ReadUInt16()).WriteBytes(reader.ReadBytes(2));
-    const result = Buffer.from(writer.ToArray()).toString("hex");
-    expect(result).to.eq("4a4d100880");
+    for(let i = 0; i < 90; i ++) {
+      writer.WriteByte(125)
+        .WriteUInt16(125)
+        .WriteUInt16(125, 9)
+        .WriteUInt32(125)
+        .WriteUInt32(125, 27);
+    }
+
+    const reader = new BitReader(writer.ToArray());
+    for(let i = 0; i < 90; i ++) {
+      expect(reader.ReadByte()).to.eq(125);
+      expect(reader.ReadUInt16()).to.eq(125);
+      expect(reader.ReadUInt16(9)).to.eq(125);
+      expect(reader.ReadUInt32()).to.eq(125);
+      expect(reader.ReadUInt32(27)).to.eq(125);
+    }
   });
 
   it("should write bit", async () => {

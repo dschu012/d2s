@@ -9,7 +9,7 @@ export class BitWriter {
   }
 
   public WriteBit(value: number): BitWriter {
-    if (this.offset > this.bits.length) {
+    if (this.offset >= this.bits.length) {
       const resized = new Uint8Array(this.bits.length + 8192);
       resized.set(this.bits, 0);
       this.bits = resized;

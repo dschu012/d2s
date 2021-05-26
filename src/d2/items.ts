@@ -682,7 +682,7 @@ export function _writeMagicProperties(writer: BitWriter, properties: types.IMagi
             default:
               break;
           }
-          writer.WriteUInt16(param, prop.sP);
+          writer.WriteUInt32(param, prop.sP);
         }
         let v = property.values[valueIdx++]!;
         if (prop.sA) {
@@ -698,7 +698,7 @@ export function _writeMagicProperties(writer: BitWriter, properties: types.IMagi
         if (!prop.sB) {
           throw new Error(`Save Bits is undefined for stat: ${property.id}:${prop.s}`);
         }
-        writer.WriteUInt16(v, prop.sB);
+        writer.WriteUInt32(v, prop.sB);
       }
     }
   }

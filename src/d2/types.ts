@@ -320,6 +320,7 @@ export interface IItem {
   type: string;
   type_id: number;
   type_name: string;
+  quest_difficulty: number;
   nr_of_items_in_sockets: number;
   id: number;
   level: number;

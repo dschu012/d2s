@@ -311,6 +311,9 @@ export async function writeItem(
   if (item._unknown_data === undefined) {
     item._unknown_data = {};
   }
+  if (item.categories === undefined) {
+    item.categories = _GetItemTXT(item, constants)?.c
+  }
 
   const writer = new BitWriter();
   if (version <= 0x60) {
@@ -505,20 +508,23 @@ function _readSimpleBits(item: types.IItem, reader: BitReader, version: number, 
       }
     }
     item.type = item.type.trim().replace(/\0/g, "");
-    if (constants.armor_items[item.type]) {
+    let details = _GetItemTXT(item, constants);
+    item.categories = details?.c
+    if (item?.categories.includes('Any Armor')) {
       item.type_id = ItemType.Armor;
-      const details = constants.armor_items[item.type];
-      item.type_name = details!.n;
-    } else if (constants.weapon_items[item.type]) {
+    } else if (item?.categories.includes('Weapon')) {
       item.type_id = ItemType.Weapon;
-      const details = constants.weapon_items[item.type];
-      item.type_name = details!.n;
-    } else if (constants.other_items[item.type]) {
+      details = constants.weapon_items[item.type];
+    } else {
       item.type_id = ItemType.Other;
-      item.type_name = constants.other_items[item.type]!.n;
     }
-    const l = item.simple_item ? 1 : 3;
-    item.nr_of_items_in_sockets = reader.ReadUInt8(l);
+
+    let bits = item.simple_item ? 1 : 3;
+    if(item.categories?.includes('Quest')) {
+      item.quest_difficulty = reader.ReadUInt16(constants.magical_properties[356].sB) - constants.magical_properties[356].sA;
+      bits = 1;
+    }
+    item.nr_of_items_in_sockets = reader.ReadUInt8(bits);
   }
 }
 
@@ -578,8 +584,14 @@ function _writeSimpleBits(writer: BitWriter, version: number, item: types.IItem,
         writer.WriteUInt16(n.v, n.l);
       }
     }
-    const l = item.simple_item ? 1 : 3;
-    writer.WriteUInt8(item.nr_of_items_in_sockets, l);
+    
+    let bits = item.simple_item ? 1 : 3;
+    if(item.categories?.includes('Quest')) {
+      let difficulty = item.quest_difficulty || 0;
+      writer.WriteUInt16(difficulty + constants.magical_properties[356].sA, constants.magical_properties[356].sB);
+      bits = 1;
+    }
+    writer.WriteUInt8(item.nr_of_items_in_sockets, bits);
   }
 }
 
@@ -705,9 +717,12 @@ export function _writeMagicProperties(writer: BitWriter, properties: types.IMagi
   writer.WriteUInt16(0x1ff, 9);
 }
 
-function unkData(value: number): number | undefined {
-  if (value > 0) {
-    return value;
+function _GetItemTXT(item: types.IItem, constants: types.IConstantData) : any {
+  if (constants.armor_items[item.type]) {
+    return constants.armor_items[item.type];
+  } else if (constants.weapon_items[item.type]) {
+    return constants.weapon_items[item.type];
+  } else if (constants.other_items[item.type]) {
+    return constants.other_items[item.type];
   }
-  return undefined;
 }

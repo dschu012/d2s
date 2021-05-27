@@ -312,7 +312,7 @@ export async function writeItem(
     item._unknown_data = {};
   }
   if (item.categories === undefined) {
-    item.categories = _GetItemTXT(item, constants)?.c
+    item.categories = _GetItemTXT(item, constants)?.c;
   }
 
   const writer = new BitWriter();
@@ -509,10 +509,10 @@ function _readSimpleBits(item: types.IItem, reader: BitReader, version: number, 
     }
     item.type = item.type.trim().replace(/\0/g, "");
     let details = _GetItemTXT(item, constants);
-    item.categories = details?.c
-    if (item?.categories.includes('Any Armor')) {
+    item.categories = details?.c;
+    if (item?.categories.includes("Any Armor")) {
       item.type_id = ItemType.Armor;
-    } else if (item?.categories.includes('Weapon')) {
+    } else if (item?.categories.includes("Weapon")) {
       item.type_id = ItemType.Weapon;
       details = constants.weapon_items[item.type];
     } else {
@@ -520,7 +520,7 @@ function _readSimpleBits(item: types.IItem, reader: BitReader, version: number, 
     }
 
     let bits = item.simple_item ? 1 : 3;
-    if(item.categories?.includes('Quest')) {
+    if (item.categories?.includes("Quest")) {
       item.quest_difficulty = reader.ReadUInt16(constants.magical_properties[356].sB) - constants.magical_properties[356].sA;
       bits = 1;
     }
@@ -584,10 +584,10 @@ function _writeSimpleBits(writer: BitWriter, version: number, item: types.IItem,
         writer.WriteUInt16(n.v, n.l);
       }
     }
-    
+
     let bits = item.simple_item ? 1 : 3;
-    if(item.categories?.includes('Quest')) {
-      let difficulty = item.quest_difficulty || 0;
+    if (item.categories?.includes("Quest")) {
+      const difficulty = item.quest_difficulty || 0;
       writer.WriteUInt16(difficulty + constants.magical_properties[356].sA, constants.magical_properties[356].sB);
       bits = 1;
     }
@@ -717,7 +717,7 @@ export function _writeMagicProperties(writer: BitWriter, properties: types.IMagi
   writer.WriteUInt16(0x1ff, 9);
 }
 
-function _GetItemTXT(item: types.IItem, constants: types.IConstantData) : any {
+function _GetItemTXT(item: types.IItem, constants: types.IConstantData): any {
   if (constants.armor_items[item.type]) {
     return constants.armor_items[item.type];
   } else if (constants.weapon_items[item.type]) {

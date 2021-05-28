@@ -191,7 +191,7 @@ function _enhanceAttributeDescription(
     let desc2 = prop.d2;
     if (prop.dg && dgrps[prop.dg - 1] === 4) {
       v = dgrpsVal[prop.dg - 1];
-      descString = v >= 0 ? prop.dgP : prop.dgN;
+      descString = v >= 0 ? prop.dgP : prop.dgN ? prop.dgN : prop.dgP;
       descVal = prop.dgV;
       descFunc = prop.dgF;
       desc2 = prop.dg2;

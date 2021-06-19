@@ -5,7 +5,7 @@ import { BitReader } from "../binary/bitreader";
 import { BitWriter } from "../binary/bitwriter";
 import { readSkills, writeSkills } from "./skills";
 import * as items from "./items";
-import { enhanceAttributes, enhanceItem } from "./attribute_enhancer";
+import { enhanceAttributes, enhanceItems } from "./attribute_enhancer";
 
 const defaultConfig = {
   extendedStash: false,
@@ -44,7 +44,7 @@ async function readItem(
   const reader = new BitReader(buffer);
   const config = Object.assign(defaultConfig, userConfig);
   const item = await items.readItem(reader, version, constants, config);
-  await enhanceItem(item, constants);
+  await enhanceItems([item], constants);
   return item;
 }
 

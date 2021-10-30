@@ -99,6 +99,12 @@ function _readStrings(file: string): any {
 function _readClasses(tsv: any, tsv2: any, strings: any): any[] {
   const arr = [] as any[];
   const cClass = tsv.header.indexOf("class");
+  const cLifePerLvl = tsv.header.indexOf("LifePerLevel");
+  const cStamPerLvl = tsv.header.indexOf("StaminaPerLevel");
+  const cManaPerLvl = tsv.header.indexOf("ManaPerLevel");
+  const cLifePerVit = tsv.header.indexOf("LifePerVitality");
+  const cStamPerVit = tsv.header.indexOf("StaminaPerVitality");
+  const cManaPerMag = tsv.header.indexOf("ManaPerMagic");
   const cAllSkills = tsv.header.indexOf("StrAllSkills");
   const cSkillTab1 = tsv.header.indexOf("StrSkillTab1");
   const cSkillTab2 = tsv.header.indexOf("StrSkillTab2");
@@ -115,6 +121,14 @@ function _readClasses(tsv: any, tsv2: any, strings: any): any[] {
         as: strings[tsv.lines[i][cAllSkills]],
         ts: [strings[tsv.lines[i][cSkillTab1]], strings[tsv.lines[i][cSkillTab2]], strings[tsv.lines[i][cSkillTab3]]],
         co: strings[tsv.lines[i][cClassOnly]],
+        s: {
+          lpl: tsv.lines[i][cLifePerLvl],
+          mpl: tsv.lines[i][cManaPerLvl],
+          spl: tsv.lines[i][cStamPerLvl],
+          lpv: tsv.lines[i][cLifePerVit],
+          spv: tsv.lines[i][cStamPerVit],
+          mpe: tsv.lines[i][cManaPerMag],
+        },
       };
       id++;
     }

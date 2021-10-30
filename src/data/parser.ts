@@ -122,12 +122,12 @@ function _readClasses(tsv: any, tsv2: any, strings: any): any[] {
         ts: [strings[tsv.lines[i][cSkillTab1]], strings[tsv.lines[i][cSkillTab2]], strings[tsv.lines[i][cSkillTab3]]],
         co: strings[tsv.lines[i][cClassOnly]],
         s: {
-          lpl: tsv.lines[i][cLifePerLvl],
-          mpl: tsv.lines[i][cManaPerLvl],
-          spl: tsv.lines[i][cStamPerLvl],
-          lpv: tsv.lines[i][cLifePerVit],
-          spv: tsv.lines[i][cStamPerVit],
-          mpe: tsv.lines[i][cManaPerMag],
+          lpl: +tsv.lines[i][cLifePerLvl],
+          mpl: +tsv.lines[i][cManaPerLvl],
+          spl: +tsv.lines[i][cStamPerLvl],
+          lpv: +tsv.lines[i][cLifePerVit],
+          spv: +tsv.lines[i][cStamPerVit],
+          mpe: +tsv.lines[i][cManaPerMag],
         },
       };
       id++;

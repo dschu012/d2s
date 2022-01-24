@@ -23,6 +23,9 @@ describe("parser", () => {
     const constantData = readConstantData(files);
     expect(constantData).to.not.be.null;
     //fs.writeFileSync(path.join(__dirname, `${base}/constant_data.js`), `window.constants = \n${JSON.stringify(constantData)}`);
-    fs.writeFileSync(path.join(__dirname, "../../src/data/versions/96_constant_data.ts"), `export let constants = \n${JSON.stringify(constantData)}`);
+    fs.writeFileSync(
+      path.join(__dirname, "../../src/data/versions/96_constant_data.ts"),
+      `export let constants = \n${JSON.stringify(constantData)}`
+    );
   });
 });

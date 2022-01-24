@@ -387,7 +387,9 @@ export async function writeItem(
       writer.WriteUInt8(0x00, 7);
     }
 
-    if (item.type === "tbk" || item.type === "ibk") {
+    if (item.type === "tbk") {
+      writer.WriteUInt8(0, 5);
+    } else if (item.type === "ibk") {
       writer.WriteUInt8(1, 5);
     }
 

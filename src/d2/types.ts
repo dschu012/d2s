@@ -410,8 +410,14 @@ export interface IMagicProperty {
   op_stats: string[];
 }
 
+export enum EStashType {
+  shared,
+  private,
+}
+
 export interface IStash {
   version: string;
+  type: EStashType;
   pageCount: number;
   sharedGold: number;
   pages: IStashPage[];

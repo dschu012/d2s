@@ -23,4 +23,22 @@ describe("stash", () => {
     expect(buffer.length, "file size").to.eq(newBuffer.length);
     expect(newJson, "json").to.deep.eq(jsonData);
   });
+
+  it("should read plugy private stash file", async () => {
+    const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/PrivateStash.d2x`));
+    const jsonData = await read(buffer, constants, 0x60);
+    expect(jsonData.pageCount, "pageCount").to.eq(56);
+    expect(jsonData.sharedGold, "sharedGold").to.eq(0);
+    expect(jsonData.version, "version").to.eq("01");
+  });
+
+  it("should provide read and write consistency for plugy private stash file", async () => {
+    const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/PrivateStash.d2x`));
+    const jsonData = await read(buffer, constants, 0x60);
+    const newBuffer = await write(jsonData, constants, 0x60);
+    const newJson = await read(newBuffer, constants, 0x60);
+
+    expect(buffer.length, "file size").to.eq(newBuffer.length);
+    expect(newJson, "json").to.deep.eq(jsonData);
+  });
 });

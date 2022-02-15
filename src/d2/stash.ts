@@ -25,19 +25,28 @@ export async function read(
 
 async function readStashHeader(stash: types.IStash, reader: BitReader) {
   const header = reader.ReadString(4);
-  if (header !== "SSS\0") {
-    throw new Error(`shared stash header 'SSS' not found at position ${reader.offset - 3 * 8}`);
+  if (header !== "SSS\0" && header !== "CSTM") {
+    throw new Error(`shared stash header 'SSS' / private stash header 'CSTM' not found at position ${reader.offset - 3 * 8}`);
   }
 
   const version = reader.ReadString(2);
   stash.version = version;
 
   if (version !== "01" && version !== "02") {
-    throw new Error(`unkown shared stash version ${version} at position ${reader.offset - 2 * 8}`);
+    throw new Error(`unkown stash version ${version} at position ${reader.offset - 2 * 8}`);
   }
 
-  if (version == "02") {
+  stash.type = header === "SSS\0"
+    ? types.EStashType.shared
+    : types.EStashType.private;
+
+  if (stash.type === types.EStashType.shared && version == "02") {
     stash.sharedGold = reader.ReadUInt32();
+  }
+
+  if (stash.type === types.EStashType.private) {
+    reader.ReadUInt32();
+    stash.sharedGold = 0;
   }
 
   stash.pageCount = reader.ReadUInt32();
@@ -84,10 +93,20 @@ export async function write(
 
 async function writeStashHeader(data: types.IStash): Promise<Uint8Array> {
   const writer = new BitWriter();
-  writer.WriteString("SSS", 4);
+  if (data.type === types.EStashType.private) {
+    writer.WriteString("CSTM", 4);
+  } else {
+    writer.WriteString("SSS", 4);
+  }
+
   writer.WriteString(data.version, data.version.length);
-  if (data.version == "02") {
-    writer.WriteUInt32(data.sharedGold);
+
+  if (data.type === types.EStashType.private) {
+    writer.WriteString("", 4);
+  } else {
+    if (data.version == "02") {
+      writer.WriteUInt32(data.sharedGold);
+    }  
   }
   writer.WriteUInt32(data.pages.length);
   return writer.ToArray();

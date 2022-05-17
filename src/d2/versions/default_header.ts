@@ -8,7 +8,13 @@ export function readHeader(char: types.ID2S, reader: BitReader, constants: types
   char.header.filesize = reader.ReadUInt32(); //0x0008
   char.header.checksum = reader.ReadUInt32().toString(16).padStart(8, "0"); //0x000c
   reader.SkipBytes(4); //0x0010
+  if (char.header.version == 0x62) {
+    reader.SeekByte(267);
+  }
   char.header.name = reader.ReadString(16).replace(/\0/g, ""); //0x0014
+  if (char.header.version == 0x62) {
+    reader.SeekByte(36);
+  }
   char.header.status = _readStatus(reader.ReadUInt8()); //0x0024
   char.header.progression = reader.ReadUInt8(); //0x0025
   char.header.active_arms = reader.ReadUInt16(); //0x0026 [unk = 0x0, 0x0]

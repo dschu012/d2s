@@ -10,6 +10,33 @@ import { constants } from "../../src/data/versions/96_constant_data";
  * End to end tests.
  */
 describe("d2s", () => {
+  it("should read version 98 complex character", async () => {
+    const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/98/Agelatus.d2s"));
+    const save = await read(inputstream, constants);
+    //console.log(JSON.stringify(save, null, 2));
+    expect(save.header.name).to.eq("Agelatus");
+    expect(save.attributes.strength).to.eq(81);
+    expect(save.items.length).to.eq(54);
+  });
+
+  it("should read version 98 complex character 2", async () => {
+    const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/98/WatahaWpierdala.d2s"));
+    const save = await read(inputstream, constants);
+    //console.log(JSON.stringify(save, null, 2));
+    expect(save.header.name).to.eq("WatahaWpierdala");
+    expect(save.attributes.strength).to.eq(75);
+    expect(save.items.length).to.eq(39);
+  });
+
+  it("should read version 98 complex character 3", async () => {
+    const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/98/PaladinTwoNormal.d2s"));
+    const save = await read(inputstream, constants);
+    //console.log(JSON.stringify(save, null, 2));
+    expect(save.header.name).to.eq("PaladinTwo");
+    expect(save.attributes.strength).to.eq(159);
+    expect(save.items.length).to.eq(73);
+  });
+
   it("should read new character", async () => {
     const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/simple.d2s"));
     const save = await read(inputstream, constants);

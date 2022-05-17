@@ -17,39 +17,66 @@ export async function read(
   const stash = {} as types.IStash;
   const reader = new BitReader(buffer);
   const config = Object.assign(defaultConfig, userConfig);
-  await readStashHeader(stash, reader);
-  //could load constants based on version here
-  await readStashPages(stash, reader, version, constants);
+  const firstHeader = reader.ReadUInt32();
+  reader.SeekByte(0);
+  if (firstHeader == 0xaa55aa55) {
+    stash.pages = [];
+    let pageCount = 0;
+    while (reader.offset < reader.bits.length) {
+      pageCount++;
+      await readStashHeader(stash, reader);
+      await readStashPart(stash, reader, version, constants);
+    }
+    stash.pageCount = pageCount;
+  } else {
+    await readStashHeader(stash, reader);
+    await readStashPages(stash, reader, version, constants);
+  }
   return stash;
 }
 
 async function readStashHeader(stash: types.IStash, reader: BitReader) {
-  const header = reader.ReadString(4);
-  if (header !== "SSS\0" && header !== "CSTM") {
-    throw new Error(`shared stash header 'SSS' / private stash header 'CSTM' not found at position ${reader.offset - 3 * 8}`);
+  const header = reader.ReadUInt32();
+  switch (header) {
+    // Resurrected
+    case 0xaa55aa55:
+      reader.SkipBytes(4);
+      stash.version = reader.ReadUInt8().toString();
+      reader.SkipBytes(3);
+      stash.type = types.EStashType.shared;
+      stash.sharedGold = reader.ReadUInt32(24);
+      reader.SkipBytes(1);
+      stash.pageCount = reader.ReadUInt32(32);
+      reader.SkipBytes(44);
+      break;
+    // LoD
+    case 0x535353: // SSS
+    case 0x4d545343: // CSTM
+      stash.version = reader.ReadString(2);
+
+      if (stash.version !== "01" && stash.version !== "02") {
+        throw new Error(`unkown stash version ${stash.version} at position ${reader.offset - 2 * 8}`);
+      }
+
+      stash.type = header === 0x535353 ? types.EStashType.shared : types.EStashType.private;
+
+      if (stash.type === types.EStashType.shared && stash.version == "02") {
+        stash.sharedGold = reader.ReadUInt32();
+      }
+
+      if (stash.type === types.EStashType.private) {
+        reader.ReadUInt32();
+        stash.sharedGold = 0;
+      }
+
+      stash.pageCount = reader.ReadUInt32();
+      break;
+    default:
+      debugger;
+      throw new Error(
+        `shared stash header 'SSS' / 0xAA55AA55 / private stash header 'CSTM' not found at position ${reader.offset - 3 * 8}`
+      );
   }
-
-  const version = reader.ReadString(2);
-  stash.version = version;
-
-  if (version !== "01" && version !== "02") {
-    throw new Error(`unkown stash version ${version} at position ${reader.offset - 2 * 8}`);
-  }
-
-  stash.type = header === "SSS\0"
-    ? types.EStashType.shared
-    : types.EStashType.private;
-
-  if (stash.type === types.EStashType.shared && version == "02") {
-    stash.sharedGold = reader.ReadUInt32();
-  }
-
-  if (stash.type === types.EStashType.private) {
-    reader.ReadUInt32();
-    stash.sharedGold = 0;
-  }
-
-  stash.pageCount = reader.ReadUInt32();
 }
 
 async function readStashPages(stash: types.IStash, reader: BitReader, version: number, constants: types.IConstantData) {
@@ -73,6 +100,17 @@ async function readStashPage(stash: types.IStash, reader: BitReader, version: nu
   page.type = reader.ReadUInt32();
 
   page.name = reader.ReadNullTerminatedString();
+  page.items = await items.readItems(reader, version, constants, defaultConfig);
+  enhanceItems(page.items, constants, 1);
+  stash.pages.push(page);
+}
+
+async function readStashPart(stash: types.IStash, reader: BitReader, version: number, constants: types.IConstantData) {
+  const page: types.IStashPage = {
+    items: [],
+    name: "",
+    type: 0,
+  };
   page.items = await items.readItems(reader, version, constants, defaultConfig);
   enhanceItems(page.items, constants, 1);
   stash.pages.push(page);
@@ -106,7 +144,7 @@ async function writeStashHeader(data: types.IStash): Promise<Uint8Array> {
   } else {
     if (data.version == "02") {
       writer.WriteUInt32(data.sharedGold);
-    }  
+    }
   }
   writer.WriteUInt32(data.pages.length);
   return writer.ToArray();

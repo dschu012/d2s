@@ -5,6 +5,14 @@ import * as path from "path";
 import * as fs from "fs";
 
 describe("stash", () => {
+  it("should read D2R shared stash file", async () => {
+    const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/SharedStashSoftCoreV2.d2i`));
+    const jsonData = await read(buffer, constants, 0x62);
+    expect(jsonData.pageCount, "pageCount").to.eq(3);
+    expect(jsonData.sharedGold, "sharedGold").to.eq(2500000);
+    expect(jsonData.version, "version").to.eq("98");
+  });
+
   it("should read plugy shared stash file", async () => {
     const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/_LOD_SharedStashSave.sss`));
     const jsonData = await read(buffer, constants, 0x60);

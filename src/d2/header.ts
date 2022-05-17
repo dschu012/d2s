@@ -63,6 +63,7 @@ export async function fixHeader(writer: BitWriter) {
  * 0x59, 0x0, 0x0, 0x0 = 1.08 = version
  * 0x5c, 0x0, 0x0, 0x0 = 1.09 = version
  * 0x60, 0x0, 0x0, 0x0 = 1.13c = version
+ * 0x62, 0x0, 0x0, 0x0 = 1.2 = version
  * */
 async function _versionSpecificHeader(version: number) {
   switch (version) {

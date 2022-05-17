@@ -221,7 +221,11 @@ export async function readItem(
     if (item.personalized) {
       const arr = new Uint8Array(16);
       for (let i = 0; i < arr.length; i++) {
-        arr[i] = reader.ReadUInt8(8);
+        if (version == 0x62) {
+          arr[i] = reader.ReadUInt8(8);
+        } else {
+          arr[i] = reader.ReadUInt8(7);
+        }
         if (arr[i] === 0x00) {
           break;
         }

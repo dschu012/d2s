@@ -37,6 +37,22 @@ describe("d2s", () => {
     expect(save.items.length).to.eq(73);
   });
 
+  it("should write version 98 complex character", async () => {
+    const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/98/Agelatus.d2s"));
+    const save = await read(inputstream, constants);
+
+    const output = await write(save, constants);
+    expect(output.length).to.eq(2684);
+
+    // re-reading from saved data, amd comparing
+    const readAgain = await read(output, constants);
+
+    // ignore checksum
+    readAgain.header.checksum = save.header.checksum;
+
+    expect(save).to.deep.eq(readAgain);
+  });
+
   it("should read new character", async () => {
     const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/simple.d2s"));
     const save = await read(inputstream, constants);

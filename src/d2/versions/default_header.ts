@@ -57,12 +57,20 @@ export function readHeader(char: types.ID2S, reader: BitReader, constants: types
 export function writeHeader(char: types.ID2S, writer: BitWriter, constants: types.IConstantData) {
   writer
     .WriteUInt32(0x0) //0x0008 (filesize. needs to be writen after all data)
-    .WriteUInt32(0x0) //0x000c (checksum. needs to be calculated after all data writer)
-    .WriteUInt32(char.header.active_arms) //0x0010
-    .WriteString(char.header.name, 16) //0x0014
+    .WriteUInt32(0x0); //0x000c (checksum. needs to be calculated after all data writer)
+
+  if (char.header.version == 0x62) {
+    writer.WriteArray(new Uint8Array(Array(20).fill(0))); // 0x0010
+  } else {
+    writer
+      .WriteArray(new Uint8Array([0x00, 0x00, 0x00, 0x00])) //0x0010
+      .WriteString(char.header.name, 16); //0x0014  
+  }
+
+  writer
     .WriteArray(_writeStatus(char.header.status)) //0x0024
     .WriteUInt8(char.header.progression) //0x0025
-    .WriteArray(new Uint8Array([0x00, 0x00])) //0x0026
+    .WriteUInt16(char.header.active_arms) //0x0026
     .WriteUInt8(_classId(char.header.class, constants)) //0x0028
     .WriteArray(new Uint8Array([0x10, 0x1e])) //0x0029
     .WriteUInt8(char.header.level) //0x002b
@@ -82,9 +90,20 @@ export function writeHeader(char: types.ID2S, writer: BitWriter, constants: type
     .WriteUInt32(parseInt(char.header.merc_id, 16)) //0x00b3
     .WriteUInt16(char.header.merc_name_id) //0x00b7
     .WriteUInt16(char.header.merc_type) //0x00b9
-    .WriteUInt32(char.header.merc_experience) //0x00bb
-    .WriteArray(new Uint8Array(140)) //0x00bf [unk]
-    .WriteUInt32(0x1) //0x014b [unk = 0x1, 0x0, 0x0, 0x0]
+    .WriteUInt32(char.header.merc_experience); //0x00bb
+
+  if (char.header.version == 0x62) {
+    writer
+      .WriteArray(new Uint8Array(76)) //0x00bf [unk]
+      .WriteString(char.header.name, 16) //0x010b
+      .WriteArray(new Uint8Array(52)); //0x011b [unk]
+  } else {
+    writer    
+      .WriteArray(new Uint8Array(140)) //0x00bf [unk]
+      .WriteUInt32(0x1); //0x014b [unk = 0x1, 0x0, 0x0, 0x0]
+  }
+
+  writer
     .WriteString("Woo!", 4) //0x014f [quests = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
     .WriteArray(new Uint8Array([0x06, 0x00, 0x00, 0x00, 0x2a, 0x01])) //0x0153 [unk = 0x6, 0x0, 0x0, 0x0, 0x2a, 0x1]
     .WriteArray(_writeQuests(char.header.quests_normal)) //0x0159
@@ -561,8 +580,9 @@ function _readNPCData(bytes: Uint8Array): types.INPCData {
     } as types.INPCS;
   }
   //introductions
-  for (let j = 0; j < 3; j++) {
-    const npc = npcs[difficulties[j]];
+  for (let i = 0; i < 3; i++) {
+    const j = i * 5;
+    const npc = npcs[difficulties[i]];
     npc.warriv_act_ii.intro = reader.bits[0 + j * 8] === 1;
     npc.charsi.intro = reader.bits[2 + j * 8] === 1;
     npc.warriv_act_i.intro = reader.bits[3 + j * 8] === 1;
@@ -582,7 +602,6 @@ function _readNPCData(bytes: Uint8Array): types.INPCData {
     npc.cain_act_iii.intro = reader.bits[21 + j * 8] === 1;
     npc.elzix.intro = reader.bits[23 + j * 8] === 1;
     npc.malah.intro = reader.bits[24 + j * 8] === 1;
-    npc.malah.intro = reader.bits[24 + j * 8] === 1;
     npc.anya.intro = reader.bits[25 + j * 8] === 1;
     npc.natalya.intro = reader.bits[27 + j * 8] === 1;
     npc.meshif_act_iii.intro = reader.bits[28 + j * 8] === 1;
@@ -592,8 +611,9 @@ function _readNPCData(bytes: Uint8Array): types.INPCData {
     npc.nihlathak.intro = reader.bits[39 + j * 8] === 1;
   }
   //congrats
-  for (let j = 0; j < 3; j++) {
-    const npc = npcs[difficulties[j]];
+  for (let i = 0; i < 3; i++) {
+    const j = i * 5;
+    const npc = npcs[difficulties[i]];
     npc.warriv_act_ii.congrats = reader.bits[192 + (0 + j * 8)] === 1;
     npc.charsi.congrats = reader.bits[192 + (2 + j * 8)] === 1;
     npc.warriv_act_i.congrats = reader.bits[192 + (3 + j * 8)] === 1;
@@ -613,7 +633,6 @@ function _readNPCData(bytes: Uint8Array): types.INPCData {
     npc.cain_act_iii.congrats = reader.bits[192 + (21 + j * 8)] === 1;
     npc.elzix.congrats = reader.bits[192 + (23 + j * 8)] === 1;
     npc.malah.congrats = reader.bits[192 + (24 + j * 8)] === 1;
-    npc.malah.congrats = reader.bits[192 + (24 + j * 8)] === 1;
     npc.anya.congrats = reader.bits[192 + (25 + j * 8)] === 1;
     npc.natalya.congrats = reader.bits[192 + (27 + j * 8)] === 1;
     npc.meshif_act_iii.congrats = reader.bits[192 + (28 + j * 8)] === 1;
@@ -626,18 +645,20 @@ function _readNPCData(bytes: Uint8Array): types.INPCData {
 }
 
 function _writeNPCData(npcs: types.INPCData): Uint8Array {
-  //these are wrong, will debug later
   const writer = new BitWriter(0x30);
   writer.length = 0x30 * 8;
   if (npcs) {
     for (let j = 0; j < 3; j++) {
       const npc = npcs[difficulties[j]];
+      writer.SeekByte(j * 5);
       writer.WriteBit(+npc.warriv_act_ii.intro);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.charsi.intro);
       writer.WriteBit(+npc.warriv_act_i.intro);
       writer.WriteBit(+npc.kashya.intro);
       writer.WriteBit(+npc.akara.intro);
       writer.WriteBit(+npc.gheed.intro);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.greiz.intro);
       writer.WriteBit(+npc.jerhyn.intro);
       writer.WriteBit(+npc.meshif_act_ii.intro);
@@ -645,30 +666,37 @@ function _writeNPCData(npcs: types.INPCData): Uint8Array {
       writer.WriteBit(+npc.lysnader.intro);
       writer.WriteBit(+npc.fara.intro);
       writer.WriteBit(+npc.drogan.intro);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.alkor.intro);
       writer.WriteBit(+npc.hratli.intro);
       writer.WriteBit(+npc.ashera.intro);
+      writer.WriteBits(new Uint8Array(2).fill(0), 2);
       writer.WriteBit(+npc.cain_act_iii.intro);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.elzix.intro);
       writer.WriteBit(+npc.malah.intro);
-      writer.WriteBit(+npc.malah.intro);
       writer.WriteBit(+npc.anya.intro);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.natalya.intro);
       writer.WriteBit(+npc.meshif_act_iii.intro);
+      writer.WriteBits(new Uint8Array(2).fill(0), 2);
       writer.WriteBit(+npc.ormus.intro);
+      writer.WriteBits(new Uint8Array(5).fill(0), 5);
       writer.WriteBit(+npc.cain_act_v.intro);
       writer.WriteBit(+npc.qualkehk.intro);
       writer.WriteBit(+npc.nihlathak.intro);
     }
-    writer.SeekByte(0x24);
     for (let j = 0; j < 3; j++) {
+      writer.SeekByte(24 + j * 5);
       const npc = npcs[difficulties[j]];
       writer.WriteBit(+npc.warriv_act_ii.congrats);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.charsi.congrats);
       writer.WriteBit(+npc.warriv_act_i.congrats);
       writer.WriteBit(+npc.kashya.congrats);
       writer.WriteBit(+npc.akara.congrats);
       writer.WriteBit(+npc.gheed.congrats);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.greiz.congrats);
       writer.WriteBit(+npc.jerhyn.congrats);
       writer.WriteBit(+npc.meshif_act_ii.congrats);
@@ -676,17 +704,22 @@ function _writeNPCData(npcs: types.INPCData): Uint8Array {
       writer.WriteBit(+npc.lysnader.congrats);
       writer.WriteBit(+npc.fara.congrats);
       writer.WriteBit(+npc.drogan.congrats);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.alkor.congrats);
       writer.WriteBit(+npc.hratli.congrats);
       writer.WriteBit(+npc.ashera.congrats);
+      writer.WriteBits(new Uint8Array(2).fill(0), 2);
       writer.WriteBit(+npc.cain_act_iii.congrats);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.elzix.congrats);
       writer.WriteBit(+npc.malah.congrats);
-      writer.WriteBit(+npc.malah.congrats);
       writer.WriteBit(+npc.anya.congrats);
+      writer.WriteBit(0);
       writer.WriteBit(+npc.natalya.congrats);
       writer.WriteBit(+npc.meshif_act_iii.congrats);
+      writer.WriteBits(new Uint8Array(2).fill(0), 2);
       writer.WriteBit(+npc.ormus.congrats);
+      writer.WriteBits(new Uint8Array(5).fill(0), 5);
       writer.WriteBit(+npc.cain_act_v.congrats);
       writer.WriteBit(+npc.qualkehk.congrats);
       writer.WriteBit(+npc.nihlathak.congrats);

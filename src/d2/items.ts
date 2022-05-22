@@ -221,7 +221,11 @@ export async function readItem(
     if (item.personalized) {
       const arr = new Uint8Array(16);
       for (let i = 0; i < arr.length; i++) {
-        arr[i] = reader.ReadUInt8(7);
+        if (version == 0x62) {
+          arr[i] = reader.ReadUInt8(8);
+        } else {
+          arr[i] = reader.ReadUInt8(7);
+        }
         if (arr[i] === 0x00) {
           break;
         }
@@ -382,9 +386,13 @@ export async function writeItem(
     if (item.personalized) {
       const name = item.personalized_name.substring(0, 16);
       for (let i = 0; i < name.length; i++) {
-        writer.WriteUInt8(name.charCodeAt(i) & 0x7f, 7);
+        if (version == 0x62) {
+          writer.WriteUInt8(name.charCodeAt(i), 8);
+        } else {
+          writer.WriteUInt8(name.charCodeAt(i) & 0x7f, 7);
+        }
       }
-      writer.WriteUInt8(0x00, 7);
+      writer.WriteUInt8(0x00, version == 0x62 ? 8 : 7);
     }
 
     if (item.type === "tbk") {

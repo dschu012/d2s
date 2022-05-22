@@ -64,7 +64,7 @@ export function writeHeader(char: types.ID2S, writer: BitWriter, constants: type
   } else {
     writer
       .WriteArray(new Uint8Array([0x00, 0x00, 0x00, 0x00])) //0x0010
-      .WriteString(char.header.name, 16); //0x0014  
+      .WriteString(char.header.name, 16); //0x0014
   }
 
   writer
@@ -98,7 +98,7 @@ export function writeHeader(char: types.ID2S, writer: BitWriter, constants: type
       .WriteString(char.header.name, 16) //0x010b
       .WriteArray(new Uint8Array(52)); //0x011b [unk]
   } else {
-    writer    
+    writer
       .WriteArray(new Uint8Array(140)) //0x00bf [unk]
       .WriteUInt32(0x1); //0x014b [unk = 0x1, 0x0, 0x0, 0x0]
   }

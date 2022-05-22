@@ -3,6 +3,7 @@ import { BitWriter } from "../binary/bitwriter";
 import * as items from "./items";
 import { enhanceItems } from "./attribute_enhancer";
 import { BitReader } from "../binary/bitreader";
+import { config } from "chai";
 
 const defaultConfig = {
   extendedStash: false,
@@ -40,20 +41,17 @@ async function readStashHeader(stash: types.IStash, reader: BitReader) {
   switch (header) {
     // Resurrected
     case 0xaa55aa55:
-      reader.SkipBytes(4);
-      stash.version = reader.ReadUInt8().toString();
-      reader.SkipBytes(3);
       stash.type = types.EStashType.shared;
-      stash.sharedGold = reader.ReadUInt32(24);
-      reader.SkipBytes(1);
-      stash.pageCount = reader.ReadUInt32(32);
-      reader.SkipBytes(44);
+      stash.hardcore = reader.ReadUInt32() == 0;
+      stash.version = reader.ReadUInt32().toString();
+      stash.sharedGold = reader.ReadUInt32();
+      reader.ReadUInt32(); // size of the sector
+      reader.SkipBytes(44); // empty
       break;
     // LoD
     case 0x535353: // SSS
     case 0x4d545343: // CSTM
       stash.version = reader.ReadString(2);
-
       if (stash.version !== "01" && stash.version !== "02") {
         throw new Error(`unkown stash version ${stash.version} at position ${reader.offset - 2 * 8}`);
       }
@@ -124,8 +122,14 @@ export async function write(
 ): Promise<Uint8Array> {
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
-  writer.WriteArray(await writeStashHeader(data));
-  writer.WriteArray(await writeStashPages(data, version, constants, config));
+  if (version == 0x62) {
+    for(const page of data.pages) {
+      writer.WriteArray(await writeStashSection(data, page, constants, config));
+    }
+  } else {
+    writer.WriteArray(await writeStashHeader(data));
+    writer.WriteArray(await writeStashPages(data, version, constants, config));
+  }
   return writer.ToArray();
 }
 
@@ -147,6 +151,26 @@ async function writeStashHeader(data: types.IStash): Promise<Uint8Array> {
     }
   }
   writer.WriteUInt32(data.pages.length);
+  return writer.ToArray();
+}
+
+async function writeStashSection(
+  data: types.IStash,
+  page: types.IStashPage,
+  constants: types.IConstantData,
+  userConfig: types.IConfig
+): Promise<Uint8Array> {
+  const writer = new BitWriter();
+  writer.WriteUInt32(0xaa55aa55);
+  writer.WriteUInt32(data.hardcore ? 0 : 1);
+  writer.WriteUInt32(0x62);
+  writer.WriteUInt32(data.sharedGold);
+  writer.WriteUInt32(0); // size of the sector, to be fixed later
+  writer.WriteBytes(new Uint8Array(44).fill(0)); // empty
+  writer.WriteArray(await items.writeItems(page.items, 0x62, constants, userConfig));
+  const size = writer.offset;
+  writer.SeekByte(16);
+  writer.WriteUInt32(Math.ceil(size / 8));
   return writer.ToArray();
 }
 

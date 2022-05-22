@@ -391,7 +391,6 @@ export async function writeItem(
         } else {
           writer.WriteUInt8(name.charCodeAt(i) & 0x7f, 7);
         }
-                
       }
       writer.WriteUInt8(0x00, version == 0x62 ? 8 : 7);
     }

@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { expect, should } from "chai";
 import { read, write } from "../../src/d2/stash";
 import { constants } from "../../src/data/versions/96_constant_data";
 import * as path from "path";
@@ -11,6 +11,15 @@ describe("stash", () => {
     expect(jsonData.pageCount, "pageCount").to.eq(3);
     expect(jsonData.sharedGold, "sharedGold").to.eq(2500000);
     expect(jsonData.version, "version").to.eq("98");
+  });
+
+  it("should write D2R shared stash file", async () => {
+    const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/SharedStashSoftCoreV2.d2i`));
+    const jsonData = await read(buffer, constants, 0x62);
+
+    const savedBytes = await write(jsonData, constants, 0x62);
+
+    expect(buffer.compare(savedBytes)).to.eq(0);
   });
 
   it("should read plugy shared stash file", async () => {

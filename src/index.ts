@@ -5,3 +5,5 @@ export { readSkills, writeSkills } from "./d2/skills";
 export { enhanceAttributes, enhanceItems, enhancePlayerAttributes } from "./d2/attribute_enhancer";
 export * from "./data/parser";
 export * as types from "./d2/types";
+
+export * from "./d2/stash";

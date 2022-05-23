@@ -1,7 +1,6 @@
 import * as types from "./types";
 import { BitReader } from "../binary/bitreader";
 import { BitWriter } from "../binary/bitwriter";
-import { read } from "./stash";
 
 //todo use constants.magical_properties and csvBits
 export async function readAttributes(char: types.ID2S, reader: BitReader, constants: types.IConstantData) {

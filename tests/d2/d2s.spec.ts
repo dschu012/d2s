@@ -59,8 +59,6 @@ describe("d2s", () => {
     //console.log(JSON.stringify(save, null, 2));
     expect(save.header.name).to.eq("InitialSave");
     expect(save.attributes.strength).to.eq(30);
-
-    console.log(save);
   });
 
   it("should read new character", async () => {

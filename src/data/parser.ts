@@ -99,6 +99,13 @@ function _readStrings(file: string): any {
 function _readClasses(tsv: any, tsv2: any, strings: any): any[] {
   const arr = [] as any[];
   const cClass = tsv.header.indexOf("class");
+  // str	dex	int	vit	tot	stamina
+  const cStr = tsv.header.indexOf("str");
+  const cDex = tsv.header.indexOf("dex");
+  const cInt = tsv.header.indexOf("int");
+  const cVit = tsv.header.indexOf("vit");
+  const cStam = tsv.header.indexOf("stamina");
+  const cHpadd = tsv.header.indexOf("hpadd");
   const cLifePerLvl = tsv.header.indexOf("LifePerLevel");
   const cStamPerLvl = tsv.header.indexOf("StaminaPerLevel");
   const cManaPerLvl = tsv.header.indexOf("ManaPerLevel");
@@ -128,6 +135,14 @@ function _readClasses(tsv: any, tsv2: any, strings: any): any[] {
           lpv: +tsv.lines[i][cLifePerVit],
           spv: +tsv.lines[i][cStamPerVit],
           mpe: +tsv.lines[i][cManaPerMag],
+        },
+        a: {
+          str: +tsv.lines[i][cStr],
+          dex: +tsv.lines[i][cDex],
+          int: +tsv.lines[i][cInt],
+          vit: +tsv.lines[i][cVit],
+          stam: +tsv.lines[i][cStam],
+          hpadd: tsv.lines[i][cHpadd],
         },
       };
       id++;

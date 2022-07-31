@@ -69,7 +69,7 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
   if (constants.armor_items[item.type]) {
     details = constants.armor_items[item.type];
     item.type_id = ItemType.Armor;
-    if (details.maxac) item.defense_rating = details.maxac;
+    if (details.ethereal == 0 && details.maxac) item.defense_rating = details.maxac;
   } else if (constants.weapon_items[item.type]) {
     details = constants.weapon_items[item.type];
     item.type_id = ItemType.Weapon;

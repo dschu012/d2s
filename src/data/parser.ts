@@ -310,6 +310,9 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
   const cCode = tsv.header.indexOf("code");
   const cNameStr = tsv.header.indexOf("namestr");
   const cStackable = tsv.header.indexOf("stackable");
+  const cMinac = tsv.header.indexOf("minac");
+  const cMaxac = tsv.header.indexOf("maxac");
+  const cDurability = tsv.header.indexOf("durability");
   const cMindam = tsv.header.indexOf("mindam");
   const cMaxdam = tsv.header.indexOf("maxdam");
   const cTwoHandMindam = tsv.header.indexOf("2handmindam");
@@ -347,6 +350,9 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
           : types.EItemQuality.normal;
       item.n = strings[tsv.lines[i][cNameStr]];
       if (tsv.lines[i][cStackable] && +tsv.lines[i][cStackable] > 0) item.s = 1;
+      if (tsv.lines[i][cMinac] && +tsv.lines[i][cMinac] > 0) item.minac = +tsv.lines[i][cMinac];
+      if (tsv.lines[i][cMaxac] && +tsv.lines[i][cMaxac] > 0) item.maxac = +tsv.lines[i][cMaxac];
+      if (tsv.lines[i][cDurability]) item.durability = +tsv.lines[i][cDurability];
       if (tsv.lines[i][cMindam] && +tsv.lines[i][cMindam] > 0) item.mind = +tsv.lines[i][cMindam];
       if (tsv.lines[i][cMaxdam] && +tsv.lines[i][cMaxdam] > 0) item.maxd = +tsv.lines[i][cMaxdam];
       if (tsv.lines[i][cTwoHandMindam] && +tsv.lines[i][cTwoHandMindam] > 0) item.min2d = +tsv.lines[i][cTwoHandMindam];

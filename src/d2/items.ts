@@ -140,8 +140,11 @@ export async function readItems(
     throw new Error(`Item list header 'JM' not found at position ${reader.offset - 2 * 8}`);
   }
   const count = reader.ReadUInt16(); //0x0002
+
+  const versionConstants = _correctConstantsForVersion(char?.header.version || 0x60, constants);
+
   for (let i = 0; i < count; i++) {
-    items.push(await readItem(reader, version, constants, config));
+    items.push(await readItem(reader, version, versionConstants, config));
   }
   return items;
 }
@@ -762,4 +765,33 @@ function _GetItemTXT(item: types.IItem, constants: types.IConstantData): any {
   } else if (constants.other_items[item.type]) {
     return constants.other_items[item.type];
   }
+}
+
+function _correctConstantsForVersion (version: number, constants: types.IConstantData): types.IConstantData {
+  const versionConstants = { ...constants };
+
+  switch (version) {
+    case 0x63: // Patch 2.5
+      versionConstants.magical_properties = versionConstants.magical_properties.map((property, idx) => {
+        switch (property.s) {
+          case 'damageresist':
+          case 'magicresist':
+          case 'fireresist':
+          case 'lightresist':
+          case 'coldresist':
+          case 'poisonresist':
+            return {
+              ...versionConstants.magical_properties[idx],
+              sB: 9,
+              sA: 200,
+            };
+          default:
+            return {
+              ...versionConstants.magical_properties[idx],
+            }
+        }
+      });
+  }
+
+  return versionConstants;
 }

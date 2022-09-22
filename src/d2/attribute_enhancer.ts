@@ -21,8 +21,13 @@ export async function enhanceAttributes(char: types.ID2S, constants: types.ICons
 }
 
 export async function enhancePlayerAttributes(char: types.ID2S, constants: types.IConstantData, config?: types.IConfig) {
+
+  const onlyEquippedItems = (item: types.IItem) => item.location_id === 1 && item.equipped_id !== 13 && item.equipped_id !== 14;
+  const charmsStoredInInventory = (item: types.IItem) => ['cm1', 'cm2', 'cm3'].indexOf(item.type) !== -1 && item.location_id == 0
+    && item.alt_position_id == 1;
+
   const items = char.items.filter((item) => {
-    return item.location_id === 1 && item.equipped_id !== 13 && item.equipped_id !== 14;
+    return onlyEquippedItems(item) || charmsStoredInInventory(item);
   });
 
   char.item_bonuses = ([] as types.IMagicProperty[]).concat

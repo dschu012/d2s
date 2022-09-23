@@ -15,9 +15,19 @@ const item_property_stat_count = {
 function readConstantData(buffers: any): types.IConstantData {
   const constants = {} as types.IConstantData;
 
-  let strings = _readStrings(_getKey(buffers, "string.txt"));
-  strings = Object.assign(strings, _readStrings(_getKey(buffers, "expansionstring.txt")));
-  strings = Object.assign(strings, _readStrings(_getKey(buffers, "patchstring.txt")));
+  let strings = {};
+  if(_hasKey(buffers, "strings.txt")) {
+    strings = _readStrings(_getKey(buffers, "string.txt"));
+    strings = Object.assign(strings, _readStrings(_getKey(buffers, "expansionstring.txt")));
+    strings = Object.assign(strings, _readStrings(_getKey(buffers, "patchstring.txt")));
+  } else {
+    strings = _readJSONStrings(_getKey(buffers, "item-gems.json"));
+    strings = Object.assign(strings, _readJSONStrings(_getKey(buffers, "item-modifiers.json")));
+    strings = Object.assign(strings, _readJSONStrings(_getKey(buffers, "item-nameaffixes.json")));
+    strings = Object.assign(strings, _readJSONStrings(_getKey(buffers, "item-names.json")));
+    strings = Object.assign(strings, _readJSONStrings(_getKey(buffers, "item-runes.json")));
+    strings = Object.assign(strings, _readJSONStrings(_getKey(buffers, "skills.json")));
+  }
 
   constants.classes = _readClasses(_getArray(buffers, "CharStats.txt"), _getArray(buffers, "PlayerClass.txt"), strings);
   const skillDescs = _readSkillDesc(_getArray(buffers, "SkillDesc.txt"), strings);
@@ -74,6 +84,10 @@ function _getKey(files: { [id: string]: Buffer }, find: string): any {
   return files[key];
 }
 
+function _hasKey(files: { [id: string]: Buffer }, find: string): boolean {
+  return Object.keys(files).find((key) => key.toLowerCase() === find.toLowerCase()) != null;
+}
+
 function _readTsv(file: string): any {
   const lines = file.split(/\r?\n/).map((line) => line.split(/\t/));
   const header = lines[0];
@@ -93,6 +107,19 @@ function _readStrings(file: string): any {
         result[line[0]] = line[1];
       }
     });
+  return result;
+}
+
+function _readJSONStrings(file: string): any {
+  const result = {} as any;
+  //remove BOM
+  if (file.charCodeAt(0) === 0xFEFF) {
+    file = file.slice(1)
+  }
+  let data = JSON.parse(file);
+  for(const str of data) {
+    result[str.Key] = str.enUS;
+  }
   return result;
 }
 
@@ -168,7 +195,10 @@ function _readSkillDesc(tsv: any, strings: any): any {
 function _readSkills(tsv: any, skillDescs: any, strings: any): any[] {
   const arr = [] as any[];
   const cSkillDesc = tsv.header.indexOf("skilldesc");
-  const cId = tsv.header.indexOf("Id");
+  let cId = tsv.header.indexOf("Id");
+  if(cId < 0) {
+    cId = tsv.header.indexOf("*Id");
+  }
   const cCharclass = tsv.header.indexOf("charclass");
   for (let i = 1; i < tsv.lines.length; i++) {
     const id = +tsv.lines[i][cId];
@@ -539,3 +569,4 @@ function _readItemStatCosts(tsv: any, strings: any): any[] {
 }
 
 export { readConstantData };
+

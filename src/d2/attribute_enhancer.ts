@@ -70,10 +70,9 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
     details = constants.armor_items[item.type];
     item.type_id = ItemType.Armor;
     if (details.maxac) {
-      if (item.ethereal == 0) { 
+      if (item.ethereal == 0) {
         item.defense_rating = details.maxac;
-      }
-      else if (item.ethereal == 1) {
+      } else if (item.ethereal == 1) {
         item.defense_rating = Math.floor(details.maxac * 1.5);
       }
     }
@@ -91,7 +90,7 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
       if (details.maxd) base_damage.maxdam = Math.floor(details.maxd * 1.5);
       if (details.min2d) base_damage.twohandmindam = Math.floor(details.min2d * 1.5);
       if (details.max2d) base_damage.twohandmaxdam = Math.floor(details.max2d * 1.5);
-    }  
+    }
     item.base_damage = base_damage;
   } else if (constants.other_items[item.type]) {
     item.type_id = ItemType.Other;
@@ -107,15 +106,15 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
     if (details.it) item.inv_transform = details.it;
     if (details.iq) item.item_quality = details.iq;
     if (details.c) item.categories = details.c;
-    if (details.durability) { 
+    if (details.durability) {
       if (item.ethereal == 0) {
         item.current_durability = details.durability;
         item.max_durability = details.durability;
       } else if (item.ethereal == 1) {
-        item.current_durability = details.durability - Math.ceil(details.durability  / 2) + 1;
-        item.max_durability = details.durability - Math.ceil(details.durability  / 2) + 1;
+        item.current_durability = details.durability - Math.ceil(details.durability / 2) + 1;
+        item.max_durability = details.durability - Math.ceil(details.durability / 2) + 1;
       }
-    }  
+    }
     if (item.multiple_pictures) {
       item.inv_file = details.ig[item.picture_id];
     }

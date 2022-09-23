@@ -123,7 +123,7 @@ export async function write(
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
   if (version == 0x62) {
-    for(const page of data.pages) {
+    for (const page of data.pages) {
       writer.WriteArray(await writeStashSection(data, page, constants, config));
     }
   } else {

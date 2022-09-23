@@ -7,6 +7,11 @@ export async function readSkills(char: types.ID2S, reader: BitReader, constants:
   const offset = SkillOffset[<string>char.header.class];
   const header = reader.ReadString(2); //0x0000 [skills header = 0x69, 0x66 "if"]
   if (header !== "if") {
+    // header is not present in first save after char is created
+    if (char.header.level === 1) {
+      return; // TODO: return starter skills based on class
+    }
+
     throw new Error(`Skills header 'if' not found at position ${reader.offset - 2 * 8}`);
   }
   for (let i = 0; i < 30; i++) {

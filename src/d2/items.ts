@@ -27,7 +27,7 @@ const HUFFMAN = [[[[["w","u"],[["8",["y",["5",["j",[]]]]],"h"]],["s",[["2","n"],
 const HUFFMAN_LOOKUP = { "0": { "v": 223, "l": 8 }, "1": { "v": 31, "l": 7 }, "2": { "v": 12, "l": 6 }, "3": { "v": 91, "l": 7 }, "4": { "v": 95, "l": 8 }, "5": { "v": 104, "l": 8 }, "6": { "v": 123, "l": 7 }, "7": { "v": 30, "l": 5 }, "8": { "v": 8, "l": 6 }, "9": { "v": 14, "l": 5 }, " ": { "v": 1, "l": 2 }, "a": { "v": 15, "l": 5 }, "b": { "v": 10, "l": 4 }, "c": { "v": 2, "l": 5 }, "d": { "v": 35, "l": 6 }, "e": { "v": 3, "l": 6 }, "f": { "v": 50, "l": 6 }, "g": { "v": 11, "l": 5 }, "h": { "v": 24, "l": 5 }, "i": { "v": 63, "l": 7 }, "j": { "v": 232, "l": 9 }, "k": { "v": 18, "l": 6 }, "l": { "v": 23, "l": 5 }, "m": { "v": 22, "l": 5 }, "n": { "v": 44, "l": 6 }, "o": { "v": 127, "l": 7 }, "p": { "v": 19, "l": 5 }, "q": { "v": 155, "l": 8 }, "r": { "v": 7, "l": 5 }, "s": { "v": 4, "l": 4 }, "t": { "v": 6, "l": 5 }, "u": { "v": 16, "l": 5 }, "v": { "v": 59, "l": 7 }, "w": { "v": 0, "l": 5 }, "x": { "v": 28, "l": 5 }, "y": { "v": 40, "l": 7 }, "z": { "v": 27, "l": 8 } };
 
 export async function readCharItems(char: types.ID2S, reader: BitReader, constants: types.IConstantData, config: types.IConfig) {
-  char.items = await readItems(reader, char.header.version, constants, config);
+  char.items = await readItems(reader, char.header.version, constants, config, char);
 }
 
 export async function writeCharItems(char: types.ID2S, constants: types.IConstantData, config: types.IConfig): Promise<Uint8Array> {
@@ -40,10 +40,15 @@ export async function readMercItems(char: types.ID2S, reader: BitReader, constan
   char.merc_items = [] as types.IItem[];
   const header = reader.ReadString(2); //0x0000 [merc item list header = "jf"]
   if (header !== "jf") {
+    // header is not present in first save after char is created
+    if (char?.header.level === 1) {
+      return;
+    }
+
     throw new Error(`Mercenary header 'jf' not found at position ${reader.offset - 2 * 8}`);
   }
   if (char.header.merc_id && parseInt(char.header.merc_id, 16) !== 0) {
-    char.merc_items = await readItems(reader, char.header.version, constants, config);
+    char.merc_items = await readItems(reader, char.header.version, constants, config, char);
   }
 }
 
@@ -60,6 +65,11 @@ export async function writeMercItems(char: types.ID2S, constants: types.IConstan
 export async function readGolemItems(char: types.ID2S, reader: BitReader, constants: types.IConstantData, config: types.IConfig) {
   const header = reader.ReadString(2); //0x0000 [golem item list header = "kf"]
   if (header !== "kf") {
+    // header is not present in first save after char is created
+    if (char?.header.level === 1) {
+      return;
+    }
+
     throw new Error(`Golem header 'kf' not found at position ${reader.offset - 2 * 8}`);
   }
   const has_golem = reader.ReadUInt8();
@@ -84,12 +94,18 @@ export async function readCorpseItems(char: types.ID2S, reader: BitReader, const
   char.corpse_items = [] as types.IItem[];
   const header = reader.ReadString(2); //0x0000 [item list header = 0x4a, 0x4d "JM"]
   if (header !== "JM") {
+    // header is not present in first save after char is created
+    if (char.header.level === 1) {
+      char.is_dead = 0;
+      return;
+    }
+
     throw new Error(`Corpse header 'JM' not found at position ${reader.offset - 2 * 8}`);
   }
   char.is_dead = reader.ReadUInt16(); //0x0002 [corpse count]
   for (let i = 0; i < char.is_dead; i++) {
     reader.SkipBytes(12); //0x0004 [unk4, x_pos, y_pos]
-    char.corpse_items = char.corpse_items.concat(await readItems(reader, char.header.version, constants, config));
+    char.corpse_items = char.corpse_items.concat(await readItems(reader, char.header.version, constants, config, char));
   }
 }
 
@@ -106,15 +122,29 @@ export async function writeCorpseItem(char: types.ID2S, constants: types.IConsta
   return writer.ToArray();
 }
 
-export async function readItems(reader: BitReader, version: number, constants: types.IConstantData, config: types.IConfig) {
+export async function readItems(
+  reader: BitReader,
+  version: number,
+  constants: types.IConstantData,
+  config: types.IConfig,
+  char?: types.ID2S
+) {
   const items = [] as types.IItem[];
   const header = reader.ReadString(2); //0x0000 [item list header = 0x4a, 0x4d "JM"]
   if (header !== "JM") {
+    // header is not present in first save after char is created
+    if (char?.header.level === 1) {
+      return []; // TODO: return starter items based on class
+    }
+
     throw new Error(`Item list header 'JM' not found at position ${reader.offset - 2 * 8}`);
   }
   const count = reader.ReadUInt16(); //0x0002
+
+  const versionConstants = _correctConstantsForVersion(char?.header.version || 0x60, constants);
+
   for (let i = 0; i < count; i++) {
-    items.push(await readItem(reader, version, constants, config));
+    items.push(await readItem(reader, version, versionConstants, config));
   }
   return items;
 }
@@ -735,4 +765,33 @@ function _GetItemTXT(item: types.IItem, constants: types.IConstantData): any {
   } else if (constants.other_items[item.type]) {
     return constants.other_items[item.type];
   }
+}
+
+function _correctConstantsForVersion (version: number, constants: types.IConstantData): types.IConstantData {
+  const versionConstants = { ...constants };
+
+  switch (version) {
+    case 0x63: // Patch 2.5
+      versionConstants.magical_properties = versionConstants.magical_properties.map((property, idx) => {
+        switch (property.s) {
+          case 'damageresist':
+          case 'magicresist':
+          case 'fireresist':
+          case 'lightresist':
+          case 'coldresist':
+          case 'poisonresist':
+            return {
+              ...versionConstants.magical_properties[idx],
+              sB: 9,
+              sA: 200,
+            };
+          default:
+            return {
+              ...versionConstants.magical_properties[idx],
+            }
+        }
+      });
+  }
+
+  return versionConstants;
 }

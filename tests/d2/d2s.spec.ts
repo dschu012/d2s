@@ -53,6 +53,14 @@ describe("d2s", () => {
     expect(save).to.deep.eq(readAgain);
   });
 
+  it("should read version 98 new character", async () => {
+    const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/98/InitialSave.d2s"));
+    const save = await read(inputstream, constants);
+    //console.log(JSON.stringify(save, null, 2));
+    expect(save.header.name).to.eq("InitialSave");
+    expect(save.attributes.strength).to.eq(30);
+  });
+
   it("should read new character", async () => {
     const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/96/simple.d2s"));
     const save = await read(inputstream, constants);

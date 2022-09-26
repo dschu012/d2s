@@ -2164,7 +2164,7 @@
         },
         async previewItem(e) {
           let bytes = b64ToArrayBuffer(this.previewModel.value);
-          this.preview = await d2s.readItem(bytes, 0x60, window.constants.constants);
+          this.preview = await d2s.readItem(bytes, this.save.header.version || 0x60, window.constants.constants);
           this.setPropertiesOnItem(this.preview);
         },
         loadItem() {

@@ -141,10 +141,8 @@ export async function readItems(
   }
   const count = reader.ReadUInt16(); //0x0002
 
-  const versionConstants = _correctConstantsForVersion(char?.header.version || 0x60, constants);
-
   for (let i = 0; i < count; i++) {
-    items.push(await readItem(reader, version, versionConstants, config));
+    items.push(await readItem(reader, version, constants, config));
   }
   return items;
 }
@@ -167,7 +165,7 @@ export async function writeItems(
 export async function readItem(
   reader: BitReader,
   version: number,
-  constants: types.IConstantData,
+  originalConstants: types.IConstantData,
   config: types.IConfig,
   parent?: types.IItem
 ): Promise<types.IItem> {
@@ -177,6 +175,7 @@ export async function readItem(
       throw new Error(`Item header 'JM' not found at position ${reader.offset - 2 * 8}`);
     }
   }
+  const constants = _correctConstantsForVersion(version || 0x60, originalConstants);
   const item = {} as types.IItem;
   _readSimpleBits(item, reader, version, constants, config);
   if (!item.simple_item) {
@@ -767,7 +766,12 @@ function _GetItemTXT(item: types.IItem, constants: types.IConstantData): any {
   }
 }
 
+const _versionConstantsCache: {[version: string]: types.IConstantData} = {};
 function _correctConstantsForVersion (version: number, constants: types.IConstantData): types.IConstantData {
+  if (_versionConstantsCache[version]) {
+    return _versionConstantsCache[version];
+  }
+
   const versionConstants = { ...constants };
 
   switch (version) {
@@ -793,5 +797,6 @@ function _correctConstantsForVersion (version: number, constants: types.IConstan
       });
   }
 
+  _versionConstantsCache[version] = versionConstants;
   return versionConstants;
 }

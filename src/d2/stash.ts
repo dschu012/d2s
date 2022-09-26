@@ -12,7 +12,7 @@ const defaultConfig = {
 export async function read(
   buffer: Uint8Array,
   constants: types.IConstantData,
-  version: number,
+  version: number | null,
   userConfig?: types.IConfig
 ): Promise<types.IStash> {
   const stash = {} as types.IStash;
@@ -26,12 +26,12 @@ export async function read(
     while (reader.offset < reader.bits.length) {
       pageCount++;
       await readStashHeader(stash, reader);
-      await readStashPart(stash, reader, version, constants);
+      await readStashPart(stash, reader, version || parseInt(stash.version), constants);
     }
     stash.pageCount = pageCount;
   } else {
     await readStashHeader(stash, reader);
-    await readStashPages(stash, reader, version, constants);
+    await readStashPages(stash, reader, version || parseInt(stash.version), constants);
   }
   return stash;
 }

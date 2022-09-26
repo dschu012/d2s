@@ -16,7 +16,7 @@ function readConstantData(buffers: any): types.IConstantData {
   const constants = {} as types.IConstantData;
 
   let strings = {};
-  if(_hasKey(buffers, "strings.txt")) {
+  if (_hasKey(buffers, "strings.txt")) {
     strings = _readStrings(_getKey(buffers, "string.txt"));
     strings = Object.assign(strings, _readStrings(_getKey(buffers, "expansionstring.txt")));
     strings = Object.assign(strings, _readStrings(_getKey(buffers, "patchstring.txt")));
@@ -113,11 +113,11 @@ function _readStrings(file: string): any {
 function _readJSONStrings(file: string): any {
   const result = {} as any;
   //remove BOM
-  if (file.charCodeAt(0) === 0xFEFF) {
-    file = file.slice(1)
+  if (file.charCodeAt(0) === 0xfeff) {
+    file = file.slice(1);
   }
-  let data = JSON.parse(file);
-  for(const str of data) {
+  const data = JSON.parse(file);
+  for (const str of data) {
     result[str.Key] = str.enUS;
   }
   return result;
@@ -196,7 +196,7 @@ function _readSkills(tsv: any, skillDescs: any, strings: any): any[] {
   const arr = [] as any[];
   const cSkillDesc = tsv.header.indexOf("skilldesc");
   let cId = tsv.header.indexOf("Id");
-  if(cId < 0) {
+  if (cId < 0) {
     cId = tsv.header.indexOf("*Id");
   }
   const cCharclass = tsv.header.indexOf("charclass");
@@ -569,4 +569,3 @@ function _readItemStatCosts(tsv: any, strings: any): any[] {
 }
 
 export { readConstantData };
-

@@ -766,24 +766,23 @@ function _GetItemTXT(item: types.IItem, constants: types.IConstantData): any {
   }
 }
 
-const _versionConstantsCache: {[version: string]: types.IConstantData} = {};
-function _correctConstantsForVersion (version: number, constants: types.IConstantData): types.IConstantData {
+const _versionConstantsCache: {[versionNumber: number]: types.IConstantData} = {};
+function _correctConstantsForVersion(version: number, constants: types.IConstantData): types.IConstantData {
   if (_versionConstantsCache[version]) {
     return _versionConstantsCache[version];
   }
-
   const versionConstants = { ...constants };
 
   switch (version) {
     case 0x63: // Patch 2.5
       versionConstants.magical_properties = versionConstants.magical_properties.map((property, idx) => {
         switch (property.s) {
-          case 'damageresist':
-          case 'magicresist':
-          case 'fireresist':
-          case 'lightresist':
-          case 'coldresist':
-          case 'poisonresist':
+          case "damageresist":
+          case "magicresist":
+          case "fireresist":
+          case "lightresist":
+          case "coldresist":
+          case "poisonresist":
             return {
               ...versionConstants.magical_properties[idx],
               sB: 9,
@@ -792,7 +791,7 @@ function _correctConstantsForVersion (version: number, constants: types.IConstan
           default:
             return {
               ...versionConstants.magical_properties[idx],
-            }
+            };
         }
       });
   }

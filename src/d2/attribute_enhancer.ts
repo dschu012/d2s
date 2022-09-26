@@ -74,14 +74,28 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
   if (constants.armor_items[item.type]) {
     details = constants.armor_items[item.type];
     item.type_id = ItemType.Armor;
+    if (details.maxac) {
+      if (item.ethereal == 0) {
+        item.defense_rating = details.maxac;
+      } else if (item.ethereal == 1) {
+        item.defense_rating = Math.floor(details.maxac * 1.5);
+      }
+    }
   } else if (constants.weapon_items[item.type]) {
     details = constants.weapon_items[item.type];
     item.type_id = ItemType.Weapon;
     const base_damage = {} as types.IWeaponDamage;
-    if (details.mind) base_damage.mindam = details.mind;
-    if (details.maxd) base_damage.maxdam = details.maxd;
-    if (details.min2d) base_damage.twohandmindam = details.min2d;
-    if (details.max2d) base_damage.twohandmaxdam = details.max2d;
+    if (item.ethereal == 0) {
+      if (details.mind) base_damage.mindam = details.mind;
+      if (details.maxd) base_damage.maxdam = details.maxd;
+      if (details.min2d) base_damage.twohandmindam = details.min2d;
+      if (details.max2d) base_damage.twohandmaxdam = details.max2d;
+    } else if (item.ethereal == 1) {
+      if (details.mind) base_damage.mindam = Math.floor(details.mind * 1.5);
+      if (details.maxd) base_damage.maxdam = Math.floor(details.maxd * 1.5);
+      if (details.min2d) base_damage.twohandmindam = Math.floor(details.min2d * 1.5);
+      if (details.max2d) base_damage.twohandmaxdam = Math.floor(details.max2d * 1.5);
+    }
     item.base_damage = base_damage;
   } else if (constants.other_items[item.type]) {
     item.type_id = ItemType.Other;
@@ -97,6 +111,15 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
     if (details.it) item.inv_transform = details.it;
     if (details.iq) item.item_quality = details.iq;
     if (details.c) item.categories = details.c;
+    if (details.durability) {
+      if (item.ethereal == 0) {
+        item.current_durability = details.durability;
+        item.max_durability = details.durability;
+      } else if (item.ethereal == 1) {
+        item.current_durability = details.durability - Math.ceil(details.durability / 2) + 1;
+        item.max_durability = details.durability - Math.ceil(details.durability / 2) + 1;
+      }
+    }
     if (item.multiple_pictures) {
       item.inv_file = details.ig[item.picture_id];
     }

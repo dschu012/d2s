@@ -766,12 +766,11 @@ function _GetItemTXT(item: types.IItem, constants: types.IConstantData): any {
   }
 }
 
-const _versionConstantsCache: {[version: string]: types.IConstantData} = {};
+const _versionConstantsCache: {[versionNumber: number]: types.IConstantData} = {};
 function _correctConstantsForVersion(version: number, constants: types.IConstantData): types.IConstantData {
   if (_versionConstantsCache[version]) {
     return _versionConstantsCache[version];
   }
-
   const versionConstants = { ...constants };
 
   switch (version) {

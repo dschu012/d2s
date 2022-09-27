@@ -122,7 +122,7 @@ export async function write(
 ): Promise<Uint8Array> {
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
-  if (version == 0x62) {
+  if (version > 0x61) {
     for (const page of data.pages) {
       writer.WriteArray(await writeStashSection(data, page, constants, config));
     }

@@ -8,11 +8,11 @@ export function readHeader(char: types.ID2S, reader: BitReader, constants: types
   char.header.filesize = reader.ReadUInt32(); //0x0008
   char.header.checksum = reader.ReadUInt32().toString(16).padStart(8, "0"); //0x000c
   reader.SkipBytes(4); //0x0010
-  if (char.header.version == 0x62) {
+  if (char.header.version > 0x61) {
     reader.SeekByte(267);
   }
   char.header.name = reader.ReadString(16).replace(/\0/g, ""); //0x0014
-  if (char.header.version == 0x62) {
+  if (char.header.version > 0x61) {
     reader.SeekByte(36);
   }
   char.header.status = _readStatus(reader.ReadUInt8()); //0x0024
@@ -59,7 +59,7 @@ export function writeHeader(char: types.ID2S, writer: BitWriter, constants: type
     .WriteUInt32(0x0) //0x0008 (filesize. needs to be writen after all data)
     .WriteUInt32(0x0); //0x000c (checksum. needs to be calculated after all data writer)
 
-  if (char.header.version == 0x62) {
+  if (char.header.version > 0x61) {
     writer.WriteArray(new Uint8Array(Array(20).fill(0))); // 0x0010
   } else {
     writer
@@ -92,7 +92,7 @@ export function writeHeader(char: types.ID2S, writer: BitWriter, constants: type
     .WriteUInt16(char.header.merc_type) //0x00b9
     .WriteUInt32(char.header.merc_experience); //0x00bb
 
-  if (char.header.version == 0x62) {
+  if (char.header.version > 0x61) {
     writer
       .WriteArray(new Uint8Array(76)) //0x00bf [unk]
       .WriteString(char.header.name, 16) //0x010b

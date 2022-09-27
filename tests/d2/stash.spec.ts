@@ -22,6 +22,16 @@ describe("stash", () => {
     expect(buffer.compare(savedBytes)).to.eq(0);
   });
 
+  it("should read D2R shared stash file, with version autodetection", async () => {
+    const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/SharedStashSoftCoreV2_0x63.d2i`));
+    const jsonData = await read(buffer, constants, null);
+    const savedBytes = await write(jsonData, constants, 0x62);
+    const savedJsonData = await read(savedBytes, constants, null);
+    jsonData.version = '';
+    savedJsonData.version = '';
+    expect(jsonData).to.deep.eq(savedJsonData);
+  });
+
   it("should read plugy shared stash file", async () => {
     const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/_LOD_SharedStashSave.sss`));
     const jsonData = await read(buffer, constants, 0x60);

@@ -440,6 +440,10 @@ function _descFunc(
       property.description = `${sign}${v} to ${skill?.s}`;
       break;
     }
+    case 29: {
+      property.description = descString.replace(/%d%/, (v).toString());
+      break;
+    }
     default: {
       throw new Error(`No handler for descFunc: ${descFunc}`);
     }

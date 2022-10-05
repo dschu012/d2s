@@ -494,7 +494,10 @@ function _readSetOrUnqItems(tsv: any, strings: any): any[] {
 function _readItemStatCosts(tsv: any, strings: any): any[] {
   const arr = [] as any[];
   const cStat = tsv.header.indexOf("Stat");
-  const cId = tsv.header.indexOf("ID");
+  let cId = tsv.header.indexOf("ID");
+  if (cId < 0) {
+    cId = tsv.header.indexOf("*ID");
+  }
   const cCSvBits = tsv.header.indexOf("CSvBits");
   const cCSvParam = tsv.header.indexOf("CSvParam");
   const cCSvSigned = tsv.header.indexOf("CSvSigned");

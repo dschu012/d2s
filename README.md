@@ -56,3 +56,4 @@ function write(data: types.ID2S, constants: types.IConstantData, userConfig?: ty
 * http://user.xmission.com/~trevin/DiabloIIv1.09_File_Format.shtml
 * https://github.com/nickshanks/Alkor
 * https://github.com/HarpyWar/d2s-character-editor
+

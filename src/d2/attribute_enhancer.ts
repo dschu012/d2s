@@ -403,8 +403,12 @@ function _descFunc(
       break;
     }
     case 19: {
-      property.description = descString.replace(/%d/, v.toString());
-      property.description = property.description.replace(/%\+d%/, v.toString());
+      property.description = descString
+        .replace(/%d%/, v.toString())
+        .replace(/%\+d%/, "+" + v.toString())
+        .replace(/%\-d%/, "-" + v.toString())
+        .replace(/%\+d/, "+" + v.toString())
+        .replace(/%\-d/, "-" + v.toString());
       break;
     }
     case 20: {
@@ -446,8 +450,12 @@ function _descFunc(
       break;
     }
     case 29: {
-      property.description = descString.replace(/%d%/, v.toString());
-      property.description = property.description.replace(/%\+d%/, v.toString());
+      property.description = descString
+        .replace(/%d%/, v.toString())
+        .replace(/%\+d%/, "+" + v.toString())
+        .replace(/%\-d%/, "-" + v.toString())
+        .replace(/%\+d/, "+" + v.toString())
+        .replace(/%\-d/, "-" + v.toString());
       break;
     }
     default: {

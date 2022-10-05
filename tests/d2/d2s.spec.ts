@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { read, write, readItem, setConstantData } from "../../src/d2/d2s";
+import { read, write, readItem, writeItem, setConstantData } from "../../src/d2/d2s";
 import * as fs from "fs";
 import * as path from "path";
 import * as types from "../../src/d2/types";
@@ -185,4 +185,5 @@ describe("d2s", () => {
       //fs.writeFileSync(path.join(__dirname,`../../../data/save/${d2s.header.name}.d2s`), output);
     }
   }).timeout(Infinity);
-});
+
+  });

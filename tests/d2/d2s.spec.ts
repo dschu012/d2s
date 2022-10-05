@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { read, write, readItem } from "../../src/d2/d2s";
+import { read, write, readItem, setConstantData } from "../../src/d2/d2s";
 import * as fs from "fs";
 import * as path from "path";
 import * as types from "../../src/d2/types";
@@ -65,6 +65,15 @@ describe("d2s", () => {
   it("should read version 99 character", async () => {
     const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/99/Wilhelm.d2s"));
     const save = await read(inputstream, version99.constants);
+    //console.log(JSON.stringify(save, null, 2));
+    expect(save.header.name).to.eq("Wilhelm");
+  });
+
+  it("should read version 99 character, autodetect constants", async () => {
+    setConstantData(96, constants);
+    setConstantData(99, version99.constants);
+    const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/99/Wilhelm.d2s"));
+    const save = await read(inputstream);
     //console.log(JSON.stringify(save, null, 2));
     expect(save.header.name).to.eq("Wilhelm");
   });

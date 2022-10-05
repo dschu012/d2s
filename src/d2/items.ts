@@ -175,7 +175,7 @@ export async function readItem(
       throw new Error(`Item header 'JM' not found at position ${reader.offset - 2 * 8}`);
     }
   }
-  const constants = _correctConstantsForVersion(version || 0x60, originalConstants);
+  const constants = originalConstants;
   const item = {} as types.IItem;
   _readSimpleBits(item, reader, version, constants, config);
   if (!item.simple_item) {
@@ -764,38 +764,4 @@ function _GetItemTXT(item: types.IItem, constants: types.IConstantData): any {
   } else if (constants.other_items[item.type]) {
     return constants.other_items[item.type];
   }
-}
-
-const _versionConstantsCache: { [versionNumber: number]: types.IConstantData } = {};
-function _correctConstantsForVersion(version: number, constants: types.IConstantData): types.IConstantData {
-  if (_versionConstantsCache[version]) {
-    return _versionConstantsCache[version];
-  }
-  const versionConstants = { ...constants };
-
-  switch (version) {
-    case 0x63: // Patch 2.5
-      versionConstants.magical_properties = versionConstants.magical_properties.map((property, idx) => {
-        switch (property.s) {
-          case "damageresist":
-          case "magicresist":
-          case "fireresist":
-          case "lightresist":
-          case "coldresist":
-          case "poisonresist":
-            return {
-              ...versionConstants.magical_properties[idx],
-              sB: 9,
-              sA: 200,
-            };
-          default:
-            return {
-              ...versionConstants.magical_properties[idx],
-            };
-        }
-      });
-  }
-
-  _versionConstantsCache[version] = versionConstants;
-  return versionConstants;
 }

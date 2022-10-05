@@ -6,6 +6,7 @@ import * as types from "../../src/d2/types";
 import { constants } from "../../src/data/versions/96_constant_data";
 import { BitReader } from "../../src/binary/bitreader";
 import { read } from "../../src/d2/d2s";
+import * as version99 from "../../src/data/versions/99_constant_data";
 
 describe("items", () => {
   const config = {
@@ -66,7 +67,7 @@ describe("items", () => {
 
   it("should read item list from 99 version saves", async () => {
     const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/99/Barbarian.d2s"));
-    const char = await read(inputstream, constants, config);
+    const char = await read(inputstream, version99.constants, config);
     expect(char.header.version).to.eq(99);
     expect(char.items.length).to.eq(86);
   });

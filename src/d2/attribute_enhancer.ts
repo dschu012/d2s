@@ -441,7 +441,7 @@ function _descFunc(
       break;
     }
     case 29: {
-      property.description = descString.replace(/%d%/, (v).toString());
+      property.description = descString.replace(/%d%/, v.toString());
       break;
     }
     default: {

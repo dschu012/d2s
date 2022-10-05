@@ -27,8 +27,8 @@ describe("stash", () => {
     const jsonData = await read(buffer, constants, null);
     const savedBytes = await write(jsonData, constants, 0x62);
     const savedJsonData = await read(savedBytes, constants, null);
-    jsonData.version = '';
-    savedJsonData.version = '';
+    jsonData.version = "";
+    savedJsonData.version = "";
     expect(jsonData).to.deep.eq(savedJsonData);
   });
 

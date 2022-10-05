@@ -210,6 +210,10 @@ function _enhanceAttributeDescription(
     }
     let descFunc = prop.dF;
     let descString = v >= 0 ? prop.dP : prop.dN;
+    //hack for d2r...?
+    if (property.id == 39 || property.id == 41 || property.id == 43 || property.id == 45) {
+      descString = prop.dP;
+    }
     let descVal = prop.dV;
     let desc2 = prop.d2;
     if (prop.dg && dgrps[prop.dg - 1] === 4) {
@@ -400,6 +404,7 @@ function _descFunc(
     }
     case 19: {
       property.description = descString.replace(/%d/, v.toString());
+      property.description = property.description.replace(/%\+d%/, v.toString());
       break;
     }
     case 20: {
@@ -442,6 +447,7 @@ function _descFunc(
     }
     case 29: {
       property.description = descString.replace(/%d%/, v.toString());
+      property.description = property.description.replace(/%\+d%/, v.toString());
       break;
     }
     default: {

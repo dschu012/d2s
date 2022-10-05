@@ -185,5 +185,4 @@ describe("d2s", () => {
       //fs.writeFileSync(path.join(__dirname,`../../../data/save/${d2s.header.name}.d2s`), output);
     }
   }).timeout(Infinity);
-
-  });
+});

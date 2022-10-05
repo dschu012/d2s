@@ -22,7 +22,7 @@ async function read(buffer: Uint8Array, constants?: types.IConstantData, userCon
   const config = Object.assign(defaultConfig, userConfig);
   await readHeader(char, reader);
   //could load constants based on version here
-  if(!constants) {
+  if (!constants) {
     constants = getConstantData(char.header.version);
   }
   await readHeaderData(char, reader, constants);
@@ -46,7 +46,7 @@ async function readItem(
 ): Promise<types.IItem> {
   const reader = new BitReader(buffer);
   const config = Object.assign(defaultConfig, userConfig);
-  if(!constants) {
+  if (!constants) {
     constants = getConstantData(version);
   }
   const item = await items.readItem(reader, version, constants, config);
@@ -62,7 +62,7 @@ async function write(data: types.ID2S, constants?: types.IConstantData, userConf
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
   writer.WriteArray(await writeHeader(data));
-  if(!constants) {
+  if (!constants) {
     constants = getConstantData(data.header.version);
   }
   writer.WriteArray(await writeHeaderData(data, constants));
@@ -86,24 +86,23 @@ async function writeItem(
 ): Promise<Uint8Array> {
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
-  if(!constants) {
+  if (!constants) {
     constants = getConstantData(version);
   }
   writer.WriteArray(await items.writeItem(item, version, constants, config));
   return writer.ToArray();
 }
 
-var versionedConstants:
-  Map<number, types.IConstantData> = new Map<number, types.IConstantData>();
+const versionedConstants: Map<number, types.IConstantData> = new Map<number, types.IConstantData>();
 
-function getConstantData(version: number) : types.IConstantData {
-  if(!(version in versionedConstants)) {
+function getConstantData(version: number): types.IConstantData {
+  if (!(version in versionedConstants)) {
     throw new Error(`No constant data found for this version ${version}`);
   }
   return versionedConstants[version];
 }
 
-function setConstantData(version: number, data: types.IConstantData)  {
+function setConstantData(version: number, data: types.IConstantData) {
   versionedConstants[version] = data;
 }
 

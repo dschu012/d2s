@@ -215,6 +215,10 @@ function _enhanceAttributeDescription(
     }
     let descFunc = prop.dF;
     let descString = v >= 0 ? prop.dP : prop.dN;
+    //hack for d2r...?
+    if (property.id == 39 || property.id == 41 || property.id == 43 || property.id == 45) {
+      descString = prop.dP;
+    }
     let descVal = prop.dV;
     let desc2 = prop.d2;
     if (prop.dg && dgrps[prop.dg - 1] === 4) {
@@ -242,7 +246,7 @@ function _enhanceAttributeDescription(
         descString = prop.dE;
         //TODO. why???
         if (prop.s === "item_maxdamage_percent") {
-          descString = `+%d% ${descString.replace(/}/gi, "")}`;
+          descString = `+%d% ${descString.replace(/}/gi, "").replace(/%\+?d%%/gi, "")}`;
         }
       }
       property.description = descString.replace(/%d/gi, () => {
@@ -369,22 +373,12 @@ function _descFunc(
     case 14: {
       const clazz = constants.classes[property.values[1]];
       const skillTabStr = clazz.ts[property.values[0]];
-      descString = skillTabStr.replace(/%d/gi, v);
+      descString = _sprintf(skillTabStr, v);
       property.description = `${descString} ${clazz.co}`;
       break;
     }
     case 15: {
-      //todo... not right % chance?
-      let count = 2;
-      descString = descString
-        .replace(/%d%|%s/gi, () => {
-          const v = property.values[count--];
-          if (count == 0) {
-            return constants.skills[v].s;
-          }
-          return v;
-        })
-        .replace(/%d/, property.values[count--].toString());
+      descString = _sprintf(descString, property.values[2], property.values[0], constants.skills[property.values[1]].s);
       property.description = `${descString}`;
       break;
     }
@@ -404,7 +398,7 @@ function _descFunc(
       break;
     }
     case 19: {
-      property.description = descString.replace(/%d/, v.toString());
+      property.description = _sprintf(descString, v.toString());
       break;
     }
     case 20: {
@@ -427,22 +421,41 @@ function _descFunc(
     }
     case 24: {
       //charges
-      let count = 0;
-      descString = descString.replace(/%d/gi, () => {
-        return property.values[2 + count++].toString();
-      });
-      property.description = `Level ${property.values[0]} ${constants.skills[property.values[1]].s} ${descString}`;
+      //legacy desc string
+      if (descString.indexOf("(") == 0) {
+        let count = 0;
+        descString = descString.replace(/%d/gi, () => {
+          return property.values[2 + count++].toString();
+        });
+        property.description = `Level ${property.values[0]} ${constants.skills[property.values[1]].s} ${descString}`;
+      } else {
+        property.description = _sprintf(
+          descString,
+          property.values[0],
+          constants.skills[property.values[1]].s,
+          property.values[2],
+          property.values[3]
+        );
+      }
       break;
     }
     case 27: {
       const skill = constants.skills[property.values[0]];
       const clazz = _classFromCode(skill.c, constants);
-      property.description = `${sign}${v} to ${skill?.s} ${clazz?.co}`;
+      if (descString) {
+        property.description = _sprintf(descString, v, skill?.s, clazz?.co);
+      } else {
+        property.description = `${sign}${v} to ${skill?.s} ${clazz?.co}`;
+      }
       break;
     }
     case 28: {
       const skill = constants.skills[property.values[0]];
       property.description = `${sign}${v} to ${skill?.s}`;
+      break;
+    }
+    case 29: {
+      property.description = _sprintf(descString, v.toString());
       break;
     }
     default: {
@@ -471,6 +484,19 @@ function _descFunc(
   if (desc2Present) {
     property.description += ` ${desc2}`;
   }
+}
+
+function _sprintf(str: string, ...args: any[]): string {
+  let i = 0;
+  return str
+    .replace(/%\+?d|%\+?s/gi, (m) => {
+      let v = args[i++].toString();
+      if (m.indexOf("+") >= 0) {
+        v = "+" + v;
+      }
+      return v;
+    })
+    .replace("%%", "%");
 }
 
 function _itemStatCostFromStat(stat: string, constants: types.IConstantData): number {

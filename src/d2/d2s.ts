@@ -16,12 +16,15 @@ function reader(buffer: Uint8Array) {
   return new BitReader(buffer);
 }
 
-async function read(buffer: Uint8Array, constants: types.IConstantData, userConfig?: types.IConfig): Promise<types.ID2S> {
+async function read(buffer: Uint8Array, constants?: types.IConstantData, userConfig?: types.IConfig): Promise<types.ID2S> {
   const char = {} as types.ID2S;
   const reader = new BitReader(buffer);
   const config = Object.assign(defaultConfig, userConfig);
   await readHeader(char, reader);
   //could load constants based on version here
+  if (!constants) {
+    constants = getConstantData(char.header.version);
+  }
   await readHeaderData(char, reader, constants);
   await readAttributes(char, reader, constants);
   await readSkills(char, reader, constants);
@@ -38,11 +41,14 @@ async function read(buffer: Uint8Array, constants: types.IConstantData, userConf
 async function readItem(
   buffer: Uint8Array,
   version: number,
-  constants: types.IConstantData,
+  constants?: types.IConstantData,
   userConfig?: types.IConfig
 ): Promise<types.IItem> {
   const reader = new BitReader(buffer);
   const config = Object.assign(defaultConfig, userConfig);
+  if (!constants) {
+    constants = getConstantData(version);
+  }
   const item = await items.readItem(reader, version, constants, config);
   await enhanceItems([item], constants);
   return item;
@@ -52,11 +58,13 @@ function writer(buffer: Uint8Array) {
   return new BitWriter();
 }
 
-async function write(data: types.ID2S, constants: types.IConstantData, userConfig?: types.IConfig): Promise<Uint8Array> {
+async function write(data: types.ID2S, constants?: types.IConstantData, userConfig?: types.IConfig): Promise<Uint8Array> {
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
   writer.WriteArray(await writeHeader(data));
-  //could load constants based on version here
+  if (!constants) {
+    constants = getConstantData(data.header.version);
+  }
   writer.WriteArray(await writeHeaderData(data, constants));
   writer.WriteArray(await writeAttributes(data, constants));
   writer.WriteArray(await writeSkills(data, constants));
@@ -73,13 +81,29 @@ async function write(data: types.ID2S, constants: types.IConstantData, userConfi
 async function writeItem(
   item: types.IItem,
   version: number,
-  constants: types.IConstantData,
+  constants?: types.IConstantData,
   userConfig?: types.IConfig
 ): Promise<Uint8Array> {
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
+  if (!constants) {
+    constants = getConstantData(version);
+  }
   writer.WriteArray(await items.writeItem(item, version, constants, config));
   return writer.ToArray();
 }
 
-export { reader, writer, read, write, readItem, writeItem };
+const versionedConstants: Map<number, types.IConstantData> = new Map<number, types.IConstantData>();
+
+function getConstantData(version: number): types.IConstantData {
+  if (!(version in versionedConstants)) {
+    throw new Error(`No constant data found for this version ${version}`);
+  }
+  return versionedConstants[version];
+}
+
+function setConstantData(version: number, data: types.IConstantData) {
+  versionedConstants[version] = data;
+}
+
+export { reader, writer, read, write, readItem, writeItem, getConstantData, setConstantData };

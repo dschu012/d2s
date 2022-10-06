@@ -3,6 +3,7 @@ import { read, write } from "../../src/d2/stash";
 import { constants } from "../../src/data/versions/96_constant_data";
 import * as path from "path";
 import * as fs from "fs";
+import * as version99 from "../../src/data/versions/99_constant_data";
 
 describe("stash", () => {
   it("should read D2R shared stash file", async () => {
@@ -24,11 +25,11 @@ describe("stash", () => {
 
   it("should read D2R shared stash file, with version autodetection", async () => {
     const buffer = fs.readFileSync(path.join(__dirname, `../../examples/stash/SharedStashSoftCoreV2_0x63.d2i`));
-    const jsonData = await read(buffer, constants, null);
-    const savedBytes = await write(jsonData, constants, 0x62);
-    const savedJsonData = await read(savedBytes, constants, null);
-    jsonData.version = '';
-    savedJsonData.version = '';
+    const jsonData = await read(buffer, version99.constants, null);
+    const savedBytes = await write(jsonData, version99.constants, 0x62);
+    const savedJsonData = await read(savedBytes, version99.constants, null);
+    jsonData.version = "";
+    savedJsonData.version = "";
     expect(jsonData).to.deep.eq(savedJsonData);
   });
 

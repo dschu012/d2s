@@ -765,3 +765,16 @@ function _GetItemTXT(item: types.IItem, constants: types.IConstantData): any {
     return constants.other_items[item.type];
   }
 }
+
+const versionedConstants: Map<number, types.IConstantData> = new Map<number, types.IConstantData>();
+
+export function getConstantData(version: number): types.IConstantData {
+  if (!(version in versionedConstants)) {
+    throw new Error(`No constant data found for this version ${version}`);
+  }
+  return versionedConstants[version];
+}
+
+export function setConstantData(version: number, data: types.IConstantData) {
+  versionedConstants[version] = data;
+}

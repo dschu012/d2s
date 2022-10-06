@@ -11,8 +11,8 @@ const defaultConfig = {
 
 export async function read(
   buffer: Uint8Array,
-  constants: types.IConstantData,
-  version: number | null,
+  constants?: types.IConstantData,
+  version?: number | null,
   userConfig?: types.IConfig
 ): Promise<types.IStash> {
   const stash = {} as types.IStash;
@@ -26,12 +26,20 @@ export async function read(
     while (reader.offset < reader.bits.length) {
       pageCount++;
       await readStashHeader(stash, reader);
-      await readStashPart(stash, reader, version || parseInt(stash.version), constants);
+      const saveVersion = version || parseInt(stash.version);
+      if (!constants) {
+        constants = items.getConstantData(saveVersion);
+      }
+      await readStashPart(stash, reader, saveVersion, constants);
     }
     stash.pageCount = pageCount;
   } else {
     await readStashHeader(stash, reader);
-    await readStashPages(stash, reader, version || parseInt(stash.version), constants);
+    const saveVersion = version || parseInt(stash.version);
+    if (!constants) {
+      constants = items.getConstantData(saveVersion);
+    }
+    await readStashPages(stash, reader, saveVersion, constants);
   }
   return stash;
 }
@@ -122,6 +130,9 @@ export async function write(
 ): Promise<Uint8Array> {
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
+  if (!constants) {
+    constants = items.getConstantData(version);
+  }
   if (version > 0x61) {
     for (const page of data.pages) {
       writer.WriteArray(await writeStashSection(data, page, constants, config));

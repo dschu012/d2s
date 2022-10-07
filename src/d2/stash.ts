@@ -4,6 +4,7 @@ import * as items from "./items";
 import { enhanceItems } from "./attribute_enhancer";
 import { BitReader } from "../binary/bitreader";
 import { config } from "chai";
+import { getConstantData } from "./constants";
 
 const defaultConfig = {
   extendedStash: false,
@@ -28,7 +29,7 @@ export async function read(
       await readStashHeader(stash, reader);
       const saveVersion = version || parseInt(stash.version);
       if (!constants) {
-        constants = items.getConstantData(saveVersion);
+        constants = getConstantData(saveVersion);
       }
       await readStashPart(stash, reader, saveVersion, constants);
     }
@@ -37,7 +38,7 @@ export async function read(
     await readStashHeader(stash, reader);
     const saveVersion = version || parseInt(stash.version);
     if (!constants) {
-      constants = items.getConstantData(saveVersion);
+      constants = getConstantData(saveVersion);
     }
     await readStashPages(stash, reader, saveVersion, constants);
   }
@@ -131,7 +132,7 @@ export async function write(
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
   if (!constants) {
-    constants = items.getConstantData(version);
+    constants = getConstantData(version);
   }
   if (version > 0x61) {
     for (const page of data.pages) {

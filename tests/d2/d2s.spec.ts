@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import { read, write, readItem, writeItem, setConstantData } from "../../src/d2/d2s";
+import { read, write, readItem, writeItem } from "../../src/d2/d2s";
+import { setConstantData } from "../../src/d2/constants";
 import * as fs from "fs";
 import * as path from "path";
 import * as types from "../../src/d2/types";

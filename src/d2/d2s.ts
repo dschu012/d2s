@@ -5,6 +5,7 @@ import { BitReader } from "../binary/bitreader";
 import { BitWriter } from "../binary/bitwriter";
 import { readSkills, writeSkills } from "./skills";
 import * as items from "./items";
+import { getConstantData } from "./constants";
 import { enhanceAttributes, enhanceItems } from "./attribute_enhancer";
 
 const defaultConfig = {
@@ -23,7 +24,7 @@ async function read(buffer: Uint8Array, constants?: types.IConstantData, userCon
   await readHeader(char, reader);
   //could load constants based on version here
   if (!constants) {
-    constants = items.getConstantData(char.header.version);
+    constants = getConstantData(char.header.version);
   }
   await readHeaderData(char, reader, constants);
   await readAttributes(char, reader, constants);
@@ -47,7 +48,7 @@ async function readItem(
   const reader = new BitReader(buffer);
   const config = Object.assign(defaultConfig, userConfig);
   if (!constants) {
-    constants = items.getConstantData(version);
+    constants = getConstantData(version);
   }
   const item = await items.readItem(reader, version, constants, config);
   await enhanceItems([item], constants);
@@ -63,7 +64,7 @@ async function write(data: types.ID2S, constants?: types.IConstantData, userConf
   const writer = new BitWriter();
   writer.WriteArray(await writeHeader(data));
   if (!constants) {
-    constants = items.getConstantData(data.header.version);
+    constants = getConstantData(data.header.version);
   }
   writer.WriteArray(await writeHeaderData(data, constants));
   writer.WriteArray(await writeAttributes(data, constants));
@@ -87,13 +88,10 @@ async function writeItem(
   const config = Object.assign(defaultConfig, userConfig);
   const writer = new BitWriter();
   if (!constants) {
-    constants = items.getConstantData(version);
+    constants = getConstantData(version);
   }
   writer.WriteArray(await items.writeItem(item, version, constants, config));
   return writer.ToArray();
 }
 
-const getConstantData = items.getConstantData;
-const setConstantData = items.setConstantData;
-
-export { reader, writer, read, write, readItem, writeItem, getConstantData, setConstantData };
+export { reader, writer, read, write, readItem, writeItem };

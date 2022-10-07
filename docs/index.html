@@ -89,17 +89,25 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
     crossorigin="anonymous"></script>
-  <script src="../dist/constants.bundle.js"></script>
+  <script src="../dist/constants_96.bundle.js"></script>
+  <script src="../dist/constants_99.bundle.js"></script>
   <script src="../dist/d2s.bundle.js"></script>
   <script>
     //if we arent local, use github latest
     if (window.d2s === undefined) {
       let s = document.createElement('script');
-      s.src = "https://github.com/dschu012/d2s/releases/latest/download/constants.bundle.min.js";
+      s.src = "https://github.com/dschu012/d2s/releases/latest/download/constants_96.bundle.min.js";
+      document.querySelector('body').appendChild(s);
+      s = document.createElement('script');
+      s.src = "https://github.com/dschu012/d2s/releases/latest/download/constants_99.bundle.min.js";
       document.querySelector('body').appendChild(s);
       s = document.createElement('script');
       s.src = "https://github.com/dschu012/d2s/releases/latest/download/d2s.bundle.min.js";
       document.querySelector('body').appendChild(s);
+      d2s.setConstantData(0x60, constants_96.constants);  //1.10-1.14d
+      d2s.setConstantData(0x61, constants_96.constants);  //alpha?
+      d2s.setConstantData(0x62, constants_96.constants);  //2.4
+      d2s.setConstantData(0x63, constants_99.constants);  //2.5
     }
     let editor = new JSONEditor(document.querySelector('#d2sJson'), {
       mode: 'form',
@@ -117,7 +125,8 @@
           if(e.target.value.endsWith('.json')) {
             editor.set(re.target.result);
           }
-          d2s.read(re.target.result, constants.constants).then(function(response) {
+          
+          d2s.read(re.target.result).then(function(response) {
             editor.set(response);
           });
         } catch (e) {
@@ -139,12 +148,12 @@
     function save(d2r) {
       let j = editor.get();
       if(d2r) {
-        j.header.version = 0x61;
+        j.header.version = 0x63;
       }  else {
         j.header.version = 0x60;
       }
       try {
-        d2s.write(j, constants.constants).then(function(response) {
+        d2s.write(j).then(function(response) {
           let blob = new Blob([response], { type: "octet/stream" });
           link.href = window.URL.createObjectURL(blob);
           link.download = j.header.name + '.d2s';

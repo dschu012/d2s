@@ -353,7 +353,11 @@ function _descFunc(
     }
     case 5:
     case 10: {
-      value = `${(v * 100) / 128}%`;
+      if (descString.indexOf("%%") < 0) {
+        value = `${(v * 100) / 128}%`;
+      } else {
+        value = (v * 100) / 128;
+      }
       break;
     }
     case 11: {
@@ -458,9 +462,10 @@ function _descFunc(
     }
   }
   if (value) {
+    descVal = descVal ? descVal : 0;
     switch (descVal) {
       case 0: {
-        property.description = `${descString}`;
+        property.description = _sprintf(descString, value);
         break;
       }
       case 1: {

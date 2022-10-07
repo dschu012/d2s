@@ -104,10 +104,6 @@
       s = document.createElement('script');
       s.src = "https://github.com/dschu012/d2s/releases/latest/download/d2s.bundle.min.js";
       document.querySelector('body').appendChild(s);
-      d2s.setConstantData(0x60, constants_96.constants);  //1.10-1.14d
-      d2s.setConstantData(0x61, constants_96.constants);  //alpha?
-      d2s.setConstantData(0x62, constants_96.constants);  //2.4
-      d2s.setConstantData(0x63, constants_99.constants);  //2.5
     }
     let editor = new JSONEditor(document.querySelector('#d2sJson'), {
       mode: 'form',
@@ -125,7 +121,10 @@
           if(e.target.value.endsWith('.json')) {
             editor.set(re.target.result);
           }
-          
+          d2s.setConstantData(0x60, constants_96.constants);  //1.10-1.14d
+          d2s.setConstantData(0x61, constants_96.constants);  //alpha?
+          d2s.setConstantData(0x62, constants_96.constants);  //2.4
+          d2s.setConstantData(0x63, constants_99.constants);  //2.5
           d2s.read(re.target.result).then(function(response) {
             editor.set(response);
           });
@@ -153,6 +152,10 @@
         j.header.version = 0x60;
       }
       try {
+        d2s.setConstantData(0x60, constants_96.constants);  //1.10-1.14d
+        d2s.setConstantData(0x61, constants_96.constants);  //alpha?
+        d2s.setConstantData(0x62, constants_96.constants);  //2.4
+        d2s.setConstantData(0x63, constants_99.constants);  //2.5
         d2s.write(j).then(function(response) {
           let blob = new Blob([response], { type: "octet/stream" });
           link.href = window.URL.createObjectURL(blob);

@@ -3,7 +3,6 @@ import { BitWriter } from "../binary/bitwriter";
 import * as items from "./items";
 import { enhanceItems } from "./attribute_enhancer";
 import { BitReader } from "../binary/bitreader";
-import { config } from "chai";
 import { getConstantData } from "./constants";
 
 const defaultConfig = {
@@ -13,20 +12,18 @@ const defaultConfig = {
 export async function read(
   buffer: Uint8Array,
   constants?: types.IConstantData,
-  version?: number | null,
-  userConfig?: types.IConfig
+  version?: number | null
 ): Promise<types.IStash> {
-  const stash = {} as types.IStash;
+  const stash = { pages: [] as types.IStashPage[] } as types.IStash;
   const reader = new BitReader(buffer);
-  const config = Object.assign(defaultConfig, userConfig);
-  const firstHeader = reader.ReadUInt32();
+  stash.type = readStashHeader(reader);
   reader.SeekByte(0);
-  if (firstHeader == 0xaa55aa55) {
-    stash.pages = [];
+  // Resurrected
+  if (stash.type === types.EStashType.D2R) {
     let pageCount = 0;
     while (reader.offset < reader.bits.length) {
       pageCount++;
-      await readStashHeader(stash, reader);
+      await readStashMeta(stash, reader);
       const saveVersion = version || parseInt(stash.version);
       if (!constants) {
         constants = getConstantData(saveVersion);
@@ -34,60 +31,110 @@ export async function read(
       await readStashPart(stash, reader, saveVersion, constants);
     }
     stash.pageCount = pageCount;
-  } else {
-    await readStashHeader(stash, reader);
+  }
+  // PlugY/Atma/Gomule
+  else {
+    await readStashMeta(stash, reader);
     const saveVersion = version || parseInt(stash.version);
     if (!constants) {
       constants = getConstantData(saveVersion);
     }
-    await readStashPages(stash, reader, saveVersion, constants);
+    // PluggY
+    if (stash.type === types.EStashType.SSS || stash.type === types.EStashType.CSTM) {
+      await readStashPages(stash, reader, saveVersion, constants);
+    }
+    // Atma/Gomule
+    else if (stash.type === types.EStashType.D2X) {
+      const stashItems = [] as types.IItem[];
+      reader.SeekByte(11);
+      for (let i = 0; i < stash.itemCount; i++) {
+        stashItems.push(await items.readItem(reader, saveVersion, constants, {}));
+      }
+      stash.pages.push({ items: stashItems } as types.IStashPage);
+    }
   }
   return stash;
 }
 
-async function readStashHeader(stash: types.IStash, reader: BitReader) {
-  const header = reader.ReadUInt32();
-  switch (header) {
-    // Resurrected
-    case 0xaa55aa55:
-      stash.type = types.EStashType.shared;
-      stash.hardcore = reader.ReadUInt32() == 0;
-      stash.version = reader.ReadUInt32().toString();
+function readStashHeader(reader: BitReader): types.EStashType {
+  reader.SeekBit(0);
+  const header32 = reader.ReadUInt32();
+  // Resurrected
+  if (header32 === 0xaa55aa55) {
+    return types.EStashType.D2R;
+  }
+  // SSS (PlugY)
+  else if (header32 === 0x535353) {
+    return types.EStashType.SSS;
+  }
+  // CSTM (PlugY)
+  else if (header32 === 0x4d545343) {
+    return types.EStashType.CSTM;
+  }
+  // Check 24 bit header
+  reader.SeekBit(0);
+  const header24 = reader.ReadUInt32(24);
+  // D2X (Atma/Gomule)
+  if (header24 === 0x583244) {
+    return types.EStashType.D2X;
+  }
+  const header24Hex = header24?.toString(16);
+  const header32Hex = header32?.toString(16);
+  throw new Error(`unknown stash header at position 0: 24bit = 0x${header24Hex}, 32bit = 0x${header32Hex}`);
+}
+
+async function readStashMeta(stash: types.IStash, reader: BitReader) {
+  // Skip header, already parsed into stash type
+  reader.SkipBytes(4);
+  // Resurrected
+  if (stash.type === types.EStashType.D2R) {
+    stash.shared = true;
+    stash.hardcore = reader.ReadUInt32() == 0;
+    stash.version = reader.ReadUInt32().toString();
+    stash.sharedGold = reader.ReadUInt32();
+    reader.ReadUInt32(); // size of the sector
+    reader.SkipBytes(44); // empty
+  }
+  // SSS or CSTM (PlugY)
+  else if (stash.type === types.EStashType.SSS || stash.type === types.EStashType.CSTM) {
+    if (stash.type === types.EStashType.SSS) {
+      stash.type = types.EStashType.SSS;
+      stash.shared = true;
+    }
+    else if (stash.type === types.EStashType.CSTM) {
+      stash.type = types.EStashType.CSTM;
+      stash.shared = false;
+    }
+    stash.version = reader.ReadString(2);
+    if (stash.version !== "01" && stash.version !== "02") {
+      throw new Error(`unknown stash version ${stash.version} at position ${reader.offset - 16}`);
+    }
+    if (stash.shared && stash.version == "02") {
       stash.sharedGold = reader.ReadUInt32();
-      reader.ReadUInt32(); // size of the sector
-      reader.SkipBytes(44); // empty
-      break;
-    // LoD
-    case 0x535353: // SSS
-    case 0x4d545343: // CSTM
-      stash.version = reader.ReadString(2);
-      if (stash.version !== "01" && stash.version !== "02") {
-        throw new Error(`unkown stash version ${stash.version} at position ${reader.offset - 2 * 8}`);
-      }
-
-      stash.type = header === 0x535353 ? types.EStashType.shared : types.EStashType.private;
-
-      if (stash.type === types.EStashType.shared && stash.version == "02") {
-        stash.sharedGold = reader.ReadUInt32();
-      }
-
-      if (stash.type === types.EStashType.private) {
-        reader.ReadUInt32();
-        stash.sharedGold = 0;
-      }
-
-      stash.pageCount = reader.ReadUInt32();
-      break;
-    default:
-      debugger;
-      throw new Error(
-        `shared stash header 'SSS' / 0xAA55AA55 / private stash header 'CSTM' not found at position ${reader.offset - 3 * 8}`
-      );
+    }
+    if (!stash.shared) {
+      reader.ReadUInt32();
+      stash.sharedGold = 0;
+    }
+    stash.pageCount = reader.ReadUInt32();
+  }
+  // D2X (Atma/Gomule)
+  else if (stash.type === types.EStashType.D2X) {
+    stash.type = types.EStashType.D2X;
+    stash.shared = true;
+    reader.SeekByte(3);
+    stash.itemCount = reader.ReadUInt16();
+    stash.version = reader.ReadUInt16().toString();
+    if (stash.version !== "99") {
+      throw new Error(`unknown stash version ${stash.version} at position ${reader.offset - 16}`);
+    }
+  }
+  else {
+    throw new Error(`unknown stash type: ${stash.type}`);
   }
 }
 
 async function readStashPages(stash: types.IStash, reader: BitReader, version: number, constants: types.IConstantData) {
-  stash.pages = [];
   for (let i = 0; i < stash.pageCount; i++) {
     await readStashPage(stash, reader, version, constants);
   }
@@ -134,33 +181,40 @@ export async function write(
   if (!constants) {
     constants = getConstantData(version);
   }
-  if (version > 0x61) {
+  // Resurrected
+  if (data.type === types.EStashType.D2R) {
     for (const page of data.pages) {
       writer.WriteArray(await writeStashSection(data, page, constants, config));
     }
-  } else {
+  }
+  // SSS or CSTM (PlugY)
+  else if (data.type === types.EStashType.SSS || data.type === types.EStashType.CSTM) {
     writer.WriteArray(await writeStashHeader(data));
     writer.WriteArray(await writeStashPages(data, version, constants, config));
+  }
+  // D2X (Atma/Gomule)
+  else if (data.type === types.EStashType.D2X) {
+    throw new Error('No write support for D2X (Atma/Gomule)');
   }
   return writer.ToArray();
 }
 
 async function writeStashHeader(data: types.IStash): Promise<Uint8Array> {
   const writer = new BitWriter();
-  if (data.type === types.EStashType.private) {
-    writer.WriteString("CSTM", 4);
-  } else {
+  if (data.shared) {
     writer.WriteString("SSS", 4);
+  } else {
+    writer.WriteString("CSTM", 4);
   }
 
   writer.WriteString(data.version, data.version.length);
 
-  if (data.type === types.EStashType.private) {
-    writer.WriteString("", 4);
-  } else {
+  if (data.shared) {
     if (data.version == "02") {
       writer.WriteUInt32(data.sharedGold);
     }
+  } else {
+    writer.WriteString("", 4);
   }
   writer.WriteUInt32(data.pages.length);
   return writer.ToArray();

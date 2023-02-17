@@ -70,6 +70,13 @@ describe("d2s", () => {
     expect(save.header.name).to.eq("Wilhelm");
   });
 
+  it.only("should read version 99 character", async () => {
+    const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/99/Assassin.d2s"));
+    const save = await read(inputstream, version99.constants);
+    //console.log(JSON.stringify(save, null, 2));
+    expect(save.header.name).to.eq("Assassin");
+  });
+
   it("should read version 99 character, autodetect constants", async () => {
     setConstantData(96, constants);
     setConstantData(99, version99.constants);

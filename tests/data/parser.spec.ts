@@ -4,10 +4,10 @@ import * as path from "path";
 import { readConstantData } from "../../src/data/parser";
 
 describe("parser", () => {
-  xit("read txt files", async () => {
+  it("read txt files", async () => {
     //let base = '../../../resurgence'
-    const base = "../../../d2/115-2.5/data";
-    const v = base.indexOf("2.5") >= 0 ? 99 : 96;
+    const base = "../../../d2/115-2.6/data";
+    const v = base.indexOf("2.6") >= 0 ? 99 : 96;
     const files = {};
     let dir = path.join(__dirname, `${base}/global/excel/`);
     fs.readdirSync(dir).forEach((file) => {
@@ -33,7 +33,7 @@ describe("parser", () => {
     const constantData = readConstantData(files);
     expect(constantData).to.not.be.null;
 
-    //fs.writeFileSync(path.join(__dirname, `${base}/constant_data.js`), `window.constants = \n${JSON.stringify(constantData)}`);
+    fs.writeFileSync(path.join(__dirname, `${base}/constant_data.js`), `window.constants = \n${JSON.stringify(constantData)}`);
     fs.writeFileSync(
       path.join(__dirname, `../../src/data/versions/${v}_constant_data.ts`),
       `export let constants = \n${JSON.stringify(constantData)}`

@@ -70,7 +70,7 @@ describe("d2s", () => {
     expect(save.header.name).to.eq("Wilhelm");
   });
 
-  it.only("should read version 99 character", async () => {
+  it("should read version 99 character", async () => {
     const inputstream = fs.readFileSync(path.join(__dirname, "../../examples/chars/99/Assassin.d2s"));
     const save = await read(inputstream, version99.constants);
     //console.log(JSON.stringify(save, null, 2));

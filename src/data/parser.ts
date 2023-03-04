@@ -378,6 +378,7 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
   const cNormCode = tsv.header.indexOf("normcode");
   const cUberCode = tsv.header.indexOf("ubercode");
   const cUltraCode = tsv.header.indexOf("ultracode");
+  const cGemSockets = tsv.header.indexOf("gemsockets");
 
   for (let i = 1; i < tsv.lines.length; i++) {
     const code = tsv.lines[i][cCode];
@@ -414,6 +415,8 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
       if (tsv.lines[i][cInvwidth]) item.iw = +tsv.lines[i][cInvwidth];
       if (tsv.lines[i][cInvheight]) item.ih = +tsv.lines[i][cInvheight];
       if (tsv.lines[i][cInvtransform]) item.it = +tsv.lines[i][cInvtransform];
+      if (tsv.lines[i][cGemSockets]) item.gemsockets = +tsv.lines[i][cGemSockets];
+      if (tsv.lines[i][cType]) item.type = tsv.lines[i][cType];
       const type = itemtypes[tsv.lines[i][cType]];
       if (type && type.ig) {
         item.ig = type.ig;

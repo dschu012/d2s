@@ -411,14 +411,18 @@ export interface IMagicProperty {
 }
 
 export enum EStashType {
-  shared,
-  private,
+  D2R,
+  SSS,
+  CSTM,
+  D2X,
 }
 
 export interface IStash {
   version: string;
   type: EStashType;
   pageCount: number;
+  itemCount: number;
+  shared: boolean;
   sharedGold: number;
   hardcore: boolean;
   pages: IStashPage[];

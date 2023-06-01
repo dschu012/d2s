@@ -1,4 +1,4 @@
-import { expect, should } from "chai";
+import { expect } from "chai";
 import { read, write } from "../../src/d2/stash";
 import { constants } from "../../src/data/versions/96_constant_data";
 import * as path from "path";
@@ -68,5 +68,26 @@ describe("stash", () => {
 
     expect(buffer.length, "file size").to.eq(newBuffer.length);
     expect(newJson, "json").to.deep.eq(jsonData);
+  });
+
+  it("should read D2X shared stash file (Atma/GoMule)", async () => {
+    const buffer = fs.readFileSync(path.join(__dirname, "../../examples/stash/Atma_GoMule.d2x"));
+    const jsonData = await read(buffer, version99.constants, 0x62);
+    expect(jsonData.version).to.eq("99");
+    expect(jsonData.itemCount).to.eq(2599);
+    expect(jsonData.pages[0]?.items?.length).to.eq(2599);
+    expect(jsonData.pages[0].items[2598].unique_name).to.eq("Twitchthroe");
+  });
+
+  it("should not write D2X shared stash file (Atma/GoMule)", async () => {
+    const buffer = fs.readFileSync(path.join(__dirname, "../../examples/stash/Atma_GoMule.d2x"));
+    const jsonData = await read(buffer, version99.constants, 0x62);
+    let err: unknown;
+    try {
+      await write(jsonData, constants, 0x62);
+    } catch (e) {
+      err = e;
+    }
+    expect(err).to.be.instanceOf(Error);
   });
 });

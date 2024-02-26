@@ -379,6 +379,9 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
   const cUberCode = tsv.header.indexOf("ubercode");
   const cUltraCode = tsv.header.indexOf("ultracode");
   const cGemSockets = tsv.header.indexOf("gemsockets");
+  const cSpawnable = tsv.header.indexOf("spawnable");
+  const cOneOrTwoHadned = tsv.header.indexOf("1or2handed");
+  const cTwoHanded = tsv.header.indexOf("2handed");
 
   for (let i = 1; i < tsv.lines.length; i++) {
     const code = tsv.lines[i][cCode];
@@ -416,6 +419,9 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
       if (tsv.lines[i][cInvheight]) item.ih = +tsv.lines[i][cInvheight];
       if (tsv.lines[i][cInvtransform]) item.it = +tsv.lines[i][cInvtransform];
       if (tsv.lines[i][cGemSockets]) item.gemsockets = +tsv.lines[i][cGemSockets];
+      if (tsv.lines[i][cSpawnable]) item.spawnable = +tsv.lines[i][cSpawnable];
+      if (tsv.lines[i][cOneOrTwoHadned]) item.handed1or2 = +tsv.lines[i][cOneOrTwoHadned];
+      if (tsv.lines[i][cTwoHanded]) item.handed2 = +tsv.lines[i][cTwoHanded];
       if (tsv.lines[i][cType]) item.type = tsv.lines[i][cType];
       const type = itemtypes[tsv.lines[i][cType]];
       if (type && type.ig) {

@@ -4,7 +4,7 @@ import * as path from "path";
 import { readConstantData } from "../../src/data/parser";
 
 describe("parser", () => {
-  xit("read txt files", async () => {
+  it("read txt files", async () => {
     //let base = '../../../resurgence'
     const base = "../../../data/2.6"
     const v = base.indexOf("2.6") >= 0 ? 99 : 96;

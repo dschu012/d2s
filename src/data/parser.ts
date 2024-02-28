@@ -221,6 +221,7 @@ function _readRareNames(tsv: any, idx: number, strings: any): any[] {
     const name = tsv.lines[i][cName];
     if (name) {
       arr[id - idx] = {
+        id: id,
         n: strings[name],
       };
       id++;
@@ -238,6 +239,7 @@ function _readMagicNames(tsv: any, strings: any): any[] {
     const name = tsv.lines[i][cName];
     if (name != "Expansion") {
       const o = {} as any;
+      o.id = id;
       o.n = strings[name];
       if (tsv.lines[i][cTransformcolor]) o.tc = tsv.lines[i][cTransformcolor];
       arr[id] = o;
@@ -489,6 +491,7 @@ function _readSetOrUnqItems(tsv: any, strings: any): any[] {
     const index = tsv.lines[i][cIndex];
     if (index && index != "Expansion") {
       const o = {} as any;
+      o.id = id;
       o.n = strings[tsv.lines[i][cIndex]];
       if (tsv.lines[i][cInvfile]) o.i = tsv.lines[i][cInvfile];
       if (tsv.lines[i][cCode]) o.c = tsv.lines[i][cCode];

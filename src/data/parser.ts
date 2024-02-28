@@ -205,6 +205,7 @@ function _readSkills(tsv: any, skillDescs: any, strings: any): any[] {
     const skillDesc = tsv.lines[i][cSkillDesc];
     if (skillDesc) {
       const o = {} as any;
+      o.id = id;
       if (skillDescs[skillDesc]) o.s = skillDescs[skillDesc];
       if (tsv.lines[i][cCharclass]) o.c = tsv.lines[i][cCharclass];
       arr[id] = o;
@@ -542,6 +543,7 @@ function _readItemStatCosts(tsv: any, strings: any): any[] {
     const stat = tsv.lines[i][cStat];
     if (stat) {
       const o = {} as any;
+      o.id = id;
       o.s = stat;
       if (tsv.lines[i][cCSvBits]) o.cB = +tsv.lines[i][cCSvBits];
       if (tsv.lines[i][cCSvParam]) o.cP = +tsv.lines[i][cCSvParam];

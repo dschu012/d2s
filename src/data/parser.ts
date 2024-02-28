@@ -150,6 +150,7 @@ function _readClasses(tsv: any, tsv2: any, strings: any): any[] {
     const clazz = tsv.lines[i][cClass];
     if (clazz && clazz != "Expansion") {
       arr[id] = {
+        id: id,
         n: clazz,
         c: tsv2.lines[i][cCode],
         as: strings[tsv.lines[i][cAllSkills]],

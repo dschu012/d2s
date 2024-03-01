@@ -386,6 +386,7 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
   const cSpawnable = tsv.header.indexOf("spawnable");
   const cOneOrTwoHadned = tsv.header.indexOf("1or2handed");
   const cTwoHanded = tsv.header.indexOf("2handed");
+  const cNodurability = tsv.header.indexOf("nodurability");
 
   for (let i = 1; i < tsv.lines.length; i++) {
     const code = tsv.lines[i][cCode];
@@ -422,11 +423,13 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
       if (tsv.lines[i][cInvwidth]) item.iw = +tsv.lines[i][cInvwidth];
       if (tsv.lines[i][cInvheight]) item.ih = +tsv.lines[i][cInvheight];
       if (tsv.lines[i][cInvtransform]) item.it = +tsv.lines[i][cInvtransform];
+      if (tsv.lines[i][cType]) item.type = tsv.lines[i][cType];
       if (tsv.lines[i][cGemSockets]) item.gemsockets = +tsv.lines[i][cGemSockets];
       if (tsv.lines[i][cSpawnable]) item.spawnable = +tsv.lines[i][cSpawnable];
       if (tsv.lines[i][cOneOrTwoHadned]) item.handed1or2 = +tsv.lines[i][cOneOrTwoHadned];
       if (tsv.lines[i][cTwoHanded]) item.handed2 = +tsv.lines[i][cTwoHanded];
-      if (tsv.lines[i][cType]) item.type = tsv.lines[i][cType];
+      if (tsv.lines[i][cNodurability]) item.nodurability = +tsv.lines[i][cNodurability];
+
       const type = itemtypes[tsv.lines[i][cType]];
       if (type && type.ig) {
         item.ig = type.ig;

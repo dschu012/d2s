@@ -240,7 +240,9 @@ export async function readItem(
       //fix delerium on d2gs??? why is this a thing?
       if (item.runeword_id == 2718) {
         item.runeword_id = 48;
-      }
+      } else if (item.runeword_id > 2783) {
+        item.runeword_id -= 2588;
+      } 
       if (constants.runewords[item.runeword_id]) {
         item.runeword_name = constants.runewords[item.runeword_id]!.n!;
       }

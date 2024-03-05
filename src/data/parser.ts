@@ -298,6 +298,7 @@ function _readRunewords(tsv: any, strings: any): any[] {
         id += 26;
       }
       arr[id] = {
+        id: id,
         n: strings[tsv.lines[i][cName]],
       };
     }

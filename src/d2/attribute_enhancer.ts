@@ -115,6 +115,12 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
         item.max_durability = details.durability - Math.ceil(details.durability / 2) + 1;
       }
     }
+    // Enforce coherence between total_nr_of_sockets & socketed
+    if (item.total_nr_of_sockets > 0) {
+      item.socketed = 1;
+    } else {
+      item.socketed = 0;
+    }
     if (item.multiple_pictures) {
       item.inv_file = details.ig[item.picture_id];
     }

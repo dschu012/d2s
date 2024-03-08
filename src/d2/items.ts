@@ -2,24 +2,6 @@ import * as types from "./types";
 import { BitReader } from "../binary/bitreader";
 import { BitWriter } from "../binary/bitwriter";
 
-enum ItemType {
-  Armor = 0x01,
-  Shield = 0x02, //treated the same as armor... only here to be able to parse nokkas jsons
-  Weapon = 0x03,
-  Other = 0x04,
-}
-
-enum Quality {
-  Low = 0x01,
-  Normal = 0x02,
-  Superior = 0x03,
-  Magic = 0x04,
-  Set = 0x05,
-  Rare = 0x06,
-  Unique = 0x07,
-  Crafted = 0x08,
-}
-
 // prettier-ignore
 //huffman tree
 const HUFFMAN = [[[[["w","u"],[["8",["y",["5",["j",[]]]]],"h"]],["s",[["2","n"],"x"]]],[[["c",["k","f"]],"b"],[["t","m"],["9","7"]]]],[" ",[[[["e","d"],"p"],["g",[[["z","q"],"3"],["v","6"]]]],[["r","l"],["a",[["1",["4","0"]],["i","o"]]]]]]];
@@ -191,15 +173,15 @@ export async function readItem(
       item.auto_affix_id = reader.ReadUInt16(11);
     }
     switch (item.quality) {
-      case Quality.Low:
+      case types.Quality.Low:
         item.low_quality_id = reader.ReadUInt8(3);
         break;
-      case Quality.Normal:
+      case types.Quality.Normal:
         break;
-      case Quality.Superior:
+      case types.Quality.Superior:
         item.file_index = reader.ReadUInt8(3);
         break;
-      case Quality.Magic:
+      case types.Quality.Magic:
         item.magic_prefix = reader.ReadUInt16(11);
         if (item.magic_prefix)
           item.magic_prefix_name = constants.magic_prefixes[item.magic_prefix] ? constants.magic_prefixes[item.magic_prefix].n : null;
@@ -207,16 +189,16 @@ export async function readItem(
         if (item.magic_suffix)
           item.magic_suffix_name = constants.magic_suffixes[item.magic_suffix] ? constants.magic_suffixes[item.magic_suffix].n : null;
         break;
-      case Quality.Set:
+      case types.Quality.Set:
         item.set_id = reader.ReadUInt16(12);
         item.set_name = constants.set_items[item.set_id] ? constants.set_items[item.set_id].n : null;
         break;
-      case Quality.Unique:
+      case types.Quality.Unique:
         item.unique_id = reader.ReadUInt16(12);
         item.unique_name = constants.unq_items[item.unique_id] ? constants.unq_items[item.unique_id].n : null;
         break;
-      case Quality.Rare:
-      case Quality.Crafted:
+      case types.Quality.Rare:
+      case types.Quality.Crafted:
         item.rare_name_id = reader.ReadUInt8(8);
         if (item.rare_name_id) item.rare_name = constants.rare_names[item.rare_name_id] ? constants.rare_names[item.rare_name_id].n : null;
         item.rare_name_id2 = reader.ReadUInt8(8);
@@ -272,10 +254,10 @@ export async function readItem(
     //realm data
     item.timestamp = reader.ReadUInt8(1);
 
-    if (item.type_id === ItemType.Armor) {
+    if (item.type_id === types.ItemType.Armor) {
       item.defense_rating = reader.ReadUInt16(constants.magical_properties[31].sB) - constants.magical_properties[31].sA;
     }
-    if (item.type_id === ItemType.Armor || item.type_id === ItemType.Weapon) {
+    if (item.type_id === types.ItemType.Armor || item.type_id === types.ItemType.Weapon) {
       item.max_durability = reader.ReadUInt16(constants.magical_properties[73].sB) - constants.magical_properties[73].sA;
       if (item.max_durability > 0) {
         item.current_durability = reader.ReadUInt16(constants.magical_properties[72].sB) - constants.magical_properties[72].sA;
@@ -295,7 +277,7 @@ export async function readItem(
      * means +1 to the set_list_count
      */
     let plist_flag = 0;
-    if (item.quality === Quality.Set) {
+    if (item.quality === types.Quality.Set) {
       plist_flag = reader.ReadUInt8(5);
       item.set_list_count = 0;
       item._unknown_data.plist_flag = plist_flag;
@@ -368,26 +350,26 @@ export async function writeItem(
       writer.WriteUInt16(item.auto_affix_id || 0, 11);
     }
     switch (item.quality) {
-      case Quality.Low:
+      case types.Quality.Low:
         writer.WriteUInt8(item.low_quality_id, 3);
         break;
-      case Quality.Normal:
+      case types.Quality.Normal:
         break;
-      case Quality.Superior:
+      case types.Quality.Superior:
         writer.WriteUInt8(item.file_index || 0, 3);
         break;
-      case Quality.Magic:
+      case types.Quality.Magic:
         writer.WriteUInt16(item.magic_prefix, 11);
         writer.WriteUInt16(item.magic_suffix, 11);
         break;
-      case Quality.Set:
+      case types.Quality.Set:
         writer.WriteUInt16(item.set_id, 12);
         break;
-      case Quality.Unique:
+      case types.Quality.Unique:
         writer.WriteUInt16(item.unique_id, 12);
         break;
-      case Quality.Rare:
-      case Quality.Crafted:
+      case types.Quality.Rare:
+      case types.Quality.Crafted:
         writer.WriteUInt8(item.rare_name_id !== undefined ? item.rare_name_id : _lookupRareId(item.rare_name, constants), 8);
         writer.WriteUInt8(item.rare_name_id2 !== undefined ? item.rare_name_id2 : _lookupRareId(item.rare_name2, constants), 8);
         for (let i = 0; i < 6; i++) {
@@ -434,11 +416,11 @@ export async function writeItem(
 
     writer.WriteUInt8(item.timestamp, 1);
 
-    if (item.type_id === ItemType.Armor || item.type_id === ItemType.Shield) {
+    if (item.type_id === types.ItemType.Armor || item.type_id === types.ItemType.Shield) {
       writer.WriteUInt16(item.defense_rating + constants.magical_properties[31].sA, constants.magical_properties[31].sB);
     }
 
-    if (item.type_id === ItemType.Armor || item.type_id === ItemType.Shield || item.type_id === ItemType.Weapon) {
+    if (item.type_id === types.ItemType.Armor || item.type_id === types.ItemType.Shield || item.type_id === types.ItemType.Weapon) {
       writer.WriteUInt16(item.max_durability || 0, constants.magical_properties[73].sB);
       if (item.max_durability > 0) {
         writer.WriteUInt16(item.current_durability, constants.magical_properties[72].sB);
@@ -453,7 +435,7 @@ export async function writeItem(
       writer.WriteUInt8(item.total_nr_of_sockets, 4);
     }
 
-    if (item.quality === Quality.Set) {
+    if (item.quality === types.Quality.Set) {
       const set_attribute_count = item.set_attributes != null ? item.set_attributes.length : 0;
       //reduced by -1 removed as this seems to be wrong
       const plist_flag = (1 << set_attribute_count) - 1;
@@ -552,12 +534,12 @@ function _readSimpleBits(item: types.IItem, reader: BitReader, version: number, 
     let details = _GetItemTXT(item, constants);
     item.categories = details?.c;
     if (item?.categories.includes("Any Armor")) {
-      item.type_id = ItemType.Armor;
+      item.type_id = types.ItemType.Armor;
     } else if (item?.categories.includes("Weapon")) {
-      item.type_id = ItemType.Weapon;
+      item.type_id = types.ItemType.Weapon;
       details = constants.weapon_items[item.type];
     } else {
-      item.type_id = ItemType.Other;
+      item.type_id = types.ItemType.Other;
     }
 
     let bits = item.simple_item ? 1 : 3;
@@ -653,7 +635,7 @@ export function _readMagicProperties(reader: BitReader, constants: types.IConsta
       if (prop.sP) {
         let param = reader.ReadUInt16(prop.sP);
         switch (prop.dF) {
-          case 14: //+skill to skilltab
+          case 14: //TODO +skill to skilltab
             values.push(param & 0x7);
             param = (param >> 3) & 0x1fff;
             break;

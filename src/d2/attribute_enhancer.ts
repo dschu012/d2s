@@ -1,12 +1,5 @@
 import * as types from "./types";
 
-enum ItemType {
-  Armor = 0x01,
-  Shield = 0x02, //treated the same as armor... only here to be able to parse nokkas jsons
-  Weapon = 0x03,
-  Other = 0x04,
-}
-
 //do nice stuff
 //combine group properties (all resists/all stats) and build friendly strings for a ui
 //enhanced def/durability/weapon damage.
@@ -62,13 +55,61 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
     const pt = constants.armor_items[parent.type] || constants.weapon_items[parent.type] || constants.other_items[item.type];
     const t = constants.other_items[item.type];
     if (t.m) {
-      item.magic_attributes = _compactAttributes(t.m[pt.gt], constants);
+      item.magic_attributes = compactAttributes(t.m[pt.gt], constants);
     }
   }
+
+  item.level = boundValue(item.level, 1, 99);
+  // Ensure coherence of other attributes with quality
+  if (item.given_runeword) {
+      item.runeword_name = constants.runewords[item.runeword_id] ? constants.runewords[item.runeword_id].n : "";
+      if (item.quality > types.Quality.Superior) {
+          // Cannot be a runeword
+          item.given_runeword = 0;
+          item.runeword_id = 0;
+          item.runeword_name = "";
+          item.runeword_attributes = [];
+      }
+  }
+  if (item.quality !== types.Quality.Magic) {
+      item.magic_prefix = 0;
+      item.magic_suffix = 0;
+  }
+  if (item.quality === types.Quality.Rare || item.quality === types.Quality.Crafted) {
+      item.rare_name = constants.rare_names[item.rare_name_id] ? constants.rare_names[item.rare_name_id].n : "";
+      item.rare_name2 = constants.rare_names[item.rare_name_id2] ? constants.rare_names[item.rare_name_id2].n : "";
+  }
+  else {
+      item.rare_name_id = 0;
+      item.rare_name = "";
+      item.rare_name_id2 = 0;
+      item.rare_name2 = "";
+      item.magical_name_ids = [0, 0, 0, 0, 0, 0];
+  }
+  if (item.quality === types.Quality.Set) {
+      item.set_name = constants.set_items[item.set_id] ? constants.set_items[item.set_id].n : "";
+  }
+  else {
+      item.set_id = 0;
+      item.set_name = "";
+      item.set_attributes = [];
+  }
+  if (item.quality === types.Quality.Unique) {
+      item.unique_name = constants.unq_items[item.unique_id] ? constants.unq_items[item.unique_id].n : "";
+  }
+  else {
+      item.unique_id = 0;
+      item.unique_name = "";
+  }
+  if (item.quality !== types.Quality.Magic && item.quality !== types.Quality.Unique) {
+      item.personalized = 0;
+      item.personalized_name = "";
+  }
+
   let details = null;
   if (constants.armor_items[item.type]) {
     details = constants.armor_items[item.type];
-    item.type_id = ItemType.Armor;
+    item.type_id = types.ItemType.Armor;
     if (details.maxac) {
       if (item.ethereal == 0) {
         item.defense_rating = details.maxac;
@@ -78,7 +119,7 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
     }
   } else if (constants.weapon_items[item.type]) {
     details = constants.weapon_items[item.type];
-    item.type_id = ItemType.Weapon;
+    item.type_id = types.ItemType.Weapon;
     const base_damage = {} as types.IWeaponDamage;
     if (item.ethereal == 0) {
       if (details.mind) base_damage.mindam = details.mind;
@@ -93,7 +134,7 @@ export function enhanceItem(item: types.IItem, constants: types.IConstantData, l
     }
     item.base_damage = base_damage;
   } else if (constants.other_items[item.type]) {
-    item.type_id = ItemType.Other;
+    item.type_id = types.ItemType.Other;
     details = constants.other_items[item.type];
   }
   if (details) {
@@ -178,7 +219,7 @@ function _enhanceAttributeDescription(
   const dgrpsVal = [0, 0, 0];
   for (const property of magic_attributes) {
     const prop = constants.magical_properties[property.id];
-    const v = property.values[property.values.length - 1];
+    const v = property.values[property.values?.length - 1];
     if (prop.dg) {
       if (dgrpsVal[prop.dg - 1] === 0) {
         dgrpsVal[prop.dg - 1] = v;
@@ -193,7 +234,7 @@ function _enhanceAttributeDescription(
     if (prop == null) {
       throw new Error(`Cannot find Magical Property for id: ${property.id}`);
     }
-    let v = property.values[property.values.length - 1];
+    let v = property.values[property.values?.length - 1];
     if (prop.ob === "level") {
       switch (prop.o) {
         case 1: {
@@ -275,46 +316,65 @@ function _enhanceAttributeDescription(
   return magic_attributes;
 }
 
-function _compactAttributes(mods: any[], constants: types.IConstantData): types.IMagicProperty[] {
+export function compactAttributes(mods: any[], constants: types.IConstantData): types.IMagicProperty[] {
   const magic_attributes = [] as types.IMagicProperty[];
   for (const mod of mods) {
-    const properties = constants.properties[mod.m] || [];
-    for (let i = 0; i < properties.length; i++) {
-      const property = properties[i];
-      let stat = property.s;
-      switch (property.f) {
-        case 5: {
-          stat = "mindamage";
-          break;
+    for (const stat of constants.properties[mod.prop] || []) {
+      const statId = constants.magical_properties.findIndex((e) => e.s === stat.s)
+      const prop = constants.magical_properties[statId];
+      if (prop) {
+        //if (prop.np) continue;
+        let v = [mod.min, mod.max];
+        switch (prop.dF) {
+          //item_addclassskills
+          case 13: {
+            v = [stat.val, mod.min];
+            break;
+          }
+          //item_addskill_tab
+          case 14: {
+            //TODO +skill to skilltab
+            //v = [mod.p & 7, (mod.p >> 3) * 3, mod.min];
+            v = [Math.abs(Math.round(mod.p / 3) - 3), Math.floor(mod.p / 3), mod.min];
+            break;
+          }
+          //item_skillon
+          case 15: {
+            v = [mod.max, mod.p, mod.min];
+            break;
+          }
+          //item_aura
+          case 16: {
+            v = [mod.p, mod.min];
+            break;
+          }
+          //charged_skill
+          case 24: {
+            v = [mod.max, mod.p, mod.min, mod.min];
+            break;
+          }
+          //item_singleskill
+          case 27: {
+            v = [mod.p, mod.min];
+            if (mod.prop == "skill-rand") {
+              const rnd = Math.floor(Math.random() * (mod.max - mod.min) + mod.min);
+              v = [constants.skills[rnd]?.id, mod.p];
+            }            
+            break;
+          }
+          //item_nonclassskill
+          case 28: {
+            v = [mod.p, mod.min];
+            break;
+          }
+          default: 
         }
-        case 6: {
-          stat = "maxdamage";
-          break;
-        }
-        case 7: {
-          stat = "item_maxdamage_percent";
-          break;
-        }
-        case 20: {
-          stat = "item_indesctructible";
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-      const id = _itemStatCostFromStat(stat, constants);
-      const prop = constants.magical_properties[id];
-      if (prop.np) i += prop.np;
-      const v = [mod.min, mod.max];
-      if (mod.p) {
-        v.push(mod.p);
-      }
-      magic_attributes.push({
-        id: id,
-        values: v,
-        name: prop.s,
-      } as types.IMagicProperty);
+        magic_attributes.push({
+          id: statId,
+          values: v,
+          name: prop.s,
+        } as types.IMagicProperty);
+      }  
     }
   }
   return magic_attributes;
@@ -377,19 +437,19 @@ function _descFunc(
     }
     case 14: {
       const clazz = constants.classes[property.values[1]];
-      const skillTabStr = clazz.ts[property.values[0]];
+      const skillTabStr = clazz?.ts[property.values[0]];
       descString = _sprintf(skillTabStr, v);
-      property.description = `${descString} ${clazz.co}`;
+      property.description = `${descString} ${clazz?.co}`;
       break;
     }
     case 15: {
-      descString = _sprintf(descString, property.values[2], property.values[0], constants.skills[property.values[1]].s);
+      descString = _sprintf(descString, property.values[2], property.values[0], constants.skills[property.values[1]]?.n);
       property.description = `${descString}`;
       break;
     }
     case 16: {
       property.description = descString.replace(/%d/, v.toString());
-      property.description = property.description.replace(/%s/, constants.skills[property.values[0]].s);
+      property.description = property.description.replace(/%s/, constants.skills[property.values[0]].n);
       break;
     }
     case 17: {
@@ -403,7 +463,7 @@ function _descFunc(
       break;
     }
     case 19: {
-      property.description = _sprintf(descString, v.toString());
+      property.description = _sprintf(descString, v?.toString());
       break;
     }
     case 20: {
@@ -432,12 +492,12 @@ function _descFunc(
         descString = descString.replace(/%d/gi, () => {
           return property.values[2 + count++].toString();
         });
-        property.description = `Level ${property.values[0]} ${constants.skills[property.values[1]].s} ${descString}`;
+        property.description = `Level ${property.values[0]} ${constants.skills[property.values[1]].n} ${descString}`;
       } else {
         property.description = _sprintf(
           descString,
           property.values[0],
-          constants.skills[property.values[1]].s,
+          constants.skills[property.values[1]]?.n,
           property.values[2],
           property.values[3]
         );
@@ -446,9 +506,9 @@ function _descFunc(
     }
     case 27: {
       const skill = constants.skills[property.values[0]];
-      const clazz = _classFromCode(skill.c, constants);
+      const clazz = _classFromCode(skill?.c, constants);
       if (descString) {
-        property.description = _sprintf(descString, v, skill?.s, clazz?.co);
+        property.description = _sprintf(descString, v, skill?.n, clazz?.co);
       } else {
         property.description = `${sign}${v} to ${skill?.s} ${clazz?.co}`;
       }
@@ -456,7 +516,7 @@ function _descFunc(
     }
     case 28: {
       const skill = constants.skills[property.values[0]];
-      property.description = `${sign}${v} to ${skill?.s}`;
+      property.description = `${sign}${v} to ${skill?.n}`;
       break;
     }
     case 29: {
@@ -494,15 +554,17 @@ function _descFunc(
 
 function _sprintf(str: string, ...args: any[]): string {
   let i = 0;
-  return str
-    .replace(/%\+?d|%\+?s/gi, (m) => {
-      let v = args[i++].toString();
+  return str?.replace(/%\+?d|%\+?s/gi, (m) => {
+      let v = args[i++]?.toString();
       if (m.indexOf("+") >= 0) {
         v = "+" + v;
       }
       return v;
-    })
-    .replace("%%", "%");
+    }).replace("%%", "%");
+}
+
+function boundValue(v: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, v));
 }
 
 function _itemStatCostFromStat(stat: string, constants: types.IConstantData): number {

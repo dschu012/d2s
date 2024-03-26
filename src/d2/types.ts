@@ -404,10 +404,15 @@ export interface IMagicProperty {
   id: number;
   name: string;
   values: number[];
-  description: string;
-  visible: boolean;
-  op_value: number;
-  op_stats: string[];
+  param?:number,
+  value?: number,
+  df?: number,
+  type?: string,
+  so?:number,
+  description?: string;
+  visible?: boolean;
+  op_value?: number;
+  op_stats?: string[];
 }
 
 export enum EStashType {

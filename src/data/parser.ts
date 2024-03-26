@@ -264,55 +264,87 @@ function _readProperties(tsv: any, strings: any): any {
     cStats[j].cVal = tsv.header.indexOf(`val${j}`);
   }
   for (let i = 1; i < tsv.lines.length; i++) {
-    const code = tsv.lines[i][cCode];
-    if (code != "Expansion") {
-      const prop = [];
+    const propId = tsv.lines[i][cCode];
+    if (propId != "Expansion") {
+      const stats = [];
       //prop.code = code;
       for (let j = 1; j <= 7; j++) {
         let stat;
+        let type;
         const func = tsv.lines[i][cStats[j].cFunc];
-        switch (func) {
-          case "5": {
-            stat = "mindamage";
-            break;
-          }
-          case "6": {
-            stat = "maxdamage";
-            break;
-          }
-          case "7": {
-            stat = "item_maxdamage_percent";
-            break;
-          }
-          case "20": {
-            stat = "item_indesctructible";
-            break;
-          }
-          case "23": {
-            stat = "ethereal"
-            break;
-          }
-          default: {
-            stat = tsv.lines[i][cStats[j].cStat];
-            break;
-          }
-        }
+        stat = tsv.lines[i][cStats[j].cStat];
+        type = propertyTypeFromFunc(func);
         const val = tsv.lines[i][cStats[j].cVal];
         if (!stat && !func) {
           break;
         }
+
+        switch (func) {
+          case "5": {
+            stat = "mindamage";
+            type = "other";
+            break;
+          }
+          case "6": {
+            stat = "maxdamage";
+            type = "other";
+            break;
+          }
+          // case "": {
+          //   stat = "item_mindamage_percent";
+          //   type = "other";
+          //   break;
+          // }
+          case "7": {
+            stat = "item_maxdamage_percent";
+            type = "all";
+            break;
+          }
+          case "20": {
+            stat = "item_indesctructible";
+            type = "other";
+            break;
+          }
+          // case "23": {
+          //   stat = "ethereal"
+          //   break;
+          // }
+          default: {
+            break;
+          }
+        }
+
         const s = {} as any;
         if (stat) s.s = stat;
+        if (type) s.type = type;
         if (func) s.f = +func;
         if (val) s.val = +val;
-        prop[j - 1] = s;
+        stats[j - 1] = s;
       }
-      if (prop.length) {
-        arr[code] = prop;
-      }
+
+      arr[propId] = stats;
     }
   }
   return arr;
+}
+
+function propertyTypeFromFunc(func: string): string {
+  switch (func) {
+    case "11":
+      return "proc";
+    case "19":
+      return "charges";
+    case "3":
+      return "all";
+    case "15":
+      return "min";
+    case "16":
+      return "max";
+    case "17":
+      return "param";
+    default:
+      return "other";
+  }
 }
 
 function _readRunewords(tsv: any, strings: any, skills: any[]): any[] {

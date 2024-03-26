@@ -1,0 +1,156 @@
+[
+  {
+    "s": "group:all-attr",
+    "statsInGroup": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "allEqual": true,
+    "dP": "to all Attributes",
+    "dN": "to all Attributes",
+    "dF": 1,
+    "dV": 1,
+    "so": 67
+  },
+  {
+    "s": "group:all-res",
+    "statsInGroup": [
+      39,
+      41,
+      43,
+      45
+    ],
+    "allEqual": true,
+    "dP": "All Resistances +%d",
+    "dN": "All Resistances +%d",
+    "dF": 19,
+    "so": 40
+  },
+  {
+    "s": "group:enhanced-dmg",
+    "statsInGroup": [
+      17,
+      18
+    ],
+    "allEqual": true,
+    "dP": "Enhanced damage",
+    "dN": "Enhanced damage",
+    "dF": 4,
+    "dV": 1,
+    "so": 130
+  },
+  {
+    "s": "group:primary-dmg",
+    "statsInGroup": [
+      21,
+      22
+    ],
+    "isRange": true,
+    "dP": "+%d damage",
+    "dN": "Adds %d-%d damage",
+    "dF": 100,
+    "so": 127
+  },
+  {
+    "s": "group:secondary-dmg",
+    "statsInGroup": [
+      23,
+      24
+    ],
+    "isRange": true,
+    "dP": "+%d damage",
+    "dN": "Adds %d-%d damage",
+    "dF": 100,
+    "so": 124
+  },
+  {
+    "s": "group:fire-dmg",
+    "statsInGroup": [
+      48,
+      49
+    ],
+    "isRange": true,
+    "dP": "+%d fire damage",
+    "dN": "Adds %d-%d fire damage",
+    "dF": 100,
+    "so": 102
+  },
+  {
+    "s": "group:light-dmg",
+    "statsInGroup": [
+      50,
+      51
+    ],
+    "isRange": true,
+    "dP": "+%d lightning damage",
+    "dN": "Adds %d-%d lightning damage",
+    "dF": 100,
+    "so": 99
+  },
+  {
+    "s": "group:magic-dmg",
+    "statsInGroup": [
+      52,
+      53
+    ],
+    "isRange": true,
+    "dP": "+%d magic damage",
+    "dN": "Adds %d-%d magic damage",
+    "dF": 100,
+    "so": 104
+  },
+  {
+    "s": "group:cold-dmg",
+    "statsInGroup": [
+      54,
+      55,
+      56
+    ],
+    "isRange": true,
+    "dP": "+%d cold damage",
+    "dN": "Adds %d-%d cold damage",
+    "dF": 100,
+    "so": 96
+  },
+  {
+    "s": "group:poison-dmg",
+    "statsInGroup": [
+      57,
+      58,
+      59
+    ],
+    "isRange": true,
+    "dP": "+%d poison damage over %d seconds",
+    "dN": "Adds %d-%d poison damage over %d seconds",
+    "dF": 101,
+    "so": 92
+  },
+  {
+    "s": "group:min-dmg",
+    "statsInGroup": [
+      21,
+      23
+    ],
+    "allEqual": true,
+    "dP": "to Minimum Damage",
+    "dN": "to Minimum Damage",
+    "dF": 1,
+    "dV": 1,
+    "so": 127
+  },
+  {
+    "s": "group:max-dmg",
+    "statsInGroup": [
+      22,
+      24
+    ],
+    "allEqual": true,
+    "dP": "to Maximum Damage",
+    "dN": "to Maximum Damage",
+    "dF": 1,
+    "dV": 1,
+    "so": 126
+  }
+]

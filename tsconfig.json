@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "suppressImplicitAnyIndexErrors": true,
+    "resolveJsonModule": true,
     "target": "es5",
     "module": "commonjs",
     "declaration": true,

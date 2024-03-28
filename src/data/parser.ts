@@ -40,9 +40,9 @@ function readConstantData(buffers: any): types.IConstantData {
   constants.magic_suffixes = _readMagicNames(_getArray(buffers, "MagicSuffix.txt"), strings);
   constants.properties = _readProperties(_getArray(buffers, "Properties.txt"), strings);
   constants.magical_properties = _readItemStatCosts(_getArray(buffers, "ItemStatCost.txt"), strings);
-  constants.runewords = _readRunewords(_getArray(buffers, "Runes.txt"), strings);
-  constants.set_items = _readSetOrUnqItems(_getArray(buffers, "SetItems.txt"), strings);
-  constants.unq_items = _readSetOrUnqItems(_getArray(buffers, "UniqueItems.txt"), strings);
+  constants.runewords = _readRunewords(_getArray(buffers, "Runes.txt"), strings, constants.skills);
+  constants.set_items = _readSetOrUnqItems(_getArray(buffers, "SetItems.txt"), strings, constants.skills);
+  constants.unq_items = _readSetOrUnqItems(_getArray(buffers, "UniqueItems.txt"), strings, constants.skills);
   const item_types = _readTypes(_getArray(buffers, "ItemTypes.txt"), strings);
   const armor_items = _readItems(_getArray(buffers, "Armor.txt"), item_types, strings);
   const weapon_items = _readItems(_getArray(buffers, "Weapons.txt"), item_types, strings);
@@ -150,6 +150,7 @@ function _readClasses(tsv: any, tsv2: any, strings: any): any[] {
     const clazz = tsv.lines[i][cClass];
     if (clazz && clazz != "Expansion") {
       arr[id] = {
+        id: id,
         n: clazz,
         c: tsv2.lines[i][cCode],
         as: strings[tsv.lines[i][cAllSkills]],
@@ -194,6 +195,7 @@ function _readSkillDesc(tsv: any, strings: any): any {
 
 function _readSkills(tsv: any, skillDescs: any, strings: any): any[] {
   const arr = [] as any[];
+  const cSkill = tsv.header.indexOf("skill");
   const cSkillDesc = tsv.header.indexOf("skilldesc");
   let cId = tsv.header.indexOf("Id");
   if (cId < 0) {
@@ -205,7 +207,9 @@ function _readSkills(tsv: any, skillDescs: any, strings: any): any[] {
     const skillDesc = tsv.lines[i][cSkillDesc];
     if (skillDesc) {
       const o = {} as any;
-      if (skillDescs[skillDesc]) o.s = skillDescs[skillDesc];
+      o.id = id;
+      if (tsv.lines[i][cSkillDesc]) o.s = tsv.lines[i][cSkill];
+      if (skillDescs[skillDesc]) o.n = skillDescs[skillDesc];
       if (tsv.lines[i][cCharclass]) o.c = tsv.lines[i][cCharclass];
       arr[id] = o;
     }
@@ -221,6 +225,7 @@ function _readRareNames(tsv: any, idx: number, strings: any): any[] {
     const name = tsv.lines[i][cName];
     if (name) {
       arr[id - idx] = {
+        id: id,
         n: strings[name],
       };
       id++;
@@ -238,6 +243,7 @@ function _readMagicNames(tsv: any, strings: any): any[] {
     const name = tsv.lines[i][cName];
     if (name != "Expansion") {
       const o = {} as any;
+      o.id = id;
       o.n = strings[name];
       if (tsv.lines[i][cTransformcolor]) o.tc = tsv.lines[i][cTransformcolor];
       arr[id] = o;
@@ -255,37 +261,118 @@ function _readProperties(tsv: any, strings: any): any {
     cStats[j] = {} as any;
     cStats[j].cStat = tsv.header.indexOf(`stat${j}`);
     cStats[j].cFunc = tsv.header.indexOf(`func${j}`);
+    cStats[j].cVal = tsv.header.indexOf(`val${j}`);
   }
   for (let i = 1; i < tsv.lines.length; i++) {
-    const code = tsv.lines[i][cCode];
-    if (code != "Expansion") {
-      const prop = [];
+    const propId = tsv.lines[i][cCode];
+    if (propId != "Expansion") {
+      const stats = [];
       //prop.code = code;
       for (let j = 1; j <= 7; j++) {
-        const stat = tsv.lines[i][cStats[j].cStat];
+        let stat;
+        let type;
         const func = tsv.lines[i][cStats[j].cFunc];
+        stat = tsv.lines[i][cStats[j].cStat];
+        type = propertyTypeFromFunc(func);
+        const val = tsv.lines[i][cStats[j].cVal];
         if (!stat && !func) {
           break;
         }
+
+        switch (func) {
+          case "5": {
+            stat = "mindamage";
+            type = "other";
+            break;
+          }
+          case "6": {
+            stat = "maxdamage";
+            type = "other";
+            break;
+          }
+          // case "": {
+          //   stat = "item_mindamage_percent";
+          //   type = "other";
+          //   break;
+          // }
+          case "7": {
+            stat = "item_maxdamage_percent";
+            type = "all";
+            break;
+          }
+          case "20": {
+            stat = "item_indesctructible";
+            type = "other";
+            break;
+          }
+          // case "23": {
+          //   stat = "ethereal"
+          //   break;
+          // }
+          default: {
+            break;
+          }
+        }
+
         const s = {} as any;
         if (stat) s.s = stat;
+        if (type) s.type = type;
         if (func) s.f = +func;
-        prop[j - 1] = s;
+        if (val) s.val = +val;
+        stats[j - 1] = s;
       }
-      if (prop.length) {
-        arr[code] = prop;
-      }
+
+      arr[propId] = stats;
     }
   }
   return arr;
 }
 
-function _readRunewords(tsv: any, strings: any): any[] {
+function propertyTypeFromFunc(func: string): string {
+  switch (func) {
+    case "11":
+      return "proc";
+    case "19":
+      return "charges";
+    case "3":
+      return "all";
+    case "15":
+      return "min";
+    case "16":
+      return "max";
+    case "17":
+      return "param";
+    default:
+      return "other";
+  }
+}
+
+function _readRunewords(tsv: any, strings: any, skills: any[]): any[] {
   const arr = [] as any[];
   const cName = tsv.header.indexOf("Name");
+  const cComplete = tsv.header.indexOf("complete");
+  const types = [];
+  for (let i = 1; i < 7; i++) {
+    types.push(tsv.header.indexOf(`itype${i}`))
+  }
+  const runes = [];
+  for (let i = 1; i < 7; i++) {
+    runes.push(tsv.header.indexOf(`Rune${i}`));
+  }
+  const modifiers = [] as any;
+  for (let i = 1; i < 12; i++) {
+    modifiers[i] = [];
+    modifiers[i].cMod = tsv.header.indexOf(`T1Code${i}`);
+    modifiers[i].cParam = tsv.header.indexOf(`T1Param${i}`);
+    modifiers[i].cMin = tsv.header.indexOf(`T1Min${i}`);
+    modifiers[i].cMax = tsv.header.indexOf(`T1Max${i}`);
+  }
+
   for (let i = 1; i < tsv.lines.length; i++) {
     const name = tsv.lines[i][cName];
-    if (name) {
+    const enabled = tsv.lines[i][cComplete];
+    const o = {} as any;
+    if (enabled) {
       let id = +name.substring(8);
       //TODO: why?
       if (id > 75) {
@@ -293,9 +380,49 @@ function _readRunewords(tsv: any, strings: any): any[] {
       } else {
         id += 26;
       }
-      arr[id] = {
-        n: strings[tsv.lines[i][cName]],
-      };
+
+      o.id = id;
+      o.n = strings[tsv.lines[i][cName]];
+      const t = [];
+      for (let j = 0; j <= 6; j++ ) {
+        const type = tsv.lines[i][types[j]];
+        if (!type) {
+          break;
+        }
+        t[j] = type;
+      }
+      o.types = t;
+      const r = [];
+      for (let j = 0; j <= 6; j++) {
+        const rune = tsv.lines[i][runes[j]];
+        if (!rune) {
+          break;
+        }
+        r[j] = rune;
+      }
+      o.r = r;
+
+      o.m = [];
+      const s = skills.filter(s => s && s.s);
+      for (let j = 1; j < 12; j++) {
+        const mod = tsv.lines[i][modifiers[j].cMod];
+        if (!mod) {
+          break;
+        }
+        const m = {} as any;
+        m.prop = mod;
+        let param = Number(+tsv.lines[i][modifiers[j].cParam]);
+        //string value
+        if (Number.isNaN(param)) {
+          param = s.find(s => s.s == tsv.lines[i][modifiers[j].cParam])?.id;
+        }
+        if (tsv.lines[i][modifiers[j].cParam]) m.p = param;
+        if (tsv.lines[i][modifiers[j].cMin]) m.min = +tsv.lines[i][modifiers[j].cMin];
+        if (tsv.lines[i][modifiers[j].cMax]) m.max = +tsv.lines[i][modifiers[j].cMax];
+        o.m.push(m);
+      }
+
+      arr[id] = o;
     }
   }
   return arr;
@@ -378,6 +505,11 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
   const cNormCode = tsv.header.indexOf("normcode");
   const cUberCode = tsv.header.indexOf("ubercode");
   const cUltraCode = tsv.header.indexOf("ultracode");
+  const cGemSockets = tsv.header.indexOf("gemsockets");
+  const cSpawnable = tsv.header.indexOf("spawnable");
+  const cOneOrTwoHadned = tsv.header.indexOf("1or2handed");
+  const cTwoHanded = tsv.header.indexOf("2handed");
+  const cNodurability = tsv.header.indexOf("nodurability");
 
   for (let i = 1; i < tsv.lines.length; i++) {
     const code = tsv.lines[i][cCode];
@@ -414,6 +546,13 @@ function _readItems(tsv: any, itemtypes: any, strings: any): any[] {
       if (tsv.lines[i][cInvwidth]) item.iw = +tsv.lines[i][cInvwidth];
       if (tsv.lines[i][cInvheight]) item.ih = +tsv.lines[i][cInvheight];
       if (tsv.lines[i][cInvtransform]) item.it = +tsv.lines[i][cInvtransform];
+      if (tsv.lines[i][cType]) item.type = tsv.lines[i][cType];
+      if (tsv.lines[i][cGemSockets]) {item.gemsockets = +tsv.lines[i][cGemSockets]} else {item.gemsockets = 0};
+      if (tsv.lines[i][cSpawnable]) item.spawnable = +tsv.lines[i][cSpawnable];
+      if (tsv.lines[i][cOneOrTwoHadned]) item.handed1or2 = +tsv.lines[i][cOneOrTwoHadned];
+      if (tsv.lines[i][cTwoHanded]) item.handed2 = +tsv.lines[i][cTwoHanded];
+      if (tsv.lines[i][cNodurability]) item.nodurability = +tsv.lines[i][cNodurability];
+
       const type = itemtypes[tsv.lines[i][cType]];
       if (type && type.ig) {
         item.ig = type.ig;
@@ -445,8 +584,14 @@ function _readGems(miscItems: any, tsv: any, strings: any) {
     const code = tsv.lines[i][cCode];
     if (code && code != "Expansion") {
       const item = miscItems[code];
+      // const row = {
+      //   weapon: [],
+      //   helm: [],
+      //   shield: [],
+      // };
       for (let k = 0; k < 3; k++) {
         const type = types[k];
+        //const m = {} as any;
         for (let j = 1; j <= 3; j++) {
           const mod = tsv.lines[i][cols[type][j].cMod];
           if (!mod) {
@@ -457,33 +602,66 @@ function _readGems(miscItems: any, tsv: any, strings: any) {
             item.m[k] = [];
           }
           const m = {} as any;
-          m.m = mod;
+          m.prop = mod;
           if (tsv.lines[i][cols[type][j].cParam]) m.p = +tsv.lines[i][cols[type][j].cParam];
           if (tsv.lines[i][cols[type][j].cMin]) m.min = +tsv.lines[i][cols[type][j].cMin];
           if (tsv.lines[i][cols[type][j].cMax]) m.max = +tsv.lines[i][cols[type][j].cMax];
           item.m[k].push(m);
         }
+        //row[type].push(m);
       }
+      //item.m = row;
     }
   }
 }
 
-function _readSetOrUnqItems(tsv: any, strings: any): any[] {
+function _readSetOrUnqItems(tsv: any, strings: any, skills : any[]): any[] {
   const arr = [] as any[];
   const cIndex = tsv.header.indexOf("index");
   const cInvfile = tsv.header.indexOf("invfile");
   let cCode = tsv.header.indexOf("code");
   if (cCode < 0) cCode = tsv.header.indexOf("item");
   const cInvtransform = tsv.header.indexOf("invtransform");
+  const cLvl = tsv.header.indexOf("lvl");
+  const modifiers = [] as any;
+  for (let i = 1; i < 12; i++) {
+    modifiers[i] = [];
+    modifiers[i].cMod = tsv.header.indexOf(`prop${i}`);
+    modifiers[i].cParam = tsv.header.indexOf(`par${i}`);
+    modifiers[i].cMin = tsv.header.indexOf(`min${i}`);
+    modifiers[i].cMax = tsv.header.indexOf(`max${i}`);
+  }
+
   let id = 0;
   for (let i = 1; i < tsv.lines.length; i++) {
     const index = tsv.lines[i][cIndex];
     if (index && index != "Expansion") {
       const o = {} as any;
+      o.id = id;
       o.n = strings[tsv.lines[i][cIndex]];
       if (tsv.lines[i][cInvfile]) o.i = tsv.lines[i][cInvfile];
       if (tsv.lines[i][cCode]) o.c = tsv.lines[i][cCode];
       if (tsv.lines[i][cInvtransform]) o.tc = tsv.lines[i][cInvtransform];
+      if (tsv.lines[i][cLvl]) o.lvl = tsv.lines[i][cLvl];
+      o.m = [];
+      for (let j = 1; j < 12; j++) {
+        const mod = tsv.lines[i][modifiers[j].cMod];
+        if (!mod) {
+          break;
+        }
+        const m = {} as any;
+        m.prop = mod;
+        let param = Number(+tsv.lines[i][modifiers[j].cParam]);
+        if (Number.isNaN(param)) {
+          param = skills
+          .filter(s => s && s.s)
+          .find(s => s.s == tsv.lines[i][modifiers[j].cParam])?.id;
+        }
+        if (tsv.lines[i][modifiers[j].cParam]) m.p = param;
+        if (tsv.lines[i][modifiers[j].cMin]) m.min = +tsv.lines[i][modifiers[j].cMin];
+        if (tsv.lines[i][modifiers[j].cMax]) m.max = +tsv.lines[i][modifiers[j].cMax];
+        o.m.push(m);
+      }
       arr[id] = o;
       id++;
     }
@@ -525,11 +703,13 @@ function _readItemStatCosts(tsv: any, strings: any): any[] {
   const cOpStat1 = tsv.header.indexOf("op stat1");
   const cOpStat2 = tsv.header.indexOf("op stat2");
   const cOpStat3 = tsv.header.indexOf("op stat3");
+  let id = 0;
   for (let i = 1; i < tsv.lines.length; i++) {
-    const id = +tsv.lines[i][cId];
+    //const id = +tsv.lines[i][cId];
     const stat = tsv.lines[i][cStat];
     if (stat) {
       const o = {} as any;
+      o.id = id;
       o.s = stat;
       if (tsv.lines[i][cCSvBits]) o.cB = +tsv.lines[i][cCSvBits];
       if (tsv.lines[i][cCSvParam]) o.cP = +tsv.lines[i][cCSvParam];
@@ -566,6 +746,7 @@ function _readItemStatCosts(tsv: any, strings: any): any[] {
         o.dE = strings[dmgstatrange.equalstr];
       }
       arr[id] = o;
+      id++;
     }
   }
   return arr;

@@ -404,10 +404,15 @@ export interface IMagicProperty {
   id: number;
   name: string;
   values: number[];
-  description: string;
-  visible: boolean;
-  op_value: number;
-  op_stats: string[];
+  param?:number,
+  value?: number,
+  df?: number,
+  type?: string,
+  so?:number,
+  description?: string;
+  visible?: boolean;
+  op_value?: number;
+  op_stats?: string[];
 }
 
 export enum EStashType {
@@ -434,4 +439,22 @@ export enum EItemQuality {
   normal,
   exceptional,
   elite,
+}
+
+export enum Quality {
+  Low = 0x01,
+  Normal = 0x02,
+  Superior = 0x03,
+  Magic = 0x04,
+  Set = 0x05,
+  Rare = 0x06,
+  Unique = 0x07,
+  Crafted = 0x08,
+}
+
+export enum ItemType {
+  Armor = 0x01,
+  Shield = 0x02, //treated the same as armor... only here to be able to parse nokkas jsons
+  Weapon = 0x03,
+  Other = 0x04,
 }

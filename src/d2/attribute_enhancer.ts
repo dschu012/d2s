@@ -48,8 +48,8 @@ function postProcessItem(item: types.IItem, constants: types.IConstantData) {
       const gem = constants.other_items[socketed.type];
       if (gem.m) {
         socketed.magic_attributes = generateFixedMods(gem.m[pt.gt], constants);
-        enhanceItem(socketed, constants);
       }
+      enhanceItem(socketed, constants);
     }
   }
 

@@ -549,9 +549,9 @@ function _readSimpleBits(item: types.IItem, reader: BitReader, version: number, 
     item.type = item.type.trim().replace(/\0/g, "");
     let details = _GetItemTXT(item, constants);
     item.categories = details?.c;
-    if (item?.categories.includes("Any Armor")) {
+    if (item?.categories?.includes("Any Armor")) {
       item.type_id = ItemType.Armor;
-    } else if (item?.categories.includes("Weapon")) {
+    } else if (item?.categories?.includes("Weapon")) {
       item.type_id = ItemType.Weapon;
       details = constants.weapon_items[item.type];
     } else {

@@ -366,7 +366,7 @@ export interface IItem {
   inv_transform: number;
   transform_color: string;
   item_quality: EItemQuality;
-  categories: string[];
+  categories?: string[];
   file_index: number;
   auto_affix_id: number;
   _unknown_data: {

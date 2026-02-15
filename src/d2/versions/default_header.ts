@@ -11,10 +11,17 @@ export function readHeader(char: types.ID2S, reader: BitReader, constants: types
   if (char.header.version > 0x61) {
     reader.SeekByte(267);
   }
+  if (char.header.version > 0x63) {
+    reader.SeekByte(299);
+  }
   char.header.name = reader.ReadString(16).replace(/\0/g, ""); //0x0014
   if (char.header.version > 0x61) {
     reader.SeekByte(36);
   }
+  if (char.header.version > 0x63) {
+    reader.SeekByte(20);
+  }
+  
   char.header.status = _readStatus(reader.ReadUInt8()); //0x0024
   char.header.progression = reader.ReadUInt8(); //0x0025
   char.header.active_arms = reader.ReadUInt16(); //0x0026 [unk = 0x0, 0x0]
@@ -38,13 +45,19 @@ export function readHeader(char: types.ID2S, reader: BitReader, constants: types
   char.header.merc_name_id = reader.ReadUInt16(); //0x00b7
   char.header.merc_type = reader.ReadUInt16(); //0x00b9
   char.header.merc_experience = reader.ReadUInt32(); //0x00bb
-  reader.SkipBytes(144); //0x00bf [unk]
+  if (char.header.version == 0x69) {
+    reader.SkipBytes(228);
+  } else  if (char.header.version > 0x61) {
+    reader.SkipBytes(144);
+  }
+  
   reader.SkipBytes(4); //0x014f [quests header identifier = 0x57, 0x6f, 0x6f, 0x21 "Woo!"]
   reader.SkipBytes(4); //0x0153 [version = 0x6, 0x0, 0x0, 0x0]
   reader.SkipBytes(2); //0x0153 [quests header length = 0x2a, 0x1]
   char.header.quests_normal = _readQuests(reader.ReadArray(96)); //0x0159
   char.header.quests_nm = _readQuests(reader.ReadArray(96)); //0x01b9
   char.header.quests_hell = _readQuests(reader.ReadArray(96)); //0x0219
+  
   reader.SkipBytes(2); //0x0279 [waypoint header identifier = 0x57, 0x53 "WS"]
   reader.SkipBytes(4); //0x027b [waypoint header version = 0x1, 0x0, 0x0, 0x0]
   reader.SkipBytes(2); //0x027f [waypoint header length = 0x50, 0x0]

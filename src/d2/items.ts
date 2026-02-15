@@ -279,6 +279,9 @@ export async function readItem(
         item.current_durability = reader.ReadUInt16(constants.magical_properties[72].sB) - constants.magical_properties[72].sA;
       }
     }
+    if (version === 105) {
+      reader.SkipBits(1);
+    }
 
     if (constants.stackables[item.type]) {
       item.quantity = reader.ReadUInt16(9);
@@ -323,6 +326,9 @@ export async function readItem(
       }
     }
   }
+  if (version === 105 && reader.ReadBit()) {
+      reader.SkipBits(8);
+  }
   reader.Align();
 
   if (item.nr_of_items_in_sockets > 0 && item.simple_item === 0) {
@@ -331,7 +337,7 @@ export async function readItem(
       item.socketed_items.push(await readItem(reader, version, constants, config, item));
     }
   }
-  //console.log(JSON.stringify(item));
+  
   return item;
 }
 
@@ -549,9 +555,9 @@ function _readSimpleBits(item: types.IItem, reader: BitReader, version: number, 
     item.type = item.type.trim().replace(/\0/g, "");
     let details = _GetItemTXT(item, constants);
     item.categories = details?.c;
-    if (item?.categories.includes("Any Armor")) {
+    if (item?.categories?.includes("Any Armor")) {
       item.type_id = ItemType.Armor;
-    } else if (item?.categories.includes("Weapon")) {
+    } else if (item?.categories?.includes("Weapon")) {
       item.type_id = ItemType.Weapon;
       details = constants.weapon_items[item.type];
     } else {
